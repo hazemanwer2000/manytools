@@ -1,0 +1,5 @@
+{
+    "paths" : {
+        "app-icon" : "{{{CURRENT-DIRECTORY}}}/resources/icon/app-icon.png"
+    } 
+}
