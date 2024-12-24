@@ -1,5 +1,11 @@
 {
-    "paths" : {
-        "app-icon" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie.png"
+    "title" : "Cookie Cutter'",
+    "window" : {
+        "minimum-size" : [600, 400]
+    },
+    "path" : {
+        "icon" : {
+            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie.png"
+        }
     } 
 }
