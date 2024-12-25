@@ -11,7 +11,7 @@ class FilterOption(GElements.Widgets.Complex.FilterList.FilterOption):
 
     def getData(self):
         return {
-            'Name' : __class__.getName(),
+            'Name' : self.getName(),
             'Cfg' : {},
         }
 

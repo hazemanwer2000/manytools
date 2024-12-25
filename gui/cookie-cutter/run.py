@@ -10,6 +10,7 @@ import automatey.Utils.PyUtils as PyUtils
 
 import sys
 import time
+from pprint import pprint
 
 import Utils.CustomWidgets
 
@@ -66,6 +67,22 @@ def performRecurrentActivities():
 
 timer = GConcurrency.Timer(performRecurrentActivities, TimeUtils.Time.createFromMilliseconds(50))
 timer.start()
+
+# ? ? Setup context-menu for 'Trim-Times-Table'.
+
+def seekTimeFromTable():
+    contextInfo = trimTimesTable.getContextInfo()
+    timeFromTableAsString = trimTimesTable.getCell(contextInfo['row-index'], contextInfo['column-index'])
+    seekTime = TimeUtils.Time.createFromString(timeFromTableAsString)
+    videoPlayer.seekPosition(seekTime)
+
+trimTimesTableMenu = GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text='Seek',
+        fcn=seekTimeFromTable
+    )
+])
+trimTimesTable.setContextMenu(trimTimesTableMenu)
 
 # ? Run GUI loop.
 window.show()
