@@ -22,7 +22,10 @@ class FilterOptionLess(FilterOption):
         super().__init__(self.label)
 
 class FilterOptionFull(FilterOption):
-    
+    '''
+    For option(s) with one or more cfg. param.
+    '''
+
     def __init__(self, cfgNames:list, cfgPlaceholders:list):
         
         # ? Setup option's title and container.
@@ -38,8 +41,7 @@ class FilterOptionFull(FilterOption):
             cfgLineEdit = GElements.Widgets.Basics.LineEdit(placeholder=cfgPlaceholder)
             cfgVerticalContainer = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
             cfgVerticalContainer.getLayout().insertWidget(cfgLabel)
-            cfgVerticalContainer.getLayout().insertWidget(GElements.Widgets.Decorators.Outline(cfgLineEdit,
-                                                                                               elementMargin=AbstractGraphics.SymmetricMargin(5)))
+            cfgVerticalContainer.getLayout().insertWidget(cfgLineEdit)
             self.rootVerticalContainer.getLayout().insertWidget(GElements.Widgets.Decorators.Outline(cfgVerticalContainer,
                                                                                                      elementMargin=AbstractGraphics.SymmetricMargin(5)))
         
@@ -61,8 +63,127 @@ class FilterOptions:
                 'Contrast-Factor',
             ]
             self.cfgPlaceholders = [
-                '(e.g., 1.0 has no effect)',
-                '(e.g., 1.0 has no effect)',
+                'e.g., 1.0 has no effect',
+                'e.g., 1.0 has no effect',
             ]
             super().__init__(self.cfgNames, self.cfgPlaceholders)
 
+    class GaussianBlur(FilterOptionFull):
+        
+        def __init__(self):
+            self.cfgNames = [
+                'Kernel-Size',
+            ]
+            self.cfgPlaceholders = [
+                'e.g., 3, 5, 7',
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class Sharpen(FilterOptionFull):
+        
+        def __init__(self):
+            self.cfgNames = [
+                'Factor',
+                'Kernel-Size',
+            ]
+            self.cfgPlaceholders = [
+                'e.g., 1.0 has no effect',
+                'e.g., 3, 5, 7',
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class Pixelate(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Factor',
+            ]
+            self.cfgPlaceholders = [
+                'e.g., 1.0 has no effect',
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class AddBorder(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Thickness',
+                'Color',
+            ]
+            self.cfgPlaceholders = [
+                'e.g., 50',
+                'e.g., #ffffff',
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class Crop(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Top-Left',
+                'Bottom-Right',
+            ]
+            self.cfgPlaceholders = [
+                "e.g., (1, 1), (W, H)",
+                "e.g., (1, 1), (W, H)",
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class Resize(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Width',
+                'Height',
+            ]
+            self.cfgPlaceholders = [
+                "e.g., 600, -1 (i.e., keep aspect ratio)",
+                "e.g., 400, -1 (i.e., keep aspect ratio)",
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class VideoFade(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Duration',
+                'Per-Cut',
+            ]
+            self.cfgPlaceholders = [
+                "i.e., in seconds",
+                "i.e., yes or no",
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class AudioFade(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Duration',
+                'Per-Cut',
+            ]
+            self.cfgPlaceholders = [
+                "i.e., in seconds",
+                "i.e., yes or no",
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)
+
+    class AudioMute(FilterOptionLess):
+        pass
+
+    class GIF(FilterOptionFull):
+
+        def __init__(self):
+            self.cfgNames = [
+                'Capture-FPS',
+                'Playback-Factor',
+                'Width',
+                'Height',
+            ]
+            self.cfgPlaceholders = [
+                "i.e., 10",
+                'e.g., 1.0 has no effect',
+                "e.g., 600, -1 (i.e., keep aspect ratio)",
+                "e.g., 400, -1 (i.e., keep aspect ratio)",
+            ]
+            super().__init__(self.cfgNames, self.cfgPlaceholders)

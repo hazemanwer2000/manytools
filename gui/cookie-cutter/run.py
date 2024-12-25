@@ -40,7 +40,7 @@ filterList = GElements.Widgets.Complex.FilterList(filterOptionClassList)
 rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
 rootLayout.setWidget(videoPlayer, 0, 0)
 rootLayout.setWidget(trimTimesTable, 1, 0)
-rootLayout.setWidget(filterList, 0, 1, rowSpan=2)
+rootLayout.setWidget(GElements.Widgets.Decorators.ScrollArea(filterList, isVerticalScrollBar=True), 0, 1, rowSpan=2)
 rootLayout.setRowMinimumSize(1, 0)
 rootLayout.setColumnMinimumSize(1, 250)
 
