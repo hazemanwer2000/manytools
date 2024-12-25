@@ -46,25 +46,27 @@ class FilterOptionFull(FilterOption):
             self.rootVerticalContainer.getLayout().insertWidget(GElements.Widgets.Decorators.Outline(cfgVerticalContainer,
                                                                                                      elementMargin=AbstractGraphics.SymmetricMargin(5)))
         
+        self.cfgWidgets = cfgWidgets
+        self.cfgNames = cfgNames
+        
         super().__init__(self.rootVerticalContainer)
 
-# Note: For convenience, all option(s) shall be derived from this class.
+# Note: Convenience class, for option(s) with 'LineEdit' widget(s) only.
 class FilterOptionLineEditOnly(FilterOptionFull):
     '''
     For option(s) with line-input only.
     '''
     
     def __init__(self, cfgNames:list, cfgPlaceholders:list):
-        self.cfgNames = cfgNames
-        self.cfgLineEdits = []
+        cfgLineEdits = []
         for cfgPlaceholder in cfgPlaceholders:
             cfgLineEdit = GElements.Widgets.Basics.LineEdit(placeholder=cfgPlaceholder)
-            self.cfgLineEdits.append(cfgLineEdit)
-        super().__init__(cfgNames, self.cfgLineEdits)
+            cfgLineEdits.append(cfgLineEdit)
+        super().__init__(cfgNames, cfgLineEdits)
     
     def getData(self):
         dataDict = super().getData()
-        for cfgName, cfgLineEdit in zip(self.cfgNames, self.cfgLineEdits):
+        for cfgName, cfgLineEdit in zip(self.cfgNames, self.cfgWidgets):
             dataDict['Cfg'][cfgName] = cfgLineEdit.getText()
         return dataDict
 
@@ -124,7 +126,7 @@ class FilterOptions:
             ]
             super().__init__(cfgNames, cfgPlaceholders)
 
-    class AddBorder(FilterOptionLineEditOnly):
+    class AddBorder(FilterOptionFull):
 
         def __init__(self):
             cfgNames = [
