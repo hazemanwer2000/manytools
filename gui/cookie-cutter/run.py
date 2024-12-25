@@ -6,9 +6,12 @@ import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
 import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.PyUtils as PyUtils
 
 import sys
 import time
+
+import Utils.CustomWidgets
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
@@ -30,13 +33,20 @@ videoPlayer.load(f_video)
 
 trimTimesTable = GElements.Widgets.Basics.EntryTable(['Start-Time', 'End-Time'])
 
+filterOptionClassList = [attr for attr in Utils.CustomWidgets.FilterOptions.__dict__.values()
+                         if (PyUtils.isClass(attr) and issubclass(attr, GElements.Widgets.Complex.FilterList.FilterOption))]
+filterList = GElements.Widgets.Complex.FilterList(filterOptionClassList)
+
 rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
 rootLayout.setWidget(videoPlayer, 0, 0)
 rootLayout.setWidget(trimTimesTable, 1, 0)
+rootLayout.setWidget(filterList, 0, 1, rowSpan=2)
+rootLayout.setRowMinimumSize(1, 0)
+rootLayout.setColumnMinimumSize(1, 250)
 
 window = GElements.Window(title=constants['title'],
                           rootLayout=rootLayout,
-                          minimumSize=constants['window']['minimum-size'],
+                          minimumSize=constants['gui']['window']['min-size'],
                           isEnableStatusBar=True)
 
 # ? Setup event handler(s).

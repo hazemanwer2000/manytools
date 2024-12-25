@@ -1,11 +1,13 @@
 {
     "title" : "Cookie Cutter'",
-    "window" : {
-        "minimum-size" : [600, 400]
-    },
     "path" : {
         "icon" : {
             "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie.png"
         }
-    } 
+    },
+    "gui" : {
+        "window" : {
+            "min-size" : [800, 600]
+        } 
+    }
 }
