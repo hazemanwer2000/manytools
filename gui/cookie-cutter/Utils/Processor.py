@@ -28,6 +28,9 @@ class VideoInformation:
 commandQueue = GConcurrency.Queue()
 
 class INTERNAL:
+    
+    # ? Video-handler.
+    video:VideoUtils.Video = None
 
     class Validation:
         
@@ -143,19 +146,40 @@ class INTERNAL:
                 resultStatus = 0
                 resultInfo = ''
                 
-                # ? Clean-up arguments.
                 try:
+                    
+                    # ? Clean-up arguments.
                     
                     # ? ? Process time-entries.
                     for trimTimeEntry in commandStruct['Trim-Times']:
+                        
                         if trimTimeEntry['Start-Time'] != '':
                             trimTimeEntry['Start-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['Start-Time'])
+                        else:
+                            trimTimeEntry['Start-Time'] = None
+                            
                         if trimTimeEntry['End-Time'] != '':
                             trimTimeEntry['End-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['End-Time'])
+                        else:
+                            trimTimeEntry['End-Time'] = None
                     
                     # ? ? Options.
                     for option in commandStruct['Options']:
                         INTERNAL.CommandHandler.Generate.OptionValidation.__dict__[option['Name'].replace('-', '')](option['Cfg'])
+                        
+                    # ? Process arguments.
+                    
+                    trimActions = []
+                    for trimTimeEntry in commandStruct['Trim-Times']:
+                        trimAction = VideoUtils.Actions.Trim(trimTimeEntry['Start-Time'], trimTimeEntry['End-Time'])
+                        trimActions.append(trimAction)
+                    
+                    joinAction = VideoUtils.Actions.Join(*trimActions)
+                    
+                    INTERNAL.video.registerAction(joinAction)
+                    
+                    f_videoDst = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(INTERNAL.Parameters.f_video)))
+                    INTERNAL.video.saveAs(f_videoDst)
                 
                 except:
                     resultStatus = 1
@@ -172,20 +196,20 @@ class INTERNAL:
 
     # ? Initialization parameter(s).
     class Parameters:
-        f_video = None
+        f_video:FileUtils.File = None
         f_videoInfoTemplate = None
 
     @staticmethod
     def longInitialize():
         
         # ? (Long-)Initialization.
-        video = VideoUtils.Video(INTERNAL.Parameters.f_video)
+        INTERNAL.video = VideoUtils.Video(INTERNAL.Parameters.f_video)
         
         # ? Initialization of video information.
-        VideoInformation.keyframes = video.getKeyframes()
-        VideoInformation.fps = video.getFPS()
-        VideoInformation.dimensions = video.getDimensions()
-        VideoInformation.duration = video.getDuration()
+        VideoInformation.keyframes = INTERNAL.video.getKeyframes()
+        VideoInformation.fps = INTERNAL.video.getFPS()
+        VideoInformation.dimensions = INTERNAL.video.getDimensions()
+        VideoInformation.duration = INTERNAL.video.getDuration()
         # ? ? 
         summaryFormatter = ProcessUtils.FileTemplate.fromFile(INTERNAL.Parameters.f_videoInfoTemplate).createFormatter()
         summaryFormatter.assertParameter('fps', f"{VideoInformation.fps:.3f}")
