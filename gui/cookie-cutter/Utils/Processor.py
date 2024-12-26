@@ -8,19 +8,21 @@ import time
 # ? Command queue.
 commandQueue = GConcurrency.Queue()
 
-# ? Initialization parameter(s).
-f_video = None
+class INTERNAL:
 
-def initialize(_f_video:FileUtils.File):
+    # ? Initialization parameter(s).
+    class Parameters:
+        f_video = None
+
+def initialize(f_video:FileUtils.File):
     
     # ? (Short-)Initialization.
-    global f_video
-    f_video = _f_video
+    INTERNAL.Parameters.f_video = f_video
 
 def loop(thread:GConcurrency.Thread):
     
     # ? (Long-)Initialization.
-    video = VideoUtils.Video(f_video)
+    video = VideoUtils.Video(INTERNAL.Parameters.f_video)
     
     while(True):        
         

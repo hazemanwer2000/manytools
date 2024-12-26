@@ -7,6 +7,7 @@ import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.Utils.PyUtils as PyUtils
+import automatey.Resources as Resources
 
 import sys
 import time
@@ -79,13 +80,12 @@ def seekTimeFromTable():
     seekTime = TimeUtils.Time.createFromString(timeFromTableAsString)
     videoPlayer.seekPosition(seekTime)
 
-trimTimesTableMenu = GUtils.Menu([
+trimTimesTable.setContextMenu(GUtils.Menu([
     GUtils.Menu.EndPoint(
         text='Seek',
-        fcn=seekTimeFromTable
+        fcn=seekTimeFromTable,
     )
-])
-trimTimesTable.setContextMenu(trimTimesTableMenu)
+]))
 
 # ? ? Construct processor thread.
 
@@ -95,6 +95,35 @@ def processorNotificationHandler(data:dict):
 Utils.Processor.initialize(f_video)
 processorThread = GConcurrency.Thread(mainFcn=Utils.Processor.loop, notifyFcn=processorNotificationHandler)
 processorThread.run()
+
+# ? ? Construct window menu and toolbar.
+
+def process():
+    pass
+
+def jumpToPreviousKeyframe():
+    pass
+
+def jumpToNextKeyframe():
+    pass
+
+window.createToolbar(GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text='Process',
+        fcn=process,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/generic/cil-movie.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='Previous Keyframe',
+        fcn=jumpToPreviousKeyframe,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/generic/cil-hand-point-left.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='Next Keyframe',
+        fcn=jumpToNextKeyframe,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/generic/cil-hand-point-right.png'))),
+    ),
+]))
 
 # ? Run GUI loop.
 window.show()
