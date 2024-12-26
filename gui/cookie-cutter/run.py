@@ -52,6 +52,13 @@ window = GElements.Window(title=constants['title'],
                           minimumSize=constants['gui']['window']['min-size'],
                           isEnableStatusBar=True)
 
+# ? ? App-wide announcement(s).
+class Announcement:
+    
+    @staticmethod
+    def VideoInformationStillLoading():
+        GElements.StandardDialog.Message.Announce.Warning('Video information is still being loaded.')
+
 # ? Setup event handler(s).
 
 # ? ? Setup timer (i.e., for recurrent activities).
@@ -96,22 +103,22 @@ Utils.Processor.initialize(f_video)
 processorThread = GConcurrency.Thread(mainFcn=Utils.Processor.loop, notifyFcn=processorNotificationHandler)
 processorThread.run()
 
-# ? ? Construct window menu and toolbar.
+# ? ? Construct window toolbar.
+
+def jumpToNearestKeyframe(isForward:bool):
+    if Utils.Processor.VideoInformation.isInitialized == True:
+        pass
+    else:
+        Announcement.VideoInformationStillLoading()
 
 def initiateVideoGeneration():
     pass
 
-def jumpToPreviousKeyframe():
-    pass
-
-def jumpToNextKeyframe():
-    pass
-
-def queryVideoInformation():
-    pass
-
-def loadKeyframes():
-    pass
+def showVideoInformation():
+    if Utils.Processor.VideoInformation.isInitialized == True:
+        pass
+    else:
+        Announcement.VideoInformationStillLoading()
 
 window.createToolbar(GUtils.Menu([
     GUtils.Menu.EndPoint(
@@ -120,23 +127,18 @@ window.createToolbar(GUtils.Menu([
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-movie.png'))),
     ),
     GUtils.Menu.EndPoint(
-        text='Load Keyframes',
-        fcn=loadKeyframes,
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cib-kickstarter.png'))),
-    ),
-    GUtils.Menu.EndPoint(
         text='Previous Keyframe',
-        fcn=jumpToPreviousKeyframe,
+        fcn=lambda: jumpToNearestKeyframe(isForward=False),
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-hand-point-left.png'))),
     ),
     GUtils.Menu.EndPoint(
         text='Next Keyframe',
-        fcn=jumpToNextKeyframe,
+        fcn=lambda: jumpToNearestKeyframe(isForward=True),
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-hand-point-right.png'))),
     ),
     GUtils.Menu.EndPoint(
         text='Info',
-        fcn=queryVideoInformation,
+        fcn=showVideoInformation,
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-info.png'))),
     ),
 ]))
