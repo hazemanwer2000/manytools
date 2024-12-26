@@ -5,6 +5,8 @@ import automatey.Media.VideoUtils as VideoUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Base.TimeUtils as TimeUtils
+import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.Validation as Validation
 
 import time
 import traceback
@@ -27,6 +29,11 @@ commandQueue = GConcurrency.Queue()
 class INTERNAL:
 
     class Validation:
+        
+        @staticmethod
+        def Assert(values, declaration):
+            if not all(values):
+                raise ExceptionUtils.ValidationError(declaration)
 
         @staticmethod
         def asColor(hexCode):
@@ -43,7 +50,66 @@ class INTERNAL:
             class OptionValidation:
                 
                 def SepiaTone(cfgDict):
-                    print('Validating SepiaTone')
+                    pass
+
+                def Grayscale(cfgDict):
+                    pass
+
+                def BrightnessContrast(cfgDict):
+                    cfgDict['Brightness-Factor'] = Validation.asFloat(cfgDict['Brightness-Factor'])
+                    cfgDict['Contrast-Factor'] = Validation.asFloat(cfgDict['Brightness-Factor'])
+
+                def GaussianBlur(cfgDict):
+                    
+                    cfgDict['Kernel-Size'] = Validation.asInt(cfgDict['Kernel-Size'])
+                    # ? If (...) is less or equal to 1, or is not odd. 
+                    INTERNAL.Validation.Assert([
+                        (cfgDict['Kernel-Size'] <= 1),
+                        ((cfgDict['Kernel-Size'] % 2) == 0),
+                    ], 'Kernel size should be larger than 1, and odd.')
+
+                def Sharpen(cfgDict):
+                    cfgDict['Factor'] = Validation.asFloat(cfgDict['Factor'])
+
+                    cfgDict['Kernel-Size'] = Validation.asInt(cfgDict['Kernel-Size'])
+                    # ? If (...) is less or equal to 1, or is not odd. 
+                    INTERNAL.Validation.Assert([
+                        (cfgDict['Kernel-Size'] <= 1),
+                        ((cfgDict['Kernel-Size'] % 2) == 0),
+                    ], 'Kernel size should be larger than 1, and odd.')
+
+                def Pixelate(cfgDict):
+                    cfgDict['Factor'] = Validation.asFloat(cfgDict['Factor'])
+
+                def AddBorder(cfgDict):
+                    cfgDict['Color'] = INTERNAL.Validation.asColor(cfgDict['Color'])
+                    
+                    cfgDict['Thickness'] = Validation.asInt(cfgDict['Thickness'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert([
+                        (cfgDict['Thickness'] > 0),
+                    ], 'Thickness must be larger than 0.')
+
+                def Crop(cfgDict):
+                    pass
+
+                def Resize(cfgDict):
+                    pass
+
+                def VideoFade(cfgDict):
+                    pass
+
+                def AudioFade(cfgDict):
+                    pass
+
+                def AudioMute(cfgDict):
+                    pass
+
+                def TrimAtKeyframes(cfgDict):
+                    pass
+
+                def GIF(cfgDict):
+                    pass
             
             @staticmethod
             def runner(commandStruct):
