@@ -124,7 +124,7 @@ class INTERNAL:
                 def VideoFade(cfgDict):
                     cfgDict['Per-Cut'] = Validation.asBool(cfgDict['Per-Cut'])
                     
-                    cfgDict['Duration'] = Validation.asInt(cfgDict['Duration'])
+                    cfgDict['Duration'] = Validation.asFloat(cfgDict['Duration'])
                     # ? (...)
                     INTERNAL.Validation.Assert(cfgDict['Duration'], [
                         (lambda x: x > 0),
@@ -133,7 +133,7 @@ class INTERNAL:
                 def AudioFade(cfgDict):
                     cfgDict['Per-Cut'] = Validation.asBool(cfgDict['Per-Cut'])
                     
-                    cfgDict['Duration'] = Validation.asInt(cfgDict['Duration'])
+                    cfgDict['Duration'] = Validation.asFloat(cfgDict['Duration'])
                     # ? (...)
                     INTERNAL.Validation.Assert(cfgDict['Duration'], [
                         (lambda x: x > 0),
@@ -164,42 +164,56 @@ class INTERNAL:
             class OptionProcess:
                 
                 def SepiaTone(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.SepiaTone())
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.SepiaTone())
 
                 def Grayscale(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Grayscale())
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Grayscale())
 
                 def BrightnessContrast(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.BrightnessContrast(brightness=cfgDict['Brightness-Factor'],
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.BrightnessContrast(brightness=cfgDict['Brightness-Factor'],
                                                                                                     contrast=cfgDict['Contrast-Factor']))
 
                 def GaussianBlur(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.GaussianBlur(kernelSize=cfgDict['Kernel-Size']))
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.GaussianBlur(kernelSize=cfgDict['Kernel-Size']))
 
                 def Sharpen(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Sharpen(factor=cfgDict['Factor'],
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Sharpen(factor=cfgDict['Factor'],
                                                                                          kernelSize=cfgDict['Kernel-Size']))
 
                 def Pixelate(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Pixelate(factor=cfgDict['Factor']))
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Pixelate(factor=cfgDict['Factor']))
 
                 def AddBorder(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.AddBorder(AbstractGraphics.Border(thickness=cfgDict['Thickness'],
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.AddBorder(AbstractGraphics.Border(thickness=cfgDict['Thickness'],
                                                                                                                    color=cfgDict['Color'])))
 
                 def Crop(cfgDict, struct):
                     topLeft = AbstractGraphics.Point(cfgDict['Top-Left'][0], cfgDict['Top-Left'][1])
                     bottomRight = AbstractGraphics.Point(cfgDict['Bottom-Right'][0], cfgDict['Bottom-Right'][1])
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Crop(topLeft=topLeft, bottomRight=bottomRight))
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Crop(topLeft=topLeft, bottomRight=bottomRight))
 
                 def Resize(cfgDict, struct):
-                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Resize(cfgDict['Width'], cfgDict['Height']))
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Resize(cfgDict['Width'], cfgDict['Height']))
 
                 def VideoFade(cfgDict, struct):
-                    pass
+                    fadeInModifier = VideoUtils.Modifiers.Transitions.FadeIn(TimeUtils.Time.createFromSeconds(cfgDict['Duration']))
+                    fadeOutModifier = VideoUtils.Modifiers.Transitions.FadeOut(TimeUtils.Time.createFromSeconds(cfgDict['Duration']))
+                    if cfgDict['Per-Cut'] == True:
+                        struct['filters']['general'].append(fadeInModifier)
+                        struct['filters']['general'].append(fadeOutModifier)
+                    else:
+                        struct['filters']['first-cut-only'].append(fadeInModifier)
+                        struct['filters']['last-cut-only'].append(fadeOutModifier)
 
                 def AudioFade(cfgDict, struct):
-                    pass
+                    fadeInModifier = VideoUtils.AudioModifiers.Transitions.FadeIn(TimeUtils.Time.createFromSeconds(cfgDict['Duration']))
+                    fadeOutModifier = VideoUtils.AudioModifiers.Transitions.FadeOut(TimeUtils.Time.createFromSeconds(cfgDict['Duration']))
+                    if cfgDict['Per-Cut'] == True:
+                        struct['filters']['general'].append(fadeInModifier)
+                        struct['filters']['general'].append(fadeOutModifier)
+                    else:
+                        struct['filters']['first-cut-only'].append(fadeInModifier)
+                        struct['filters']['last-cut-only'].append(fadeOutModifier)
 
                 def AudioMute(cfgDict, struct):
                     struct['is-mute'] = True
@@ -248,7 +262,11 @@ class INTERNAL:
                     struct = {
                         'is-mute' : False,
                         'is-nearest-keyframe' : False,
-                        'common-filters' : [],
+                        'filters' : {
+                            'general' : [],
+                            'first-cut-only' : [],
+                            'last-cut-only' : [],
+                        },
                     }
                     for option in commandStruct['Options']:
                         INTERNAL.CommandHandler.Generate.OptionProcess.__dict__[option['Name'].replace('-', '')](option['Cfg'], struct)
@@ -259,7 +277,7 @@ class INTERNAL:
                                                              trimTimeEntry['End-Time'], 
                                                              isMute=struct['is-mute'],
                                                              isNearestKeyframe=struct['is-nearest-keyframe'],
-                                                             modifiers=struct['common-filters'])
+                                                             modifiers=struct['filters']['general'])
                         trimActions.append(trimAction)
                     
                     joinAction = VideoUtils.Actions.Join(*trimActions)
