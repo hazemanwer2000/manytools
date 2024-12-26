@@ -99,7 +99,7 @@ trimTimesTable.setContextMenu(GUtils.Menu([
 def processorNotificationHandler(data:dict):
     print(data)
 
-Utils.Processor.initialize(f_video)
+Utils.Processor.initialize(f_video, FileUtils.File(constants['path']['template']['video-info']))
 processorThread = GConcurrency.Thread(mainFcn=Utils.Processor.loop, notifyFcn=processorNotificationHandler)
 processorThread.run()
 
@@ -116,7 +116,7 @@ def initiateVideoGeneration():
 
 def showVideoInformation():
     if Utils.Processor.VideoInformation.isInitialized == True:
-        pass
+        GElements.StandardDialog.showInformation('Video Information', Utils.Processor.VideoInformation.summary, (400, 400), isSizeFixed=True)
     else:
         Announcement.VideoInformationStillLoading()
 

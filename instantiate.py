@@ -8,7 +8,7 @@ f_cwd = FileUtils.File.Utils.getWorkingDirectory()
 
 # ? Collect template file(s).
 
-f_templates = FileUtils.File('.').listDirectory(isRecursive=True, conditional=(lambda f: f.getExtension() == 'template'))
+f_templates = FileUtils.File('.').listDirectory(isRecursive=True, conditional=(lambda f: f.getExtension() == 'ttt'))
 
 # ? Process template file(s).
 

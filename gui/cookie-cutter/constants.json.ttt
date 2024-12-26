@@ -3,6 +3,9 @@
     "path" : {
         "icon" : {
             "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie.png"
+        },
+        "template" : {
+            "video-info" : "{{{CURRENT-DIRECTORY}}}/resources/template/video-info.template"
         }
     },
     "gui" : {
