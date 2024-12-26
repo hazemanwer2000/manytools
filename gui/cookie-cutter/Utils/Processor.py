@@ -3,8 +3,11 @@ import automatey.GUI.GConcurrency as GConcurrency
 import automatey.OS.FileUtils as FileUtils
 import automatey.Media.VideoUtils as VideoUtils
 import automatey.OS.ProcessUtils as ProcessUtils
+import automatey.Base.ColorUtils as ColorUtils
+import automatey.Base.TimeUtils as TimeUtils
 
 import time
+import traceback
 
 # ? Video Informaiton, has to be initialized by thread.
 class VideoInformation:
@@ -23,12 +26,41 @@ commandQueue = GConcurrency.Queue()
 
 class INTERNAL:
 
+    class Validation:
+
+        @staticmethod
+        def asColor(hexCode):
+            return ColorUtils.Color.fromHEX(hexCode)
+
+        @staticmethod
+        def asTime(timeAsString):
+            return TimeUtils.Time.createFromString(timeAsString)
+
     class CommandHandler:
         
         @staticmethod
         def generate(commandStruct):
+            
+            resultStatus = 0
+            resultInfo = ''
+            
+            # ? Clean-up arguments.
+            try:
+                
+                # ? ? Process time-entries.
+                for trimTimeEntry in commandStruct['Trim-Times']:
+                    if trimTimeEntry['Start-Time'] != '':
+                        trimTimeEntry['Start-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['Start-Time'])
+                    if trimTimeEntry['End-Time'] != '':
+                        trimTimeEntry['End-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['End-Time'])
+            
+            except:
+                resultStatus = 1
+                resultInfo = traceback.format_exc()
+            
             return {
-                'Status' : 0,
+                'Status' : resultStatus,
+                'Info' : resultInfo
             }
 
         mapping = {

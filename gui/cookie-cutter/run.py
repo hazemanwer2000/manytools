@@ -60,6 +60,14 @@ class Announcement:
     def VideoInformationStillLoading():
         GElements.StandardDialog.Message.Announce.Warning('Video information is still being loaded.')
 
+    @staticmethod
+    def VideoGenerationSuccessful():
+        GElements.StandardDialog.Message.Announce.Information('Video was generated successfully.')
+
+    @staticmethod
+    def VideoGenerationFailed():
+        GElements.StandardDialog.Message.Announce.Error('Failed to generate video.')
+
 # ? Setup event handler(s).
 
 # ? ? Setup timer (i.e., for recurrent activities).
@@ -97,9 +105,19 @@ trimTimesTable.setContextMenu(GUtils.Menu([
 
 # ? ? Construct processor thread.
 
-def processorNotificationHandler(data:dict):
-    print('Received')
-    print(data)
+def onVideoGenerationResult(result):
+    if result['Status'] == 0:
+        Announcement.VideoGenerationSuccessful()
+    else:
+        Announcement.VideoGenerationFailed()
+        GElements.StandardDialog.showInformation('(...)', result['Info'], (1000, 400), isSizeFixed=True)
+        
+commandNotificationHandlers = {
+    'Generate' : onVideoGenerationResult
+}
+
+def processorNotificationHandler(result:dict):
+    commandNotificationHandlers[result['Command']](result['Result'])
 
 Utils.Processor.initialize(f_video, FileUtils.File(constants['path']['template']['video-info']))
 processorThread = GConcurrency.Thread(mainFcn=Utils.Processor.loop, notifyFcn=processorNotificationHandler)
@@ -119,6 +137,10 @@ def jumpToNearestKeyframe(isForward:bool):
             Announcement.VideoInformationStillLoading()
 
 def initiateVideoGeneration():
+    
+    # ? Pause video first.
+    videoPlayer.pause()
+    
     commandStruct = {
         'Command' : 'Generate',
         'Arguments' : {
@@ -127,7 +149,6 @@ def initiateVideoGeneration():
         },
     }
     Utils.Processor.commandQueue.enqueue(commandStruct)
-    print('Sent!')
 
 def showVideoInformation():
     if Utils.Processor.VideoInformation.isInitialized == True:

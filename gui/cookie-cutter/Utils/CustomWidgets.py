@@ -181,6 +181,9 @@ class FilterOptions:
     class AudioMute(FilterOptionLess):
         pass
 
+    class TrimAtKeyframes(FilterOptionLess):
+        pass
+
     class GIF(FilterOptionFull):
 
         def __init__(self):
