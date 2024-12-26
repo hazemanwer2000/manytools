@@ -48,7 +48,7 @@ rootLayout.setWidget(filterList, 0, 1, rowSpan=2)
 rootLayout.setRowMinimumSize(1, 0)
 rootLayout.setColumnMinimumSize(1, 250)
 
-window = GElements.Window(title=constants['title'] + ' - ' + str(f_video),
+window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
                           rootLayout=rootLayout,
                           minimumSize=constants['gui']['window']['min-size'],
                           isEnableStatusBar=True)

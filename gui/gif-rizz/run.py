@@ -53,7 +53,7 @@ def loadFile():
     f:FileUtils.File = GElements.StandardDialog.selectExistingFile(f_srcDir)
     if (f != None) and (f.getExtension() == 'gif'):
         GIFPlayer.getRenderer().load(f)
-        window.setTitle(constants['title'] + ' - ' + str(f))
+        window.setTitle(constants['title'] + '  |  ' + str(f))
         f_srcDir = f.traverseDirectory('..')
 
 window.createToolbar(GUtils.Menu([
