@@ -54,7 +54,7 @@ class FilterOptionFull(FilterOption):
     def getData(self):
         dataDict = super().getData()
         for cfgName, cfgWidget in zip(self.cfgNames, self.cfgWidgets):
-            dataDict['Cfg'][cfgName] = str(cfgWidget)
+            dataDict['Cfg'][cfgName] = str(cfgWidget).strip()
         return dataDict
 
 class FilterOptions:

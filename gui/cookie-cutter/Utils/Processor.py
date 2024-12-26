@@ -38,33 +38,44 @@ class INTERNAL:
 
     class CommandHandler:
         
-        @staticmethod
-        def generate(commandStruct):
+        class Generate:
             
-            resultStatus = 0
-            resultInfo = ''
-            
-            # ? Clean-up arguments.
-            try:
+            class OptionValidation:
                 
-                # ? ? Process time-entries.
-                for trimTimeEntry in commandStruct['Trim-Times']:
-                    if trimTimeEntry['Start-Time'] != '':
-                        trimTimeEntry['Start-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['Start-Time'])
-                    if trimTimeEntry['End-Time'] != '':
-                        trimTimeEntry['End-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['End-Time'])
+                def SepiaTone(cfgDict):
+                    print('Validating SepiaTone')
             
-            except:
-                resultStatus = 1
-                resultInfo = traceback.format_exc()
-            
-            return {
-                'Status' : resultStatus,
-                'Info' : resultInfo
-            }
+            @staticmethod
+            def runner(commandStruct):
+                
+                resultStatus = 0
+                resultInfo = ''
+                
+                # ? Clean-up arguments.
+                try:
+                    
+                    # ? ? Process time-entries.
+                    for trimTimeEntry in commandStruct['Trim-Times']:
+                        if trimTimeEntry['Start-Time'] != '':
+                            trimTimeEntry['Start-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['Start-Time'])
+                        if trimTimeEntry['End-Time'] != '':
+                            trimTimeEntry['End-Time'] = INTERNAL.Validation.asTime(trimTimeEntry['End-Time'])
+                    
+                    # ? ? Options.
+                    for option in commandStruct['Options']:
+                        INTERNAL.CommandHandler.Generate.OptionValidation.__dict__[option['Name'].replace('-', '')](option['Cfg'])
+                
+                except:
+                    resultStatus = 1
+                    resultInfo = traceback.format_exc()
+                
+                return {
+                    'Status' : resultStatus,
+                    'Info' : resultInfo
+                }
 
         mapping = {
-            'Generate' : generate,
+            'Generate' : Generate.runner,
         }
 
     # ? Initialization parameter(s).
