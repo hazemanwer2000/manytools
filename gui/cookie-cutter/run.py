@@ -98,7 +98,7 @@ processorThread.run()
 
 # ? ? Construct window menu and toolbar.
 
-def process():
+def initiateVideoGeneration():
     pass
 
 def jumpToPreviousKeyframe():
@@ -107,21 +107,37 @@ def jumpToPreviousKeyframe():
 def jumpToNextKeyframe():
     pass
 
+def queryVideoInformation():
+    pass
+
+def loadKeyframes():
+    pass
+
 window.createToolbar(GUtils.Menu([
     GUtils.Menu.EndPoint(
-        text='Process',
-        fcn=process,
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/generic/cil-movie.png'))),
+        text='Generate',
+        fcn=initiateVideoGeneration,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-movie.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='Load Keyframes',
+        fcn=loadKeyframes,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cib-kickstarter.png'))),
     ),
     GUtils.Menu.EndPoint(
         text='Previous Keyframe',
         fcn=jumpToPreviousKeyframe,
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/generic/cil-hand-point-left.png'))),
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-hand-point-left.png'))),
     ),
     GUtils.Menu.EndPoint(
         text='Next Keyframe',
         fcn=jumpToNextKeyframe,
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/generic/cil-hand-point-right.png'))),
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-hand-point-right.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='Info',
+        fcn=queryVideoInformation,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-info.png'))),
     ),
 ]))
 
