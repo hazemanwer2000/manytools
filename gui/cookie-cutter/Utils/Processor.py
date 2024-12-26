@@ -4,6 +4,7 @@ import automatey.OS.FileUtils as FileUtils
 import automatey.Media.VideoUtils as VideoUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Base.ColorUtils as ColorUtils
+import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Utils.Validation as Validation
@@ -50,7 +51,7 @@ class INTERNAL:
         
         @staticmethod
         def asXY(XandY):
-            found = StringUtils.Regex.findAll('\(([0-9]+), ([0-9]+)\)', XandY)
+            found = StringUtils.Regex.findAll('\((-?[0-9]+), (-?[0-9]+)\)', XandY)
             if len(found) != 1:
                 raise ExceptionUtils.ValidationError("'(X, Y)' structure is not matched.")
             return [int(found[0][0]), int(found[0][1])]
@@ -107,8 +108,18 @@ class INTERNAL:
                     cfgDict['Bottom-Right'] = INTERNAL.Validation.asXY(cfgDict['Bottom-Right'])
 
                 def Resize(cfgDict):
-                    cfgDict['Width'] = INTERNAL.Validation.asXY(cfgDict['Width'])
-                    cfgDict['Height'] = INTERNAL.Validation.asXY(cfgDict['Height'])
+                    
+                    cfgDict['Width'] = Validation.asInt(cfgDict['Width'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Width'], [
+                        (lambda x: (x > 0) or (x == -1)),
+                    ], 'Dimension must be larger than 0, or -1.')
+                    
+                    cfgDict['Height'] = Validation.asInt(cfgDict['Height'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Height'], [
+                        (lambda x: (x > 0) or (x == -1)),
+                    ], 'Dimension must be larger than 0, or -1.')
 
                 def VideoFade(cfgDict):
                     cfgDict['Per-Cut'] = Validation.asBool(cfgDict['Per-Cut'])
@@ -137,8 +148,72 @@ class INTERNAL:
                 def GIF(cfgDict):
                     cfgDict['Capture-FPS'] = Validation.asFloat(cfgDict['Capture-FPS'])
                     cfgDict['Playback-Factor'] = Validation.asFloat(cfgDict['Playback-Factor'])
-                    cfgDict['Width'] = INTERNAL.Validation.asXY(cfgDict['Width'])
-                    cfgDict['Height'] = INTERNAL.Validation.asXY(cfgDict['Height'])
+                    
+                    cfgDict['Width'] = Validation.asInt(cfgDict['Width'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Width'], [
+                        (lambda x: (x > 0) or (x == -1)),
+                    ], 'Dimension must be larger than 0, or -1.')
+                    
+                    cfgDict['Height'] = Validation.asInt(cfgDict['Height'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Height'], [
+                        (lambda x: (x > 0) or (x == -1)),
+                    ], 'Dimension must be larger than 0, or -1.')
+            
+            class OptionProcess:
+                
+                def SepiaTone(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.SepiaTone())
+
+                def Grayscale(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Grayscale())
+
+                def BrightnessContrast(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.BrightnessContrast(brightness=cfgDict['Brightness-Factor'],
+                                                                                                    contrast=cfgDict['Contrast-Factor']))
+
+                def GaussianBlur(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.GaussianBlur(kernelSize=cfgDict['Kernel-Size']))
+
+                def Sharpen(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Sharpen(factor=cfgDict['Factor'],
+                                                                                         kernelSize=cfgDict['Kernel-Size']))
+
+                def Pixelate(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Pixelate(factor=cfgDict['Factor']))
+
+                def AddBorder(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.AddBorder(AbstractGraphics.Border(thickness=cfgDict['Thickness'],
+                                                                                                                   color=cfgDict['Color'])))
+
+                def Crop(cfgDict, struct):
+                    topLeft = AbstractGraphics.Point(cfgDict['Top-Left'][0], cfgDict['Top-Left'][1])
+                    bottomRight = AbstractGraphics.Point(cfgDict['Bottom-Right'][0], cfgDict['Bottom-Right'][1])
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Crop(topLeft=topLeft, bottomRight=bottomRight))
+
+                def Resize(cfgDict, struct):
+                    struct['common-filters'].append(VideoUtils.Modifiers.Filters.Resize(cfgDict['Width'], cfgDict['Height']))
+
+                def VideoFade(cfgDict, struct):
+                    pass
+
+                def AudioFade(cfgDict, struct):
+                    pass
+
+                def AudioMute(cfgDict, struct):
+                    struct['is-mute'] = True
+
+                def TrimAtKeyframes(cfgDict, struct):
+                    struct['is-nearest-keyframe'] = True
+
+                def GIF(cfgDict, struct):
+                    struct['gif-action'] = VideoUtils.Actions.GIF(
+                        captureFPS=cfgDict['Capture-FPS'],
+                        playbackFactor=cfgDict['Playback-Factor'],
+                        width=cfgDict['Width'],
+                        height=cfgDict['Height'],
+                    )
             
             @staticmethod
             def runner(commandStruct):
@@ -169,9 +244,22 @@ class INTERNAL:
                         
                     # ? Process arguments.
                     
+                    # ? ? Process option(s).
+                    struct = {
+                        'is-mute' : False,
+                        'is-nearest-keyframe' : False,
+                        'common-filters' : [],
+                    }
+                    for option in commandStruct['Options']:
+                        INTERNAL.CommandHandler.Generate.OptionProcess.__dict__[option['Name'].replace('-', '')](option['Cfg'], struct)
+                    
                     trimActions = []
                     for trimTimeEntry in commandStruct['Trim-Times']:
-                        trimAction = VideoUtils.Actions.Trim(trimTimeEntry['Start-Time'], trimTimeEntry['End-Time'])
+                        trimAction = VideoUtils.Actions.Trim(trimTimeEntry['Start-Time'], 
+                                                             trimTimeEntry['End-Time'], 
+                                                             isMute=struct['is-mute'],
+                                                             isNearestKeyframe=struct['is-nearest-keyframe'],
+                                                             modifiers=struct['common-filters'])
                         trimActions.append(trimAction)
                     
                     joinAction = VideoUtils.Actions.Join(*trimActions)
