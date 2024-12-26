@@ -1,0 +1,13 @@
+{
+    "title" : "GIF-Rizz",
+    "path" : {
+        "icon" : {
+            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/melon.png"
+        }
+    },
+    "gui" : {
+        "window" : {
+            "min-size" : [800, 600]
+        } 
+    }
+}
