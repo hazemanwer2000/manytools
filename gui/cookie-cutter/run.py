@@ -98,6 +98,7 @@ trimTimesTable.setContextMenu(GUtils.Menu([
 # ? ? Construct processor thread.
 
 def processorNotificationHandler(data:dict):
+    print('Received')
     print(data)
 
 Utils.Processor.initialize(f_video, FileUtils.File(constants['path']['template']['video-info']))
@@ -118,7 +119,15 @@ def jumpToNearestKeyframe(isForward:bool):
             Announcement.VideoInformationStillLoading()
 
 def initiateVideoGeneration():
-    pass
+    commandStruct = {
+        'Command' : 'Generate',
+        'Arguments' : {
+            'Trim-Times' : trimTimesTable.getEntries(),
+            'Options' : filterList.getData(),
+        },
+    }
+    Utils.Processor.commandQueue.enqueue(commandStruct)
+    print('Sent!')
 
 def showVideoInformation():
     if Utils.Processor.VideoInformation.isInitialized == True:

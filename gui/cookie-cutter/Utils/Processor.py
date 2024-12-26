@@ -23,10 +23,41 @@ commandQueue = GConcurrency.Queue()
 
 class INTERNAL:
 
+    class CommandHandler:
+        
+        @staticmethod
+        def generate(commandStruct):
+            return {
+                'Status' : 0,
+            }
+
+        mapping = {
+            'Generate' : generate,
+        }
+
     # ? Initialization parameter(s).
     class Parameters:
         f_video = None
         f_videoInfoTemplate = None
+
+    @staticmethod
+    def longInitialize():
+        
+        # ? (Long-)Initialization.
+        video = VideoUtils.Video(INTERNAL.Parameters.f_video)
+        
+        # ? Initialization of video information.
+        VideoInformation.keyframes = video.getKeyframes()
+        VideoInformation.fps = video.getFPS()
+        VideoInformation.dimensions = video.getDimensions()
+        VideoInformation.duration = video.getDuration()
+        # ? ? 
+        summaryFormatter = ProcessUtils.FileTemplate.fromFile(INTERNAL.Parameters.f_videoInfoTemplate).createFormatter()
+        summaryFormatter.assertParameter('fps', f"{VideoInformation.fps:.3f}")
+        summaryFormatter.assertParameter('size', str(VideoInformation.dimensions))
+        VideoInformation.summary = str(summaryFormatter)
+        # ? ? (...)
+        VideoInformation.isInitialized = True
 
 def initialize(f_video:FileUtils.File, f_videoInfoTemplate:FileUtils.File):
     
@@ -36,25 +67,21 @@ def initialize(f_video:FileUtils.File, f_videoInfoTemplate:FileUtils.File):
 
 def loop(thread:GConcurrency.Thread):
     
-    # ? (Long-)Initialization.
-    video = VideoUtils.Video(INTERNAL.Parameters.f_video)
-    
-    # ? Initialization of video information.
-    VideoInformation.keyframes = video.getKeyframes()
-    VideoInformation.fps = video.getFPS()
-    VideoInformation.dimensions = video.getDimensions()
-    VideoInformation.duration = video.getDuration()
-    # ? ? 
-    summaryFormatter = ProcessUtils.FileTemplate.fromFile(INTERNAL.Parameters.f_videoInfoTemplate).createFormatter()
-    summaryFormatter.assertParameter('fps', f"{VideoInformation.fps:.3f}")
-    summaryFormatter.assertParameter('size', str(VideoInformation.dimensions))
-    VideoInformation.summary = str(summaryFormatter)
-    # ? ? (...)
-    VideoInformation.isInitialized = True
+    INTERNAL.longInitialize()
     
     while(True):        
         
         # ? Wait until a command is present.
-        command = commandQueue.dequeue()
+        commandStruct = commandQueue.dequeue()
         
-        thread.notify(command)
+        # ? Pass command to (respective) handler.
+        result = INTERNAL.CommandHandler.mapping[commandStruct['Command']](commandStruct['Arguments'])
+        
+        # ? Construct return data.
+        returnStruct = {
+            'Command' : commandStruct['Command'],
+            'Result' : result,
+        }
+        
+        # ? Send notification.
+        thread.notify(returnStruct)
