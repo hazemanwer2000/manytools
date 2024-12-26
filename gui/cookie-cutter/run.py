@@ -13,6 +13,7 @@ import time
 from pprint import pprint
 
 import Utils.CustomWidgets
+import Utils.Processor
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
@@ -85,6 +86,15 @@ trimTimesTableMenu = GUtils.Menu([
     )
 ])
 trimTimesTable.setContextMenu(trimTimesTableMenu)
+
+# ? ? Construct processor thread.
+
+def processorNotificationHandler(data:dict):
+    print(data)
+
+Utils.Processor.initialize(f_video)
+processorThread = GConcurrency.Thread(mainFcn=Utils.Processor.loop, notifyFcn=processorNotificationHandler)
+processorThread.run()
 
 # ? Run GUI loop.
 window.show()
