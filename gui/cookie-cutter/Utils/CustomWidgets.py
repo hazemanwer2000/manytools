@@ -129,15 +129,16 @@ class FilterOptions:
     class AddBorder(FilterOptionFull):
 
         def __init__(self):
-            cfgNames = [
-                'Thickness',
-                'Color',
-            ]
-            cfgPlaceholders = [
-                "e.g., 50",
-                "e.g., #ffffff",
-            ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            cfgMapping = collections.OrderedDict()
+            cfgMapping['Thickness'] = {
+                'Widget' : GElements.Widgets.Basics.LineEdit(placeholder='e.g., 50'),
+                'Get-Data' : (lambda x: x.getText()),
+            }
+            cfgMapping['Color'] = {
+                'Widget' : GElements.Widgets.Complex.ColorSelector(ColorUtils.Colors.BLACK),
+                'Get-Data' : (lambda x: str(x.getColor())),
+            }
+            super().__init__(cfgMapping.keys(), [cfgMapping[x]['Widget'] for x in cfgMapping])
 
     class Crop(FilterOptionLineEditOnly):
 
