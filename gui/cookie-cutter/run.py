@@ -8,6 +8,7 @@ import automatey.Formats.JSON as JSON
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.Utils.PyUtils as PyUtils
 import automatey.Resources as Resources
+import automatey.Utils.MathUtils as MathUtils
 
 import sys
 import time
@@ -106,17 +107,22 @@ processorThread.run()
 # ? ? Construct window toolbar.
 
 def jumpToNearestKeyframe(isForward:bool):
-    if Utils.Processor.VideoInformation.isInitialized == True:
-        pass
-    else:
-        Announcement.VideoInformationStillLoading()
+    if (not videoPlayer.getRenderer().isPlaying()):
+        if Utils.Processor.VideoInformation.isInitialized == True:
+            currentVideoPosition = videoPlayer.getRenderer().getPosition()
+            nearestValues = MathUtils.findNearestValues(currentVideoPosition, Utils.Processor.VideoInformation.keyframes)
+            newVideoPosition = nearestValues[1] if isForward else nearestValues[0]
+            if not (newVideoPosition is None):
+                videoPlayer.seekPosition(newVideoPosition)
+        else:
+            Announcement.VideoInformationStillLoading()
 
 def initiateVideoGeneration():
     pass
 
 def showVideoInformation():
     if Utils.Processor.VideoInformation.isInitialized == True:
-        GElements.StandardDialog.showInformation('Video Information', Utils.Processor.VideoInformation.summary, (400, 400), isSizeFixed=True)
+        GElements.StandardDialog.showInformation('Video Information', Utils.Processor.VideoInformation.summary, (400, 125), isSizeFixed=True)
     else:
         Announcement.VideoInformationStillLoading()
 
