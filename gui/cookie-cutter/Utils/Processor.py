@@ -277,18 +277,19 @@ class INTERNAL:
                     for idx, trimTimeEntry in enumerate(commandStruct['Trim-Times']):
                         
                         # ? ? ? Pick-out filter(s).
-                        filters = struct['filters']['general']
+                        filters = []
+                        filters.extend(struct['filters']['general'])
                         if idx == 0:
-                            filters += struct['filters']['first-cut-only']
+                            filters.extend(struct['filters']['first-cut-only'])
                         if idx == (len(commandStruct['Trim-Times']) - 1):
-                            filters += struct['filters']['last-cut-only']
+                            filters.extend(struct['filters']['last-cut-only'])
                         
                         # ? ? ? (...)
                         trimAction = VideoUtils.Actions.Trim(trimTimeEntry['Start-Time'], 
                                                              trimTimeEntry['End-Time'], 
                                                              isMute=struct['is-mute'],
                                                              isNearestKeyframe=struct['is-nearest-keyframe'],
-                                                             modifiers=struct['filters']['general'])
+                                                             modifiers=filters)
                         trimActions.append(trimAction)
                     
                     # ? ? Other action(s) (...)
@@ -327,7 +328,7 @@ class INTERNAL:
     @staticmethod
     def longInitialize():
         
-        # ? (Long-)Initialization.
+        # ? (Long-)Initialization, takes place at the start of the infinite loop.
         INTERNAL.video = VideoUtils.Video(INTERNAL.Parameters.f_video)
         
         # ? Initialization of video information.
