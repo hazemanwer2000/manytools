@@ -106,6 +106,7 @@ trimTimesTable.setContextMenu(GUtils.Menu([
 # ? ? Construct processor thread.
 
 def onVideoGenerationResult(result):
+    GElements.StandardDialog.BackgroundActivity.release()
     if result['Status'] == 0:
         Announcement.VideoGenerationSuccessful()
     else:
@@ -137,6 +138,8 @@ def jumpToNearestKeyframe(isForward:bool):
             Announcement.VideoInformationStillLoading()
 
 def initiateVideoGeneration():
+    
+    GElements.StandardDialog.BackgroundActivity.awaitActivity()
     
     # ? Pause video first.
     videoPlayer.pause()

@@ -180,6 +180,8 @@ class INTERNAL:
                     
                     f_videoDst = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(INTERNAL.Parameters.f_video)))
                     INTERNAL.video.saveAs(f_videoDst)
+                    
+                    INTERNAL.video.clearActions()
                 
                 except:
                     resultStatus = 1
