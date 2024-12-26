@@ -50,24 +50,11 @@ class FilterOptionFull(FilterOption):
         self.cfgNames = cfgNames
         
         super().__init__(self.rootVerticalContainer)
-
-# Note: Convenience class, for option(s) with 'LineEdit' widget(s) only.
-class FilterOptionLineEditOnly(FilterOptionFull):
-    '''
-    For option(s) with line-input only.
-    '''
-    
-    def __init__(self, cfgNames:list, cfgPlaceholders:list):
-        cfgLineEdits = []
-        for cfgPlaceholder in cfgPlaceholders:
-            cfgLineEdit = GElements.Widgets.Basics.LineEdit(placeholder=cfgPlaceholder)
-            cfgLineEdits.append(cfgLineEdit)
-        super().__init__(cfgNames, cfgLineEdits)
     
     def getData(self):
         dataDict = super().getData()
-        for cfgName, cfgLineEdit in zip(self.cfgNames, self.cfgWidgets):
-            dataDict['Cfg'][cfgName] = cfgLineEdit.getText()
+        for cfgName, cfgWidget in zip(self.cfgNames, self.cfgWidgets):
+            dataDict['Cfg'][cfgName] = str(cfgWidget)
         return dataDict
 
 class FilterOptions:
@@ -78,124 +65,123 @@ class FilterOptions:
     class Grayscale(FilterOptionLess):
         pass
 
-    class BrightnessContrast(FilterOptionLineEditOnly):
+    class BrightnessContrast(FilterOptionFull):
         
         def __init__(self):
             cfgNames = [
                 'Brightness-Factor',
                 'Contrast-Factor',
             ]
-            cfgPlaceholders = [
-                'e.g., 1.0 has no effect',
-                'e.g., 1.0 has no effect',
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
 
-    class GaussianBlur(FilterOptionLineEditOnly):
-        
+    class GaussianBlur(FilterOptionFull):
+
         def __init__(self):
             cfgNames = [
                 'Kernel-Size',
             ]
-            cfgPlaceholders = [
-                'e.g., 3, 5, 7',
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 3, 5, 7'),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
 
-    class Sharpen(FilterOptionLineEditOnly):
+    class Sharpen(FilterOptionFull):
         
         def __init__(self):
             cfgNames = [
                 'Factor',
                 'Kernel-Size',
             ]
-            cfgPlaceholders = [
-                'e.g., 1.0 has no effect',
-                'e.g., 3, 5, 7',
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 3, 5, 7'),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
 
-    class Pixelate(FilterOptionLineEditOnly):
+    class Pixelate(FilterOptionFull):
 
         def __init__(self):
             cfgNames = [
                 'Factor',
             ]
-            cfgPlaceholders = [
-                'e.g., 1.0 has no effect',
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
 
     class AddBorder(FilterOptionFull):
 
         def __init__(self):
-            cfgMapping = collections.OrderedDict()
-            cfgMapping['Thickness'] = {
-                'Widget' : GElements.Widgets.Basics.LineEdit(placeholder='e.g., 50'),
-                'Get-Data' : (lambda x: x.getText()),
-            }
-            cfgMapping['Color'] = {
-                'Widget' : GElements.Widgets.Complex.ColorSelector(ColorUtils.Colors.BLACK),
-                'Get-Data' : (lambda x: str(x.getColor())),
-            }
-            super().__init__(cfgMapping.keys(), [cfgMapping[x]['Widget'] for x in cfgMapping])
+            cfgNames = [
+                'Thickness',
+                'Color',
+            ]
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 50'),
+                GElements.Widgets.Complex.ColorSelector(ColorUtils.Colors.BLACK),
+            ]
+            super().__init__(cfgNames, cfgWidgets)
 
-    class Crop(FilterOptionLineEditOnly):
+    class Crop(FilterOptionFull):
 
         def __init__(self):
             cfgNames = [
                 'Top-Left',
                 'Bottom-Right',
             ]
-            cfgPlaceholders = [
-                "e.g., (1, 1), (W, H)",
-                "e.g., (1, 1), (W, H)",
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., (1, 1), (W, H)"),
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., (1, 1), (W, H)"),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
 
-    class Resize(FilterOptionLineEditOnly):
+    class Resize(FilterOptionFull):
 
         def __init__(self):
             cfgNames = [
                 'Width',
                 'Height',
             ]
-            cfgPlaceholders = [
-                "e.g., 600, -1 (i.e., keep aspect ratio)",
-                "e.g., 400, -1 (i.e., keep aspect ratio)",
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., 600, -1 (i.e., auto)"),
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., 400, -1 (i.e., auto)"),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
 
-    class VideoFade(FilterOptionLineEditOnly):
-
-        def __init__(self):
-            cfgNames = [
-                'Duration',
-                'Per-Cut',
-            ]
-            cfgPlaceholders = [
-                "i.e., in seconds",
-                "i.e., yes or no",
-            ]
-            super().__init__(cfgNames, cfgPlaceholders)
-
-    class AudioFade(FilterOptionLineEditOnly):
+    class VideoFade(FilterOptionFull):
 
         def __init__(self):
             cfgNames = [
                 'Duration',
                 'Per-Cut',
             ]
-            cfgPlaceholders = [
-                "i.e., in seconds",
-                "i.e., yes or no",
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder="i.e., in seconds"),
+                GElements.Widgets.Basics.CheckBox(),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
+
+    class AudioFade(FilterOptionFull):
+
+        def __init__(self):
+            cfgNames = [
+                'Duration',
+                'Per-Cut',
+            ]
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder="i.e., in seconds"),
+                GElements.Widgets.Basics.CheckBox(),
+            ]
+            super().__init__(cfgNames, cfgWidgets)
 
     class AudioMute(FilterOptionLess):
         pass
 
-    class GIF(FilterOptionLineEditOnly):
+    class GIF(FilterOptionFull):
 
         def __init__(self):
             cfgNames = [
@@ -204,10 +190,10 @@ class FilterOptions:
                 'Width',
                 'Height',
             ]
-            cfgPlaceholders = [
-                "i.e., 10",
-                'e.g., 1.0 has no effect',
-                "e.g., 600, -1 (i.e., auto)",
-                "e.g., 400, -1 (i.e., auto)",
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder="i.e., 10"),
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., 600, -1 (i.e., auto)"),
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., 400, -1 (i.e., auto)"),
             ]
-            super().__init__(cfgNames, cfgPlaceholders)
+            super().__init__(cfgNames, cfgWidgets)
