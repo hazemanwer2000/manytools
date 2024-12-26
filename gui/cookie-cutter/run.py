@@ -58,7 +58,7 @@ class Announcement:
     
     @staticmethod
     def VideoInformationStillLoading():
-        GElements.StandardDialog.Message.Announce.Warning('Video information is still being loaded.')
+        GElements.StandardDialog.Message.Announce.Information('Video information is still being loaded.')
 
     @staticmethod
     def VideoGenerationSuccessful():

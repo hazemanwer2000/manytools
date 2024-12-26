@@ -7,6 +7,7 @@ import automatey.Base.ColorUtils as ColorUtils
 import automatey.Base.TimeUtils as TimeUtils
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Utils.Validation as Validation
+import automatey.Utils.StringUtils as StringUtils
 
 import time
 import traceback
@@ -31,9 +32,10 @@ class INTERNAL:
     class Validation:
         
         @staticmethod
-        def Assert(values, declaration):
-            if not all(values):
-                raise ExceptionUtils.ValidationError(declaration)
+        def Assert(value, conditionals, declaration):
+            for conditional in conditionals:
+                if not conditional(value):
+                    raise ExceptionUtils.ValidationError(declaration)
 
         @staticmethod
         def asColor(hexCode):
@@ -42,6 +44,13 @@ class INTERNAL:
         @staticmethod
         def asTime(timeAsString):
             return TimeUtils.Time.createFromString(timeAsString)
+        
+        @staticmethod
+        def asXY(XandY):
+            found = StringUtils.Regex.findAll('\(([0-9]+), ([0-9]+)\)', XandY)
+            if len(found) != 1:
+                raise ExceptionUtils.ValidationError("'(X, Y)' structure is not matched.")
+            return [int(found[0][0]), int(found[0][1])]
 
     class CommandHandler:
         
@@ -57,15 +66,15 @@ class INTERNAL:
 
                 def BrightnessContrast(cfgDict):
                     cfgDict['Brightness-Factor'] = Validation.asFloat(cfgDict['Brightness-Factor'])
-                    cfgDict['Contrast-Factor'] = Validation.asFloat(cfgDict['Brightness-Factor'])
+                    cfgDict['Contrast-Factor'] = Validation.asFloat(cfgDict['Contrast-Factor'])
 
                 def GaussianBlur(cfgDict):
                     
                     cfgDict['Kernel-Size'] = Validation.asInt(cfgDict['Kernel-Size'])
                     # ? If (...) is less or equal to 1, or is not odd. 
-                    INTERNAL.Validation.Assert([
-                        (cfgDict['Kernel-Size'] <= 1),
-                        ((cfgDict['Kernel-Size'] % 2) == 0),
+                    INTERNAL.Validation.Assert(cfgDict['Kernel-Size'], [
+                        (lambda x: x > 1),
+                        (lambda x: (x % 2) == 1),
                     ], 'Kernel size should be larger than 1, and odd.')
 
                 def Sharpen(cfgDict):
@@ -73,9 +82,9 @@ class INTERNAL:
 
                     cfgDict['Kernel-Size'] = Validation.asInt(cfgDict['Kernel-Size'])
                     # ? If (...) is less or equal to 1, or is not odd. 
-                    INTERNAL.Validation.Assert([
-                        (cfgDict['Kernel-Size'] <= 1),
-                        ((cfgDict['Kernel-Size'] % 2) == 0),
+                    INTERNAL.Validation.Assert(cfgDict['Kernel-Size'], [
+                        (lambda x: x > 1),
+                        (lambda x: (x % 2) == 1),
                     ], 'Kernel size should be larger than 1, and odd.')
 
                 def Pixelate(cfgDict):
@@ -86,21 +95,35 @@ class INTERNAL:
                     
                     cfgDict['Thickness'] = Validation.asInt(cfgDict['Thickness'])
                     # ? (...)
-                    INTERNAL.Validation.Assert([
-                        (cfgDict['Thickness'] > 0),
+                    INTERNAL.Validation.Assert(cfgDict['Thickness'], [
+                        (lambda x: x > 0),
                     ], 'Thickness must be larger than 0.')
 
                 def Crop(cfgDict):
-                    pass
+                    cfgDict['Top-Left'] = INTERNAL.Validation.asXY(cfgDict['Top-Left'])
+                    cfgDict['Bottom-Right'] = INTERNAL.Validation.asXY(cfgDict['Bottom-Right'])
 
                 def Resize(cfgDict):
-                    pass
+                    cfgDict['Width'] = INTERNAL.Validation.asXY(cfgDict['Width'])
+                    cfgDict['Height'] = INTERNAL.Validation.asXY(cfgDict['Height'])
 
                 def VideoFade(cfgDict):
-                    pass
+                    cfgDict['Per-Cut'] = Validation.asBool(cfgDict['Per-Cut'])
+                    
+                    cfgDict['Duration'] = Validation.asInt(cfgDict['Duration'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Duration'], [
+                        (lambda x: x > 0),
+                    ], 'Duration must be larger than 0.')
 
                 def AudioFade(cfgDict):
-                    pass
+                    cfgDict['Per-Cut'] = Validation.asBool(cfgDict['Per-Cut'])
+                    
+                    cfgDict['Duration'] = Validation.asInt(cfgDict['Duration'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Duration'], [
+                        (lambda x: x > 0),
+                    ], 'Duration must be larger than 0.')
 
                 def AudioMute(cfgDict):
                     pass
@@ -109,7 +132,10 @@ class INTERNAL:
                     pass
 
                 def GIF(cfgDict):
-                    pass
+                    cfgDict['Capture-FPS'] = Validation.asFloat(cfgDict['Capture-FPS'])
+                    cfgDict['Playback-Factor'] = Validation.asFloat(cfgDict['Playback-Factor'])
+                    cfgDict['Width'] = INTERNAL.Validation.asXY(cfgDict['Width'])
+                    cfgDict['Height'] = INTERNAL.Validation.asXY(cfgDict['Height'])
             
             @staticmethod
             def runner(commandStruct):
