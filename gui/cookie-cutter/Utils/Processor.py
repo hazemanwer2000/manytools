@@ -267,12 +267,23 @@ class INTERNAL:
                             'first-cut-only' : [],
                             'last-cut-only' : [],
                         },
+                        'gif-action' : None,
                     }
                     for option in commandStruct['Options']:
                         INTERNAL.CommandHandler.Generate.OptionProcess.__dict__[option['Name'].replace('-', '')](option['Cfg'], struct)
                     
+                    # ? ? Setup Trim action(s).
                     trimActions = []
-                    for trimTimeEntry in commandStruct['Trim-Times']:
+                    for idx, trimTimeEntry in enumerate(commandStruct['Trim-Times']):
+                        
+                        # ? ? ? Pick-out filter(s).
+                        filters = struct['filters']['general']
+                        if idx == 0:
+                            filters += struct['filters']['first-cut-only']
+                        if idx == (len(commandStruct['Trim-Times']) - 1):
+                            filters += struct['filters']['last-cut-only']
+                        
+                        # ? ? ? (...)
                         trimAction = VideoUtils.Actions.Trim(trimTimeEntry['Start-Time'], 
                                                              trimTimeEntry['End-Time'], 
                                                              isMute=struct['is-mute'],
@@ -280,9 +291,15 @@ class INTERNAL:
                                                              modifiers=struct['filters']['general'])
                         trimActions.append(trimAction)
                     
-                    joinAction = VideoUtils.Actions.Join(*trimActions)
+                    # ? ? Other action(s) (...)
                     
+                    joinAction = VideoUtils.Actions.Join(*trimActions)
                     INTERNAL.video.registerAction(joinAction)
+                    
+                    if not (struct['gif-action'] is None):
+                        INTERNAL.video.registerAction(struct['gif-action'])
+                    
+                    # ? ? Generate video.
                     
                     f_videoDst = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(INTERNAL.Parameters.f_video)))
                     INTERNAL.video.saveAs(f_videoDst)
