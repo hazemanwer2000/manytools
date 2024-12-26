@@ -58,10 +58,12 @@ def performRecurrentActivities():
     videoPosition = videoPlayer.getRenderer().getPosition()
     videoMousePosition = videoPlayer.getRenderer().getMousePosition()
     videoDuration = videoPlayer.getRenderer().getDuration()
+    videoVolume = videoPlayer.getRenderer().getVolume()
     
     statusText = ', '.join([
         str(videoPosition) + ' / ' + str(videoDuration),
-        str(videoMousePosition)
+        str(videoMousePosition),
+        str(videoVolume) + '%',
     ])
     window.setStatus(statusText)
 
