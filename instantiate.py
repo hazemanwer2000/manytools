@@ -29,6 +29,9 @@ for f_template in f_templates:
     f_templateDir = f_template.traverseDirectory('..')
     f_templateDirAbs = f_cwd.traverseDirectory(str(f_templateDir))
     fileFormatter.assertParameter('current-directory', str(f_templateDirAbs))
+
+    # ? ? Parameter: BASE-DIRECTORY
+    fileFormatter.assertParameter('base-directory', str(f_cwd))
     
     # ? ? Replace 'global-macros'.
     global_macros = settings['global-macros']

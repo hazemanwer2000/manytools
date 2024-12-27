@@ -3,3 +3,4 @@ constants.json
 __pycache__/
 /settings.json
 ignore*
+/env/
