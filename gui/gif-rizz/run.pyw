@@ -1,17 +1,10 @@
 
 import automatey.GUI.GElements as GElements
-import automatey.GUI.GConcurrency as GConcurrency
 import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
-import automatey.Base.TimeUtils as TimeUtils
-import automatey.Utils.PyUtils as PyUtils
-import automatey.Resources as Resources
-import automatey.Utils.MathUtils as MathUtils
 
-import sys
-import time
 from pprint import pprint
 
 # ? Get app's root directory.
@@ -39,8 +32,6 @@ window = GElements.Window(title=constants['title'],
                           minimumSize=constants['gui']['window']['min-size'])
 
 # ? Setup event handler(s).
-
-# ? ? Construct processor thread.
 
 # ? ? Construct window toolbar.
 

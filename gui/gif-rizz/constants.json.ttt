@@ -9,5 +9,9 @@
         "window" : {
             "min-size" : [800, 600]
         } 
+    },
+    "start-menu" : {
+        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/melon-48.ico",
+        "name" : "GIF Rizz"
     }
 }
