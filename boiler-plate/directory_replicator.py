@@ -21,9 +21,6 @@ f_dstDir.makeDirectory()
 
 path_inputs = f_dir.listDirectoryRelatively(isRecursive=True, conditional=conditional)
 
-f_inputs = []
-f_outputs = []
-
 FileUtils.File.Utils.replicateDirectoryStructure(f_dir, f_dstDir)
 
 for path_input in path_inputs:
