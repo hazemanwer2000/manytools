@@ -11,6 +11,15 @@
     "gui" : {
         "window" : {
             "min-size" : [800, 600]
-        } 
+        }
+    },
+
+    "context-menu" : {
+        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie-16.ico",
+        "name" : "Edit with CookieCutter"
+    },
+    
+    "global-macros" : {
+        "pythonw" : "{{{BIN-PYTHONW}}}"
     }
 }
