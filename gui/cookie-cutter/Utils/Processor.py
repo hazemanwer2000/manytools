@@ -296,15 +296,19 @@ class INTERNAL:
                     
                     joinAction = VideoUtils.Actions.Join(*trimActions)
                     INTERNAL.video.registerAction(joinAction)
-                    
+
+                    ext_dst = 'mp4'
+
                     if not (struct['gif-action'] is None):
                         INTERNAL.video.registerAction(struct['gif-action'])
+                        ext_dst = 'gif'
                     
-                    # ? ? Generate video.
-                    
-                    f_videoDst = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(INTERNAL.Parameters.f_video)))
-                    INTERNAL.video.saveAs(f_videoDst)
-                    
+                    # ? ? Generate.
+
+                    f_dst = FileUtils.File(FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(INTERNAL.Parameters.f_video), extension=ext_dst)
+                    ))
+                    INTERNAL.video.saveAs(f_dst)
                     INTERNAL.video.clearActions()
                 
                 except:
