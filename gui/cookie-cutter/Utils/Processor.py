@@ -272,6 +272,12 @@ class INTERNAL:
                     for option in commandStruct['Options']:
                         INTERNAL.CommandHandler.Generate.OptionProcess.__dict__[option['Name'].replace('-', '')](option['Cfg'], struct)
                     
+                    # ? ? ? Fix: Because micro-seconds are neglected by the video-player, must increment by 1-ms when exporting by finding nearest (previous) key-frame.
+                    if struct['is-nearest-keyframe']:
+                        for trimTimeEntry in commandStruct['Trim-Times']:
+                            if not (trimTimeEntry['Start-Time'] is None):
+                                trimTimeEntry['Start-Time'] = trimTimeEntry['Start-Time'] + TimeUtils.Time.createFromMilliseconds(1)
+                    
                     # ? ? Setup Trim action(s).
                     trimActions = []
                     for idx, trimTimeEntry in enumerate(commandStruct['Trim-Times']):
@@ -297,13 +303,17 @@ class INTERNAL:
                     joinAction = VideoUtils.Actions.Join(*trimActions)
                     INTERNAL.video.registerAction(joinAction)
 
-                    ext_dst = 'mp4'
-
                     if not (struct['gif-action'] is None):
-                        INTERNAL.video.registerAction(struct['gif-action'])
-                        ext_dst = 'gif'
+                        INTERNAL.video.registerAction(struct['gif-action'])    
                     
                     # ? ? Generate.
+                    
+                    if not (struct['gif-action'] is None):
+                        ext_dst = 'gif'
+                    elif not struct['is-nearest-keyframe']:
+                        ext_dst = 'mp4'
+                    else:
+                        ext_dst = None
 
                     f_dst = FileUtils.File(FileUtils.File.Utils.Path.iterateName(
                         FileUtils.File.Utils.Path.modifyName(str(INTERNAL.Parameters.f_video), extension=ext_dst)
