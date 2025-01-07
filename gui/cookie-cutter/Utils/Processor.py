@@ -276,7 +276,7 @@ class INTERNAL:
                     if struct['is-nearest-keyframe']:
                         for trimTimeEntry in commandStruct['Trim-Times']:
                             if not (trimTimeEntry['Start-Time'] is None):
-                                trimTimeEntry['Start-Time'] = trimTimeEntry['Start-Time'] + TimeUtils.Time.createFromMilliseconds(1)
+                                trimTimeEntry['Start-Time'] = trimTimeEntry['Start-Time'] + TimeUtils.Time.createFromMilliseconds(50)
                     
                     # ? ? Setup Trim action(s).
                     trimActions = []
