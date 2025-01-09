@@ -30,6 +30,10 @@ commandQueue = GConcurrency.Queue()
 
 class INTERNAL:
     
+    Constants = {
+        'Default-CRF' : 17,
+    }
+    
     # ? Video-handler.
     video:VideoUtils.Video = None
 
@@ -139,6 +143,13 @@ class INTERNAL:
                         (lambda x: x > 0),
                     ], 'Duration must be larger than 0.')
 
+                def CRF(cfgDict):
+                    cfgDict['Value'] = Validation.asInt(cfgDict['Value'])
+                    # ? (...)
+                    INTERNAL.Validation.Assert(cfgDict['Value'], [
+                        (lambda x: x > 0),
+                    ], 'CRF must be larger than 0.')
+
                 def AudioMute(cfgDict):
                     pass
 
@@ -215,6 +226,9 @@ class INTERNAL:
                         struct['filters']['first-cut-only'].append(fadeInModifier)
                         struct['filters']['last-cut-only'].append(fadeOutModifier)
 
+                def CRF(cfgDict, struct):
+                    struct['CRF'] = cfgDict['Value']
+
                 def AudioMute(cfgDict, struct):
                     struct['is-mute'] = True
 
@@ -268,6 +282,7 @@ class INTERNAL:
                             'last-cut-only' : [],
                         },
                         'gif-action' : None,
+                        'CRF' : INTERNAL.Constants['Default-CRF'],
                     }
                     for option in commandStruct['Options']:
                         INTERNAL.CommandHandler.Generate.OptionProcess.__dict__[option['Name'].replace('-', '')](option['Cfg'], struct)
@@ -295,7 +310,8 @@ class INTERNAL:
                                                              trimTimeEntry['End-Time'], 
                                                              isMute=struct['is-mute'],
                                                              isNearestKeyframe=struct['is-nearest-keyframe'],
-                                                             modifiers=filters)
+                                                             modifiers=filters,
+                                                             CRF=struct['CRF'])
                         trimActions.append(trimAction)
                     
                     # ? ? Other action(s) (...)

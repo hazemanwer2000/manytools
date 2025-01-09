@@ -178,6 +178,17 @@ class FilterOptions:
             ]
             super().__init__(cfgNames, cfgWidgets)
 
+    class CRF(FilterOptionFull):
+
+        def __init__(self):
+            cfgNames = [
+                'Value',
+            ]
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='i.e., 12, 15, 17, 20'),
+            ]
+            super().__init__(cfgNames, cfgWidgets)
+
     class AudioMute(FilterOptionLess):
         pass
 
