@@ -1,5 +1,6 @@
 {
     "global-macros" : {
-        "bin-pythonw" : ""
+        "bin-pythonw" : "",
+        "bin-python" : ""
     }
 }
