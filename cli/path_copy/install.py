@@ -21,9 +21,15 @@ command = ' '.join([
     '"%1"'
 ])
 
-Windows.Registry.ContextMenu.createCommand(name=command_name,
+fileCategories = [
+    Windows.Registry.ContextMenu.FileCategory.AllFiles,
+    Windows.Registry.ContextMenu.FileCategory.AllDirectories
+]
+
+for fileCategory in fileCategories:
+    Windows.Registry.ContextMenu.createCommand(name=command_name,
                                            command=command,
                                            f_icon=FileUtils.File(constants['context-menu']['icon-path']),
-                                           fileCategory=Windows.Registry.ContextMenu.FileCategory.AllFiles)
+                                           fileCategory=fileCategory)
 
 print("Context menu entry added successfully.")

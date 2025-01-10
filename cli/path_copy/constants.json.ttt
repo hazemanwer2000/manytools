@@ -1,6 +1,6 @@
 {
     "context-menu" : {
-        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/context-16.ico",
+        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/path-16.ico",
         "name" : "Copy Path (Unix-Style)"
     },
     
