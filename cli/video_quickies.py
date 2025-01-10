@@ -37,9 +37,8 @@ class CommandHandler:
         @staticmethod
         def run(f_input:FileUtils.File, crf:int):
             f_output = FileUtils.File(
-                FileUtils.File.Utils.Path.modifyName(
-                    FileUtils.File.Utils.Path.iterateName(str(f_input)),
-                    extension='mp4',
+                FileUtils.File.Utils.Path.iterateName(
+                    FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
                 )
             )
             commandFormatter = FFMPEG.CommandTemplates['Convert'].createFormatter()
