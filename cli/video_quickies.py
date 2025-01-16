@@ -44,7 +44,10 @@ class Utils:
         
         INTERNAL_Constants = {
             # (!) Note: In Seconds.
-            'sleep-time' : 1.0,
+            'sleep-time' : {
+                'upper' : 1.2,
+                'lower' : 0.8,
+            },
         }
         
         def __init__(self):
@@ -79,7 +82,13 @@ class Utils:
                 
                 # ? Report, if not halted.
                 if not isHalted:
-                    time.sleep(Utils.VocalTimer.INTERNAL_Constants['sleep-time'])
+                    
+                    time.sleep(
+                        RandomUtils.Generation.Float(
+                            Utils.VocalTimer.INTERNAL_Constants['sleep-time']['lower'],
+                            Utils.VocalTimer.INTERNAL_Constants['sleep-time']['upper'],
+                        )
+                    )
                     deltaTime = TimeUtils.Time.getEpochTime() - referenceTime
                     print(((message + ': ') if (message != None) else '') + str(deltaTime))
         
