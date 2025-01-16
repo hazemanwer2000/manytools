@@ -61,6 +61,10 @@ class Announcement:
         GElements.StandardDialog.Message.Announce.Information('Video information is still being loaded.')
 
     @staticmethod
+    def NoMoreKeyframes():
+        GElements.StandardDialog.Message.Announce.Information('Video has no more keyframes.')
+
+    @staticmethod
     def VideoGenerationSuccessful():
         GElements.StandardDialog.Message.Announce.Information('Video was generated successfully.')
 
@@ -137,6 +141,8 @@ def jumpToNearestKeyframe(isForward:bool):
             newVideoPosition = nearestValues[1] if isForward else nearestValues[0]
             if not (newVideoPosition is None):
                 videoPlayer.seekPosition(newVideoPosition)
+            else:
+                Announcement.NoMoreKeyframes()
         else:
             Announcement.VideoInformationStillLoading()
 
