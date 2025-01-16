@@ -65,6 +65,7 @@ class Utils:
             isHalted = True
             referenceTime = None
             message = None
+            messageToPrint = None
             
             while (True):
                   
@@ -75,14 +76,18 @@ class Utils:
                         break
                     elif item['command'] == 'stop':
                         isHalted = True
+                        print('')
                     elif item['command'] == 'start':
                         isHalted = False
                         referenceTime = item['args']['reference-time']
                         message = item['args']['message']
+                        messageToPrint = None
                 
                 # ? Report, if not halted.
                 if not isHalted:
                     
+                    if messageToPrint != None:
+                        print('\b' * (len(messageToPrint)), end='', flush=True)
                     time.sleep(
                         RandomUtils.Generation.Float(
                             Utils.VocalTimer.INTERNAL_Constants['sleep-time']['lower'],
@@ -90,7 +95,8 @@ class Utils:
                         )
                     )
                     deltaTime = TimeUtils.Time.getEpochTime() - referenceTime
-                    print(((message + ': ') if (message != None) else '') + str(deltaTime))
+                    messageToPrint = ((message + ': ') if (message != None) else '') + str(deltaTime)
+                    print(messageToPrint, end='', flush=True)
         
         def start(self, message=None):
             self.queue.put(item={
