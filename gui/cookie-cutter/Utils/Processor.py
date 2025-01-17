@@ -99,6 +99,13 @@ class INTERNAL:
                 def Pixelate(cfgDict):
                     cfgDict['Factor'] = Validation.asFloat(cfgDict['Factor'])
 
+                def Noise(cfgDict):
+                    cfgDict['Factor'] = Validation.asFloat(cfgDict['Factor'])
+                    # ? If (...) is less than 1. 
+                    INTERNAL.Validation.Assert(cfgDict['Factor'], [
+                        (lambda x: x >= 1),
+                    ], 'Factor must be larger or equal to 1.')
+
                 def AddBorder(cfgDict):
                     cfgDict['Color'] = INTERNAL.Validation.asColor(cfgDict['Color'])
                     
@@ -201,6 +208,9 @@ class INTERNAL:
 
                 def Pixelate(cfgDict, struct):
                     struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Pixelate(factor=cfgDict['Factor']))
+
+                def Noise(cfgDict, struct):
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Noise(factor=cfgDict['Factor']))
 
                 def AddBorder(cfgDict, struct):
                     struct['filters']['general'].append(VideoUtils.Modifiers.Filters.AddBorder(AbstractGraphics.Border(thickness=cfgDict['Thickness'],

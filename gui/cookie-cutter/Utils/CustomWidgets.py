@@ -115,6 +115,17 @@ class FilterOptions:
             ]
             super().__init__(cfgNames, cfgWidgets)
 
+    class Noise(FilterOptionFull):
+
+        def __init__(self):
+            cfgNames = [
+                'Factor',
+            ]
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
+            ]
+            super().__init__(cfgNames, cfgWidgets)
+
     class AddBorder(FilterOptionFull):
 
         def __init__(self):
