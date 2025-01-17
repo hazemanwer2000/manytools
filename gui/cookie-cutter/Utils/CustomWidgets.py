@@ -111,7 +111,7 @@ class FilterOptions:
                 'Factor',
             ]
             cfgWidgets = [
-                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 1.0 has no effect'),
+                GElements.Widgets.Basics.LineEdit(placeholder='e.g., 2, 4, 8'),
             ]
             super().__init__(cfgNames, cfgWidgets)
 

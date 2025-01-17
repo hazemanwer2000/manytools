@@ -97,7 +97,11 @@ class INTERNAL:
                     ], 'Kernel size should be larger than 1, and odd.')
 
                 def Pixelate(cfgDict):
-                    cfgDict['Factor'] = Validation.asFloat(cfgDict['Factor'])
+                    cfgDict['Factor'] = Validation.asInt(cfgDict['Factor'])
+                    # ? If (...) is less than 1. 
+                    INTERNAL.Validation.Assert(cfgDict['Factor'], [
+                        (lambda x: x >= 1),
+                    ], 'Factor must be larger or equal to 1.')
 
                 def Noise(cfgDict):
                     cfgDict['Factor'] = Validation.asFloat(cfgDict['Factor'])
