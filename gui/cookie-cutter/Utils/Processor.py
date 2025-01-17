@@ -75,6 +75,7 @@ class INTERNAL:
                 def BrightnessContrast(cfgDict):
                     cfgDict['Brightness-Factor'] = Validation.asFloat(cfgDict['Brightness-Factor'])
                     cfgDict['Contrast-Factor'] = Validation.asFloat(cfgDict['Contrast-Factor'])
+                    cfgDict['Saturation-Factor'] = Validation.asFloat(cfgDict['Saturation-Factor'])
 
                 def GaussianBlur(cfgDict):
                     
@@ -188,7 +189,8 @@ class INTERNAL:
 
                 def BrightnessContrast(cfgDict, struct):
                     struct['filters']['general'].append(VideoUtils.Modifiers.Filters.BrightnessContrast(brightness=cfgDict['Brightness-Factor'],
-                                                                                                    contrast=cfgDict['Contrast-Factor']))
+                                                                                                        contrast=cfgDict['Contrast-Factor'],
+                                                                                                        saturation=cfgDict['Saturation-Factor']))
 
                 def GaussianBlur(cfgDict, struct):
                     struct['filters']['general'].append(VideoUtils.Modifiers.Filters.GaussianBlur(kernelSize=cfgDict['Kernel-Size']))
