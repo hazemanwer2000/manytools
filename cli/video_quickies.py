@@ -143,7 +143,7 @@ class CommandHandler:
             Utils.executeCommand(str(commandFormatter))
 
             # ? Clean-up (...)
-            #FileUtils.File.Utils.recycle(f_tmpDir)
+            FileUtils.File.Utils.recycle(f_tmpDir)
 
 @click.group()
 def cli():
