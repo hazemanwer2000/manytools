@@ -152,6 +152,28 @@ class FilterOptions:
             ]
             super().__init__(cfgNames, cfgWidgets)
 
+    class Rotate(FilterOptionFull):
+
+        def __init__(self):
+            cfgNames = [
+                'Angle',
+            ]
+            cfgWidgets = [
+                GElements.Widgets.Basics.LineEdit(placeholder="e.g., 90, -90, 180"),
+            ]
+            super().__init__(cfgNames, cfgWidgets)
+
+    class Mirror(FilterOptionFull):
+
+        def __init__(self):
+            cfgNames = [
+                'Direction',
+            ]
+            cfgWidgets = [
+                GElements.Widgets.Basics.DropDownList(['Vertical', 'Horizontal'])
+            ]
+            super().__init__(cfgNames, cfgWidgets)
+
     class VideoFade(FilterOptionFull):
 
         def __init__(self):

@@ -125,6 +125,12 @@ class INTERNAL:
                         (lambda x: (x > 0) or (x == -1)),
                     ], 'Dimension must be larger than 0, or -1.')
 
+                def Rotate(cfgDict):
+                    cfgDict['Angle'] = Validation.asInt(cfgDict['Angle'])
+                                
+                def Mirror(cfgDict):
+                    pass
+
                 def VideoFade(cfgDict):
                     cfgDict['Per-Cut'] = Validation.asBool(cfgDict['Per-Cut'])
                     
@@ -205,6 +211,19 @@ class INTERNAL:
 
                 def Resize(cfgDict, struct):
                     struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Resize(cfgDict['Width'], cfgDict['Height']))
+
+                def Rotate(cfgDict, struct):
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Transformations.Rotate(AbstractGraphics.Rotation(cfgDict['Angle'])))
+
+                Mirror2Mirror = {
+                    'Horizontal' : AbstractGraphics.Mirror.Horizontal,
+                    'Vertical' : AbstractGraphics.Mirror.Vertical,
+                }
+
+                def Mirror(cfgDict, struct):
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Transformations.Mirror(
+                        INTERNAL.CommandHandler.Generate.OptionProcess.Mirror2Mirror[cfgDict['Direction']]
+                    ))
 
                 def VideoFade(cfgDict, struct):
                     fadeInModifier = VideoUtils.Modifiers.Transitions.FadeIn(TimeUtils.Time.createFromSeconds(cfgDict['Duration']))
