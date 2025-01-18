@@ -67,9 +67,55 @@ class FFMPEG:
             r'-c copy',
             r'{{{OUTPUT-FILE}}}',
         ),
+        'VideoFilter:BlackAndWhite' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-FILE}}}',
+            r'-f lavfi -i color={{{THRESHOLD-COLOR}}}:s={{{VIDEO-WIDTH}}}x{{{VIDEO-HEIGHT}}}',
+            r'-f lavfi -i color=black:s={{{VIDEO-WIDTH}}}x{{{VIDEO-HEIGHT}}}',
+            r'-f lavfi -i color=white:s={{{VIDEO-WIDTH}}}x{{{VIDEO-HEIGHT}}}',
+            r'-filter_complex "[0:v] format=gray [gray]; [gray][1:v][2:v][3:v] threshold"',
+            r'-crf {{{CRF}}}',
+            r'-c:v libx264',
+            r'-c:a aac',
+            r'{{{OUTPUT-FILE}}}',
+        ),
     }
 
 class CommandHandler:
+    
+    class Filter:
+
+        class BlackAndWhite:
+            
+            @staticmethod
+            def run(f_input:FileUtils.File, crf:int, threshold:int):
+
+                # ? (...)
+                f_output = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
+                    )
+                )
+                
+                # ? Initialize video.
+                video = VideoUtils.Video(f_input)
+                
+                # ? Construct command.
+                commandFormatter = FFMPEG.CommandTemplates['VideoFilter:BlackAndWhite'].createFormatter()
+                commandFormatter.assertParameter('input-file', str(f_input))
+                commandFormatter.assertParameter('crf', str(crf))
+                commandFormatter.assertParameter('output-file', str(f_output))
+                # ? ? Assert threshold color.
+                thresholdColor = ColorUtils.Color(threshold, threshold, threshold)
+                commandFormatter.assertParameter('threshold-color', '0x' + thresholdColor.asHEX())
+                # ? ? Assert video width and height.
+                width, height = video.getDimensions()
+                commandFormatter.assertParameter('video-width', str(width))
+                commandFormatter.assertParameter('video-height', str(height))
+                
+                # ? Execute command.
+                Utils.executeCommand(str(commandFormatter))
     
     class Convert:
         
@@ -151,6 +197,23 @@ def cli():
     Execute different video-edit command(s), quickly.
     '''
     pass
+
+@cli.group()
+def filter():
+    '''
+    Apply (complex) filter(s) to (video) file(s).
+    '''
+    pass
+
+@filter.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--crf', required=True, help='CRF value.', type=int)
+@click.option('--threshold', required=True, help='Spans from 0 to 255.', type=int)
+def black_and_white(input, crf, threshold):
+    '''
+    Forces all pixel(s) to turn, either black or white, based on a threshold value.
+    '''
+    CommandHandler.Filter.BlackAndWhite.run(FileUtils.File(input), crf, threshold)
 
 @cli.command()
 @click.option('--input', required=True, help='Input directory.')
