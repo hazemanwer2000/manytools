@@ -30,8 +30,8 @@ class Utils:
     Constants = {
         'cli' : {
             'text-color' : Graphics.TextColor(
-                foreground=ColorUtils.Colors.PURPLE,
-                background=ColorUtils.Colors.WHITE,
+                foreground=ColorUtils.Colors.WHITE,
+                background=ColorUtils.Colors.PURPLE,
             )
         }
     }
