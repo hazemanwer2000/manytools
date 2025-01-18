@@ -1,10 +1,9 @@
 
 import click
+
 import subprocess
-import threading
-import queue
-import time
 import os
+import shlex
 
 import automatey.OS.FileUtils as FileUtils
 import automatey.OS.ProcessUtils as ProcessUtils
@@ -40,7 +39,7 @@ class Utils:
     def executeCommand(*args) -> int:
         commandAsString = ' '.join(args)
         click.echo(f"\nCommand: {commandAsString}\n")
-        proc = subprocess.Popen(commandAsString.split(sep=' '))
+        proc = subprocess.Popen(shlex.split(commandAsString))
         proc.communicate()
         return proc.returncode
 
