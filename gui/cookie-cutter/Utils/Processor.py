@@ -72,7 +72,7 @@ class INTERNAL:
                 def Grayscale(cfgDict):
                     pass
 
-                def BrightnessContrast(cfgDict):
+                def Brightness(cfgDict):
                     cfgDict['Brightness-Factor'] = Validation.asFloat(cfgDict['Brightness-Factor'])
                     cfgDict['Contrast-Factor'] = Validation.asFloat(cfgDict['Contrast-Factor'])
                     cfgDict['Saturation-Factor'] = Validation.asFloat(cfgDict['Saturation-Factor'])
@@ -198,8 +198,8 @@ class INTERNAL:
                 def Grayscale(cfgDict, struct):
                     struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Grayscale())
 
-                def BrightnessContrast(cfgDict, struct):
-                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.BrightnessContrast(brightness=cfgDict['Brightness-Factor'],
+                def Brightness(cfgDict, struct):
+                    struct['filters']['general'].append(VideoUtils.Modifiers.Filters.Brightness(brightness=cfgDict['Brightness-Factor'],
                                                                                                         contrast=cfgDict['Contrast-Factor'],
                                                                                                         saturation=cfgDict['Saturation-Factor']))
 

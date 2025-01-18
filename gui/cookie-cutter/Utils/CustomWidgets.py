@@ -65,7 +65,7 @@ class FilterOptions:
     class Grayscale(FilterOptionLess):
         pass
 
-    class BrightnessContrast(FilterOptionFull):
+    class Brightness(FilterOptionFull):
         
         def __init__(self):
             cfgNames = [
