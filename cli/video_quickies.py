@@ -11,7 +11,7 @@ import automatey.Abstract.Graphics as Graphics
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Media.VideoUtils as VideoUtils
 import automatey.Media.ImageUtils as ImageUtils
-import automatey.Utils.RandomUtils as RandomUtils
+import automatey.Utils.MathUtils as MathUtils
 import automatey.Formats.JSON as JSON
 import automatey.Utils.CLI as CLI
 import automatey.OS.Specific.Windows as Windows
@@ -25,6 +25,8 @@ f_constants = f_appDir.traverseDirectory('constants.json')
 constants = JSON.fromFile(f_constants)
 
 class Utils:
+    
+    vocalTimer = CLI.VocalTimer()
     
     Constants = {
         'cli' : {
@@ -51,6 +53,10 @@ class Utils:
         proc = subprocess.Popen(shlex.split(commandAsString))
         proc.communicate()
         return proc.returncode
+
+    @staticmethod
+    def cleanUp():
+        Utils.vocalTimer.issueCommand(CLI.VocalTimer.Commands.DestroyTimer())
 
 class FFMPEG:
     
@@ -154,15 +160,14 @@ class CommandHandler:
                     )
                 )
             vid = VideoUtils.Video(f_input)
-            vocalTimer = CLI.VocalTimer()
             
             # ? Generate thumbnail(s).
             thumbnailCount = rows * cols
             f_tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
             f_thumbnailDir = f_tmpDir.traverseDirectory('thumbnails')
-            vocalTimer.issueCommand(CLI.VocalTimer.Commands.StartTimer(label='Elapsed Time:', textColor=Utils.Constants['cli']['text-color']))
+            Utils.vocalTimer.issueCommand(CLI.VocalTimer.Commands.StartTimer(label='Elapsed Time:', textColor=Utils.Constants['cli']['text-color']))
             vid.generateThumbnails(f_thumbnailDir, thumbnailCount)
-            vocalTimer.issueCommand(CLI.VocalTimer.Commands.StopTimer())
+            Utils.vocalTimer.issueCommand(CLI.VocalTimer.Commands.StopTimer())
             
             # ? Generate (joint) thumbnail.
             img_jointThumb = ImageUtils.Image.createByTiling(f_thumbnailDir.listDirectory(), rows, cols)
@@ -171,12 +176,11 @@ class CommandHandler:
             
             # ? Clean-up (...)
             FileUtils.File.Utils.recycle(f_tmpDir)
-            vocalTimer.issueCommand(CLI.VocalTimer.Commands.DestroyTimer())
 
     class Thumbnails:
         
         @staticmethod
-        def run(f_inputDir:FileUtils.File, rows:int, cols:int):
+        def run(f_inputDir:FileUtils.File, rows:int, cols:int, isForce:bool):
             
             commandConstants = Utils.Constants['command']['thumbnails']
             
@@ -196,7 +200,19 @@ class CommandHandler:
             
             # ? Loop on I/O.
             for f_videoInput, f_thumbnail in zip(f_videoInputList, f_thumbnailList):
-                if not f_thumbnail.isExists():
+                
+                # ? Generate thumbnail only if not already generated, or force-flag is set.
+                isGenerateThumbnail = False
+                if isForce:
+                    isGenerateThumbnail = True
+                    if f_thumbnail.isExists():
+                        FileUtils.File.Utils.recycle(f_thumbnail)
+                else:
+                    if not f_thumbnail.isExists():
+                        isGenerateThumbnail = True
+                    
+                # ? (...)
+                if isGenerateThumbnail:
                     CLI.echo(message='Video: ' + str(f_videoInput) + '\n', textColor=Utils.Constants['cli']['text-color'])
                     CommandHandler.Thumbnail.run(f_videoInput, rows, cols, f_output=f_thumbnail)
 
@@ -253,6 +269,7 @@ def black_and_white(input, crf, threshold):
     Forces all pixel(s) to turn, either black or white, based on a threshold value.
     '''
     CommandHandler.Filter.BlackAndWhite.run(FileUtils.File(input), crf, threshold)
+    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input directory.')
@@ -261,6 +278,7 @@ def concat(input):
     Concat multiple (video) file(s).
     '''
     CommandHandler.Concat.run(FileUtils.File(input))
+    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
@@ -270,6 +288,7 @@ def convert(input, crf):
     Convert a video into a '.mp4' file.
     '''
     CommandHandler.Convert.run(FileUtils.File(input), crf)
+    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
@@ -280,16 +299,19 @@ def thumbnail(input, rows, cols):
     Create a thumbnail for a (video) file.
     '''
     CommandHandler.Thumbnail.run(FileUtils.File(input), rows, cols)
+    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--rows', required=True, help='Number of rows.', type=int)
 @click.option('--cols', required=True, help='Number of columns.', type=int)
-def thumbnails(input, rows, cols):
+@click.option('--force', is_flag=True, default=False, help='Re-generate already generated thumbnail(s).')
+def thumbnails(input, rows, cols, force):
     '''
     Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called 'Thumbnails' present in the same directory as the video.
     '''
-    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols)
+    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, force)
+    Utils.cleanUp()
 
 if __name__ == '__main__':
     cli()
