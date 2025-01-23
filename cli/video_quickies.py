@@ -32,6 +32,15 @@ class Utils:
                 foreground=ColorUtils.Colors.WHITE,
                 background=ColorUtils.Colors.PURPLE,
             )
+        },
+        'command' : {
+            'thumbnails' : {
+                'directory-name' : 'Thumbnails',
+                'output-extension' : 'png',
+            },
+            'thumbnail' : {
+                'output-extension' : 'png',
+            }
         }
     }
     
@@ -134,12 +143,16 @@ class CommandHandler:
     class Thumbnail:
         
         @staticmethod
-        def run(f_input:FileUtils.File, rows:int, cols:int):
-            f_output = FileUtils.File(
-                FileUtils.File.Utils.Path.iterateName(
-                    FileUtils.File.Utils.Path.modifyName(str(f_input), extension='png')
+        def run(f_input:FileUtils.File, rows:int, cols:int, f_output:FileUtils.File=None):
+            
+            commandConstants = Utils.Constants['command']['thumbnail']
+            
+            if f_output is None:
+                f_output = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension=commandConstants['output-extension'])
+                    )
                 )
-            )
             vid = VideoUtils.Video(f_input)
             vocalTimer = CLI.VocalTimer()
             
@@ -159,7 +172,34 @@ class CommandHandler:
             # ? Clean-up (...)
             FileUtils.File.Utils.recycle(f_tmpDir)
             vocalTimer.issueCommand(CLI.VocalTimer.Commands.DestroyTimer())
+
+    class Thumbnails:
+        
+        @staticmethod
+        def run(f_inputDir:FileUtils.File, rows:int, cols:int):
             
+            commandConstants = Utils.Constants['command']['thumbnails']
+            
+            # ? Gather input video file(s).
+            f_thumbnailsDirList = f_inputDir.listDirectory(isRecursive=True, conditional=lambda x: (x.isDirectory() and x.getName() == commandConstants['directory-name']))
+            f_videoDirList = [x.traverseDirectory('..') for x in f_thumbnailsDirList]
+            f_videoInputList = []
+            for f_videoDir in f_videoDirList:
+                f_videoInputList += f_videoDir.listDirectory(conditional=lambda x: VideoUtils.Video.Utils.isVideo(x))
+            
+            # ? Construct output thumnail path(s).
+            f_thumbnailList = []
+            for f_videoInput in f_videoInputList:
+                videoNameWithoutExt = f_videoInput.getNameWithoutExtension()
+                f_thumbnail = f_videoInput.traverseDirectory('..', commandConstants['directory-name'], videoNameWithoutExt + '.' + commandConstants['output-extension'])
+                f_thumbnailList.append(f_thumbnail)
+            
+            # ? Loop on I/O.
+            for f_videoInput, f_thumbnail in zip(f_videoInputList, f_thumbnailList):
+                if not f_thumbnail.isExists():
+                    CLI.echo(message='Video: ' + str(f_videoInput) + '\n', textColor=Utils.Constants['cli']['text-color'])
+                    CommandHandler.Thumbnail.run(f_videoInput, rows, cols, f_output=f_thumbnail)
+
     class Concat:
         
         @staticmethod
@@ -240,6 +280,16 @@ def thumbnail(input, rows, cols):
     Create a thumbnail for a (video) file.
     '''
     CommandHandler.Thumbnail.run(FileUtils.File(input), rows, cols)
+
+@cli.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--rows', required=True, help='Number of rows.', type=int)
+@click.option('--cols', required=True, help='Number of columns.', type=int)
+def thumbnails(input, rows, cols):
+    '''
+    Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called 'Thumbnails' present in the same directory as the video.
+    '''
+    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols)
 
 if __name__ == '__main__':
     cli()
