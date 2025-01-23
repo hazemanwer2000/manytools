@@ -330,7 +330,7 @@ def thumbnail(input, rows, cols, aspect_ratio):
 @click.option('--cols', required=True, help='Number of columns.', type=int)
 @click.option('--aspect_ratio', help='Force aspect ratio of thumbnail.', type=str)
 @click.option('--force', is_flag=True, default=False, help='Re-generate already generated thumbnail(s).')
-def thumbnails(input, rows, cols, force):
+def thumbnails(input, rows, cols, aspect_ratio, force):
     '''
     Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called 'Thumbnails' present in the same directory as the video.
     '''
