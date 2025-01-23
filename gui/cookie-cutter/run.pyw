@@ -95,10 +95,20 @@ timer.start()
 # ? ? Setup context-menu for 'Trim-Times-Table'.
 
 def seekTimeFromTable():
+    
+    # ? ? ? Get time from table (as string).
     contextInfo = trimTimesTable.getContextInfo()
     timeFromTableAsString = trimTimesTable.getCell(contextInfo['row-index'], contextInfo['column-index'])
-    seekTime = TimeUtils.Time.createFromString(timeFromTableAsString)
-    videoPlayer.seekPosition(seekTime)
+    
+    # ? ? ? Attempt time conversion (from string).
+    try:
+        seekTime = TimeUtils.Time.createFromString(timeFromTableAsString)
+    except:
+        seekTime = None
+    
+    # ? ? ? If successful, seek time, else 
+    if not (seekTime is None):
+        videoPlayer.seekPosition(seekTime)
 
 trimTimesTable.setContextMenu(GUtils.Menu([
     GUtils.Menu.EndPoint(
