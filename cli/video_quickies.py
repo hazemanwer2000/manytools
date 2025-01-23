@@ -26,7 +26,7 @@ constants = JSON.fromFile(f_constants)
 
 class Utils:
     
-    vocalTimer = CLI.VocalTimer()
+    vocalTimer = None
     
     Constants = {
         'cli' : {
@@ -55,7 +55,17 @@ class Utils:
         return proc.returncode
 
     @staticmethod
+    def initialize():
+        '''
+        Initialization of all (shared) resource(s).
+        '''
+        Utils.vocalTimer = CLI.VocalTimer()
+
+    @staticmethod
     def cleanUp():
+        '''
+        Clean-up of all (shared) resource(s).
+        '''
         Utils.vocalTimer.issueCommand(CLI.VocalTimer.Commands.DestroyTimer())
 
 class FFMPEG:
@@ -149,7 +159,7 @@ class CommandHandler:
     class Thumbnail:
         
         @staticmethod
-        def run(f_input:FileUtils.File, rows:int, cols:int, f_output:FileUtils.File=None):
+        def run(f_input:FileUtils.File, rows:int, cols:int, aspectRatio:float, f_output:FileUtils.File=None):
             
             commandConstants = Utils.Constants['command']['thumbnail']
             
@@ -168,10 +178,16 @@ class CommandHandler:
             Utils.vocalTimer.issueCommand(CLI.VocalTimer.Commands.StartTimer(label='Elapsed Time:', textColor=Utils.Constants['cli']['text-color']))
             vid.generateThumbnails(f_thumbnailDir, thumbnailCount)
             Utils.vocalTimer.issueCommand(CLI.VocalTimer.Commands.StopTimer())
+
+            # ? Determine (joint) thumbnail width and height.
+            thumbnailWidth = constants['thumbnail']['width']
+            thumbnailHeight = -1
+            if aspectRatio != None:
+                thumbnailHeight = int((thumbnailWidth / aspectRatio) * (rows / cols))
             
             # ? Generate (joint) thumbnail.
             img_jointThumb = ImageUtils.Image.createByTiling(f_thumbnailDir.listDirectory(), rows, cols)
-            img_jointThumb.resize(width=constants['thumbnail']['width'], height=-1)
+            img_jointThumb.resize(width=thumbnailWidth, height=thumbnailHeight)
             img_jointThumb.saveAs(f_output)
             
             # ? Clean-up (...)
@@ -180,7 +196,7 @@ class CommandHandler:
     class Thumbnails:
         
         @staticmethod
-        def run(f_inputDir:FileUtils.File, rows:int, cols:int, isForce:bool):
+        def run(f_inputDir:FileUtils.File, rows:int, cols:int, aspectRatio:float, isForce:bool):
             
             commandConstants = Utils.Constants['command']['thumbnails']
             
@@ -214,7 +230,7 @@ class CommandHandler:
                 # ? (...)
                 if isGenerateThumbnail:
                     CLI.echo(message='Video: ' + str(f_videoInput) + '\n', textColor=Utils.Constants['cli']['text-color'])
-                    CommandHandler.Thumbnail.run(f_videoInput, rows, cols, f_output=f_thumbnail)
+                    CommandHandler.Thumbnail.run(f_videoInput, rows, cols, aspectRatio, f_output=f_thumbnail)
 
     class Concat:
         
@@ -268,6 +284,7 @@ def black_and_white(input, crf, threshold):
     '''
     Forces all pixel(s) to turn, either black or white, based on a threshold value.
     '''
+    Utils.initialize()
     CommandHandler.Filter.BlackAndWhite.run(FileUtils.File(input), crf, threshold)
     Utils.cleanUp()
 
@@ -277,6 +294,7 @@ def concat(input):
     '''
     Concat multiple (video) file(s).
     '''
+    Utils.initialize()
     CommandHandler.Concat.run(FileUtils.File(input))
     Utils.cleanUp()
 
@@ -287,6 +305,7 @@ def convert(input, crf):
     '''
     Convert a video into a '.mp4' file.
     '''
+    Utils.initialize()
     CommandHandler.Convert.run(FileUtils.File(input), crf)
     Utils.cleanUp()
 
@@ -294,23 +313,31 @@ def convert(input, crf):
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--rows', required=True, help='Number of rows.', type=int)
 @click.option('--cols', required=True, help='Number of columns.', type=int)
-def thumbnail(input, rows, cols):
+@click.option('--aspect_ratio', help='Force aspect ratio of thumbnail.', type=str)
+def thumbnail(input, rows, cols, aspect_ratio):
     '''
     Create a thumbnail for a (video) file.
     '''
-    CommandHandler.Thumbnail.run(FileUtils.File(input), rows, cols)
+    Utils.initialize()
+    if aspect_ratio != None:
+        aspect_ratio = float(eval(aspect_ratio))
+    CommandHandler.Thumbnail.run(FileUtils.File(input), rows, cols, aspectRatio=aspect_ratio)
     Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--rows', required=True, help='Number of rows.', type=int)
 @click.option('--cols', required=True, help='Number of columns.', type=int)
+@click.option('--aspect_ratio', help='Force aspect ratio of thumbnail.', type=str)
 @click.option('--force', is_flag=True, default=False, help='Re-generate already generated thumbnail(s).')
 def thumbnails(input, rows, cols, force):
     '''
     Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called 'Thumbnails' present in the same directory as the video.
     '''
-    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, force)
+    Utils.initialize()
+    if aspect_ratio != None:
+        aspect_ratio = float(eval(aspect_ratio))
+    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, aspect_ratio, force)
     Utils.cleanUp()
 
 if __name__ == '__main__':
