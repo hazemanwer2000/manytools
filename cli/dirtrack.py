@@ -39,11 +39,13 @@ class Utils:
         
         @staticmethod
         def Delta(delta):
-            for key in delta['files']:
-                CLI.echo(key.capitalize() + ':\n')
-                for filePath in delta['files']['key']:
-                    CLI.echo('  ' + filePath + '\n')
-            
+            for category in delta['files']:
+                filePathList = delta['files'][category]
+                if len(filePathList) != 0:
+                    CLI.echo(category.capitalize() + ':\n')
+                    for filePath in filePathList:
+                        CLI.echo('  ' + filePath + '\n')
+
     @staticmethod
     def constructDirectoryState():
         
@@ -139,7 +141,7 @@ class CommandHandler:
                 SharedObjects.F_DirTrack.makeDirectory()
                 currentState = Utils.constructDirectoryState()
                 isCommit = True
-                Utils.Report.Info('First commit in this directory.')
+                Utils.Report.Info('First commit in current directory.')
             else:
                 referenceState = Utils.getReferenceState()
                 currentState = Utils.constructDirectoryState()
@@ -162,7 +164,7 @@ class CommandHandler:
         def run():
 
             if not SharedObjects.F_DirTrack.isExists():
-                Utils.Report.Error("Current working directory is not tracked.")
+                Utils.Report.Error("Current directory has no commit(s).")
             else:
                 referenceState = Utils.getReferenceState()
                 currentState = Utils.constructDirectoryState()
@@ -171,7 +173,7 @@ class CommandHandler:
                 if isCommit:
                     Utils.Report.Delta(delta)
                 else:
-                    Utils.Report.Error('Nothing to commit, directory un-changed.')
+                    Utils.Report.Error('There is no delta, directory un-changed.')
 
 @click.group()
 def cli():
