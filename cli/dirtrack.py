@@ -25,26 +25,47 @@ class Utils:
         'tracker-file-name' : 'dirtrack.json',
         'tracker-directory-name' : '.dirtrack',
         'hash-algorithm' : Cryptography.Hash.Algorithms.SHA256,
+        
+        'cli' : {
+            'text-color' : {
+                'report-error' : Graphics.TextColor(
+                    foreground=ColorUtils.Colors.RED,
+                    background=ColorUtils.Colors.BLACK,
+                ),
+                'report-info' : Graphics.TextColor(
+                    foreground=ColorUtils.Colors.BLUE,
+                    background=ColorUtils.Colors.BLACK,
+                ),
+                'delta-category' : Graphics.TextColor(
+                    foreground=ColorUtils.Colors.PURPLE,
+                    background=ColorUtils.Colors.WHITE,
+                ),
+                'delta-file-path' : Graphics.TextColor(
+                    foreground=ColorUtils.Colors.WHITE,
+                    background=ColorUtils.Colors.PURPLE,
+                ),
+            }
+        },
     }
     
     class Report:
         
         @staticmethod
         def Error(msg:str):
-            CLI.echo(f'[ERROR]: {msg}\n')
+            CLI.echo(f'[ERROR]: {msg}\n', textColor=Utils.Constants['cli']['text-color']['report-error'])
 
         @staticmethod
         def Info(msg:str):
-            CLI.echo(f'[INFO]: {msg}\n')
+            CLI.echo(f'[INFO]: {msg}\n', textColor=Utils.Constants['cli']['text-color']['report-info'])
         
         @staticmethod
         def Delta(delta):
             for category in delta['files']:
                 filePathList = delta['files'][category]
                 if len(filePathList) != 0:
-                    CLI.echo(category.capitalize() + ':\n')
+                    CLI.echo(category.capitalize() + ':\n', textColor=Utils.Constants['cli']['text-color']['delta-category'])
                     for filePath in filePathList:
-                        CLI.echo('  ' + filePath + '\n')
+                        CLI.echo('  ' + filePath + '\n', textColor=Utils.Constants['cli']['text-color']['delta-file-path'])
 
     @staticmethod
     def constructDirectoryState():
