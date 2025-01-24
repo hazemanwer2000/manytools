@@ -197,7 +197,7 @@ class CommandHandler:
                 if isCommit:
                     Utils.Report.Delta(delta)
                 else:
-                    Utils.Report.Error('There is no delta, directory un-changed.')
+                    Utils.Report.Info('There is no delta, directory un-changed.')
 
 @click.group()
 def cli():
