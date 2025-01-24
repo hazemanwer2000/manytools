@@ -73,7 +73,7 @@ class Utils:
         f_cwd = FileUtils.File.Utils.getWorkingDirectory()
         
         # ? Get a list of all file(s).
-        allFilePaths = f_cwd.listDirectoryRelatively(isRecursive=True, conditional=lambda x: x.isFile() and not (Utils.Constants['tracker-directory-name'] in str(x)))
+        allFilePaths = f_cwd.listDirectoryRelatively(isRecursive=True, conditional=lambda x: x.isFile() and not ((Utils.Constants['tracker-directory-name'] + '/') in str(x)))
         allFiles = [FileUtils.File(x) for x in allFilePaths]
         
         # ? Construct state.
