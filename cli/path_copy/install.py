@@ -18,12 +18,13 @@ command_name = constants['context-menu']['name']
 command = ' '.join([
     '"' + constants['global-macros']['pythonw'].replace('/', '\\') + '"',
     str(f_app).replace('/', '\\'),
-    '"%1"'
+    '"%V"'
 ])
 
 fileCategories = [
     Windows.Registry.ContextMenu.FileCategory.AllFiles,
-    Windows.Registry.ContextMenu.FileCategory.AllDirectories
+    Windows.Registry.ContextMenu.FileCategory.AllDirectories,
+    Windows.Registry.ContextMenu.FileCategory.AllDirectoriesAsBackground,
 ]
 
 for fileCategory in fileCategories:
