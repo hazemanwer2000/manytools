@@ -6,18 +6,13 @@ import os
 import shlex
 
 import automatey.OS.FileUtils as FileUtils
-import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Abstract.Graphics as Graphics
 import automatey.Base.ColorUtils as ColorUtils
-import automatey.Media.VideoUtils as VideoUtils
 import automatey.Base.TimeUtils as TimeUtils
-import automatey.Media.ImageUtils as ImageUtils
-import automatey.Utils.MathUtils as MathUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Formats.JSON as JSON
 import automatey.Utils.Cryptography as Cryptography
 import automatey.Utils.CLI as CLI
-import automatey.OS.Specific.Windows as Windows
 
 class Utils:
     
@@ -84,7 +79,7 @@ class Utils:
             'files' : {},
         }
         # ? ? Construct file information.
-        with CLI.ProgressBar(allFiles, label='Hashing files') as iteratorWrapper:
+        with CLI.ProgressBar.create(allFiles, label='Hashing files') as iteratorWrapper:
             for f in iteratorWrapper:
                 hashAsBytes = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
                 fileState = {
