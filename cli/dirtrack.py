@@ -84,16 +84,14 @@ class Utils:
             'files' : {},
         }
         # ? ? Construct file information.
-        progressBar = CLI.ProgressBar(len(allFiles), label='Hashing files')
-        for idx in progressBar.getIterator():
-            f = allFiles[idx]
-            hashAsBytes = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
-            fileState = {
-                'hash' : StringUtils.HexString.fromBytes(hashAsBytes),
-                'size' : StringUtils.MakePretty.Size(f.getSize()),
-            }
-            state['files'][str(f)] = fileState
-        progressBar.close()
+        with CLI.ProgressBar(allFiles, label='Hashing files') as iteratorWrapper:
+            for f in iteratorWrapper:
+                hashAsBytes = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
+                fileState = {
+                    'hash' : StringUtils.HexString.fromBytes(hashAsBytes),
+                    'size' : StringUtils.MakePretty.Size(f.getSize()),
+                }
+                state['files'][str(f)] = fileState
 
         return state
 
