@@ -75,6 +75,7 @@ class Utils:
         state = {
             'metadata' : {
                 'creation-timestamp' : str(TimeUtils.DateTime.createFromNow()),
+                'file-count' : len(allFiles),
             },
             'files' : {},
         }
@@ -84,7 +85,9 @@ class Utils:
                 hashAsBytes = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
                 fileState = {
                     'hash' : StringUtils.HexString.fromBytes(hashAsBytes),
-                    'size' : StringUtils.MakePretty.Size(f.getSize()),
+                    'metadata' : {
+                        'size' : StringUtils.MakePretty.Size(f.getSize()),
+                    },
                 }
                 state['files'][str(f)] = fileState
 
