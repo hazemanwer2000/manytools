@@ -145,16 +145,41 @@ class CommandHandler:
         
         @staticmethod
         def run(f_input:FileUtils.File, crf:int):
-            f_output = FileUtils.File(
-                FileUtils.File.Utils.Path.iterateName(
-                    FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
+            
+            f_inputList = []
+            f_outputList = []
+            
+            # ? If input is a directory, (...)
+            if f_input.isDirectory():
+            
+                # ? Setup I/O directories.
+                f_inputDirectory = f_input 
+                f_outputDirectory = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_inputDirectory)))
+                f_outputDirectory.makeDirectory()
+                
+                # ? Collect I/O file(s).
+                f_inputList += f_input.listDirectory(conditional=lambda x: x.isFile())
+                for path_inputFile_relative in f_input.listDirectoryRelatively(conditional=lambda x: x.isFile()):
+                    f_outputFile = f_outputDirectory.traverseDirectory(path_inputFile_relative)
+                    f_outputList.append(f_outputFile)
+            
+            else:
+                f_inputFile = f_input
+                f_outputFile = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
+                    )
                 )
-            )
-            commandFormatter = FFMPEG.CommandTemplates['VideoConvert'].createFormatter()
-            commandFormatter.assertParameter('input-file', str(f_input))
-            commandFormatter.assertParameter('crf', str(crf))
-            commandFormatter.assertParameter('output-file', str(f_output))
-            Utils.executeCommand(str(commandFormatter))
+                f_inputList.append(f_inputFile)
+                f_outputList.append(f_outputFile)
+            
+            # ? Convert each file.
+            for f_inputFile, f_outputFile in zip(f_inputList, f_outputList):
+                commandFormatter = FFMPEG.CommandTemplates['VideoConvert'].createFormatter()
+                commandFormatter.assertParameter('input-file', str(f_inputFile))
+                commandFormatter.assertParameter('crf', str(crf))
+                commandFormatter.assertParameter('output-file', str(f_outputFile))
+                Utils.executeCommand(str(commandFormatter))
 
     class Thumbnail:
         
@@ -303,7 +328,7 @@ def concat(input):
 @click.option('--crf', required=True, help='CRF value.', type=int)
 def convert(input, crf):
     '''
-    Convert a video into a '.mp4' file.
+    Convert a video, or a directory of video(s), into '.mp4' file(s).
     '''
     Utils.initialize()
     CommandHandler.Convert.run(FileUtils.File(input), crf)
