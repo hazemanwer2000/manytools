@@ -160,7 +160,7 @@ class CommandHandler:
                 # ? Collect I/O file(s).
                 f_inputList += f_input.listDirectory(conditional=lambda x: x.isFile())
                 for path_inputFile_relative in f_input.listDirectoryRelatively(conditional=lambda x: x.isFile()):
-                    f_outputFile = f_outputDirectory.traverseDirectory(path_inputFile_relative)
+                    f_outputFile = f_outputDirectory.traverseDirectory(FileUtils.File.Utils.Path.modifyName(path_inputFile_relative, extension='mp4'))
                     f_outputList.append(f_outputFile)
             
             else:
