@@ -78,7 +78,7 @@ class FFMPEG:
             r'-crf {{{CRF}}}',
             r'-c:v libx264',
             r'-c:a aac',
-            r'-vf pad=ceil(iw/2)*2:ceil(ih/2)*2',
+            r'-vf pad=ceil(iw/2)*2:ceil(ih/2)*2,scale={{{WIDTH}}}:{{{HEIGHT}}}',
             r'{{{OUTPUT-FILE}}}',
         ),
         'VideoConcat' : ProcessUtils.CommandTemplate(
@@ -144,7 +144,7 @@ class CommandHandler:
     class Convert:
         
         @staticmethod
-        def run(f_input:FileUtils.File, crf:int):
+        def run(f_input:FileUtils.File, crf:int, width:int, height:int):
             
             f_inputList = []
             f_outputList = []
@@ -178,6 +178,8 @@ class CommandHandler:
                 commandFormatter = FFMPEG.CommandTemplates['VideoConvert'].createFormatter()
                 commandFormatter.assertParameter('input-file', str(f_inputFile))
                 commandFormatter.assertParameter('crf', str(crf))
+                commandFormatter.assertParameter('width', str(width))
+                commandFormatter.assertParameter('height', str(height))
                 commandFormatter.assertParameter('output-file', str(f_outputFile))
                 Utils.executeCommand(str(commandFormatter))
 
@@ -326,12 +328,14 @@ def concat(input):
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--crf', required=True, help='CRF value.', type=int)
-def convert(input, crf):
+@click.option('--width', required=True, help="Width. '-1' for auto-calculation, based on aspect ratio.", type=int, default=-1)
+@click.option('--height', required=True, help="Height. '-1' for auto-calculation, based on aspect ratio.", type=int, default=-1)
+def convert(input, crf, width, height):
     '''
     Convert a video, or a directory of video(s), into '.mp4' file(s).
     '''
     Utils.initialize()
-    CommandHandler.Convert.run(FileUtils.File(input), crf)
+    CommandHandler.Convert.run(FileUtils.File(input), crf, width, height)
     Utils.cleanUp()
 
 @cli.command()
