@@ -1,5 +1,7 @@
 
 import automatey.GUI.GElements as GElements
+import automatey.GUI.GConcurrency as GConcurrency
+import automatey.Base.TimeUtils as TimeUtils
 import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
@@ -29,7 +31,8 @@ rootLayout.setWidget(GElements.Widgets.Decorators.ScrollArea(GIFPlayer,
 
 window = GElements.Window(title=constants['title'],
                           rootLayout=rootLayout,
-                          minimumSize=constants['gui']['window']['min-size'])
+                          minimumSize=constants['gui']['window']['min-size'],
+                          isEnableStatusBar=True)
 
 # ? Setup event handler(s).
 
@@ -54,6 +57,19 @@ window.createToolbar(GUtils.Menu([
         icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.FileOpen),
     ),
 ]))
+
+# ? ? Setup timer (i.e., for recurrent activities).
+
+def performRecurrentActivities():
+    GIFMousePosition = GIFPlayer.getRenderer().getMousePosition()
+    
+    statusText = ', '.join([
+        str(GIFMousePosition),
+    ])
+    window.setStatus(statusText)
+
+timer = GConcurrency.Timer(performRecurrentActivities, TimeUtils.Time.createFromMilliseconds(50))
+timer.start()
 
 # ? Run GUI loop.
 window.show()
