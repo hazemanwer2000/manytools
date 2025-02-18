@@ -76,20 +76,25 @@ class Utils:
             'metadata' : {
                 'creation-timestamp' : str(TimeUtils.DateTime.createFromNow()),
                 'file-count' : len(allFiles),
+                'total-size' : None,
             },
             'files' : {},
         }
         # ? ? Construct file information.
+        totalSize = 0
         with CLI.ProgressBar.create(allFiles, label='Hashing files') as iteratorWrapper:
             for f in iteratorWrapper:
                 hashAsBytes = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
+                fileSize = f.getSize()
+                totalSize += fileSize
                 fileState = {
                     'hash' : StringUtils.HexString.fromBytes(hashAsBytes),
                     'metadata' : {
-                        'size' : StringUtils.MakePretty.Size(f.getSize()),
+                        'size' : StringUtils.MakePretty.Size(fileSize),
                     },
                 }
                 state['files'][str(f)] = fileState
+        state['metadata']['total-size'] = StringUtils.MakePretty.Size(totalSize)
 
         return state
 
