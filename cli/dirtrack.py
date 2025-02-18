@@ -156,12 +156,15 @@ class CommandHandler:
     class Commit:
         
         @staticmethod
-        def run():
+        def run(isReset:bool=False):
             
-            # ? (...)
-            isCommit = None
+            # ? If must reset, then (...)
+            if isReset:
+                if SharedObjects.F_DirTrack.isExists():
+                    FileUtils.File.Utils.recycle(SharedObjects.F_DirTrack)
             
             # ? Determine if must commit, or not (...)
+            isCommit = None
             if not SharedObjects.F_DirTrack.isExists():
                 SharedObjects.F_DirTrack.makeDirectory()
                 currentState = Utils.constructDirectoryState()
@@ -208,12 +211,13 @@ def cli():
     pass
 
 @cli.command()
-def commit():
+@click.option('--reset', is_flag=True, default=False, help='Delete all previous tracking history.')
+def commit(reset):
     '''
     Commit the current state of the directory.
     '''
     SharedObjects.initialize()
-    CommandHandler.Commit.run()
+    CommandHandler.Commit.run(reset)
     SharedObjects.cleanUp()
     
 @cli.command()
