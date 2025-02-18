@@ -357,7 +357,7 @@ def thumbnail(input, rows, cols, aspect_ratio):
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--rows', required=True, help='Number of rows.', type=int)
 @click.option('--cols', required=True, help='Number of columns.', type=int)
-@click.option('--aspect_ratio', help='Force aspect ratio of thumbnail.', type=str)
+@click.option('--aspect_ratio', help='Force aspect ratio of thumbnail (e.g., 16/9, 1.75).', type=str)
 @click.option('--force', is_flag=True, default=False, help='Re-generate already generated thumbnail(s).')
 def thumbnails(input, rows, cols, aspect_ratio, force):
     '''
