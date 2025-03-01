@@ -6,6 +6,7 @@ import os
 import shlex
 
 import automatey.OS.FileUtils as FileUtils
+import automatey.OS.Specific.Windows as Windows
 import automatey.Abstract.Graphics as Graphics
 import automatey.Base.ColorUtils as ColorUtils
 import automatey.Base.TimeUtils as TimeUtils
@@ -119,9 +120,9 @@ class Utils:
                 'is-directory-modified' : None,
             },
             'files' : {
-                'deleted' : sorted(list(filePaths_Deleted)),
-                'added' :  sorted(list(filePaths_Added)),
-                'modified' : sorted(list(filePaths_Modified)),
+                'deleted' : Windows.Utils.sorted(list(filePaths_Deleted)),
+                'added' :  Windows.Utils.sorted(list(filePaths_Added)),
+                'modified' : Windows.Utils.sorted(list(filePaths_Modified)),
             },
         }
         # ? ? Ammend metadata.
