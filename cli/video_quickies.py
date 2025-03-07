@@ -14,6 +14,7 @@ import automatey.Media.ImageUtils as ImageUtils
 import automatey.Utils.MathUtils as MathUtils
 import automatey.Formats.JSON as JSON
 import automatey.Utils.CLI as CLI
+import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.Specific.Windows as Windows
 
 # ? Get app's root directory.
@@ -205,8 +206,8 @@ class CommandHandler:
                 thumbnailTimestampAttributes = VideoUtils.ThumbnailTimestampAttributes(
                     textColor=ColorUtils.Color.fromHEX(tsOptionColorHEXCode),
                     offsetRatio=AbstractGraphics.Point(0.01, 0.03),
-                    cornerAlignment=AbstractGraphics.Alignment.Corner.BottomLeft,
-                    sizeRatio=0.075
+                    cornerAlignment=AbstractGraphics.Alignment.Corner.__dict__[StringUtils.Case.Snake2Pascal(tsOptionAlignment)],
+                    sizeRatio=MathUtils.correlate(cols, (4, 0.075), (2, 0.045))
                 )
             
             # ? Generate thumbnail(s).
@@ -234,7 +235,7 @@ class CommandHandler:
     class Thumbnails:
         
         @staticmethod
-        def run(f_inputDir:FileUtils.File, rows:int, cols:int, aspectRatio:float, isForce:bool):
+        def run(f_inputDir:FileUtils.File, rows:int, cols:int, timestampOptions:str, aspectRatio:float, isForce:bool):
             
             commandConstants = Utils.Constants['command']['thumbnails']
             
@@ -268,7 +269,7 @@ class CommandHandler:
                 # ? (...)
                 if isGenerateThumbnail:
                     CLI.echo(message='Video: ' + str(f_videoInput) + '\n', textColor=Utils.Constants['cli']['text-color'])
-                    CommandHandler.Thumbnail.run(f_videoInput, rows, cols, aspectRatio, f_output=f_thumbnail)
+                    CommandHandler.Thumbnail.run(f_videoInput, rows, cols, timestampOptions, aspectRatio, f_output=f_thumbnail)
 
     class Concat:
         
@@ -369,16 +370,17 @@ def thumbnail(input, rows, cols, timestamps, aspect_ratio):
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--rows', required=True, help='Number of rows.', type=int)
 @click.option('--cols', required=True, help='Number of columns.', type=int)
+@click.option('--timestamps', help='Specifies options for overlaying timestamps. Format is "ALIGNMENT,COLOR". For example, "bottom-left,#000000"', type=str)
 @click.option('--aspect_ratio', help='Force aspect ratio of thumbnail (e.g., 16/9, 1.75).', type=str)
 @click.option('--force', is_flag=True, default=False, help='Re-generate already generated thumbnail(s).')
-def thumbnails(input, rows, cols, aspect_ratio, force):
+def thumbnails(input, rows, cols, timestamps, aspect_ratio, force):
     '''
     Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called 'Thumbnails' present in the same directory as the video.
     '''
     Utils.initialize()
     if aspect_ratio != None:
         aspect_ratio = float(eval(aspect_ratio))
-    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, aspect_ratio, force)
+    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, timestamps, aspect_ratio, force)
     Utils.cleanUp()
 
 if __name__ == '__main__':
