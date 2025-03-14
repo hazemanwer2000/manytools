@@ -38,11 +38,11 @@ class Utils:
         },
         'command' : {
             'thumbnails' : {
-                'directory-name' : 'Thumbnails',
-                'output-extension' : 'png',
+                'directory-name' : '.Thumbnails',
+                'output-extension' : 'jpg',
             },
             'thumbnail' : {
-                'output-extension' : 'png',
+                'output-extension' : 'jpg',
             }
         }
     }
