@@ -127,10 +127,31 @@ def renderCurrentElement():
     window.setTitle(f"{Constants.WindowTitle}{windowTitleExtension}")
 
 def navigateToPreviousElement():
-    pass
+    print(WorkingPage.ElementHistory)
+    print(WorkingPage.CurrentElement)
+    
+    if WorkingPage.CurrentElement is None:
+        GElements.StandardDialog.Message.Announce.Information("No previous element in history.")
+    else:
+        WorkingPage.CurrentElement = WorkingPage.ElementHistory.previous()
+        renderCurrentElement()
+
+    print(WorkingPage.ElementHistory)
+    print(WorkingPage.CurrentElement)
 
 def navigateToNextElement():
-    pass
+    print(WorkingPage.ElementHistory)
+    print(WorkingPage.CurrentElement)
+        
+    nextElement = WorkingPage.ElementHistory.next()
+    if nextElement is None:
+        GElements.StandardDialog.Message.Announce.Information("No next element in history.")
+    else:
+        WorkingPage.CurrentElement = nextElement
+        renderCurrentElement()
+        
+    print(WorkingPage.ElementHistory)
+    print(WorkingPage.CurrentElement)
 
 def viewAsXML(flag:bool):
     WorkingPage.IsRenderXML = flag
@@ -178,16 +199,17 @@ def executeQuery():
     selectedElement = None
     
     if len(elementsQueried) == 0:
-        GElements.StandardDialog.Message.Announce.Error("No matching elements found.")
+        GElements.StandardDialog.Message.Announce.Information("No matching elements found.")
     elif len(elementsQueried) == 1:
         selectedElement = elementsQueried[0]
     elif len(elementsQueried) > Constants.ElementSelectThreshold:
-        GElements.StandardDialog.Message.Announce.Error(f"Too many matching elements found ({len(elementsQueried)} > {Constants.ElementSelectThreshold}).")
+        GElements.StandardDialog.Message.Announce.Information(f"Too many matching elements found ({len(elementsQueried)} > {Constants.ElementSelectThreshold}).")
     else:
         elementsQueried.sort(key=lambda element: (element.getType(), element.getPath()))
         elementsQueriedSummary = [(element.getType() + ': ' + element.getPath()) for element in elementsQueried]
         selectedElementIdx = GElements.StandardDialog.selectFromList(f'Select from {len(elementsQueried)} elements', elementsQueriedSummary, constants['gui']['dialog']['min-size'])
-        selectedElement = elementsQueried[selectedElementIdx]
+        if selectedElementIdx != -1:
+            selectedElement = elementsQueried[selectedElementIdx]
     
     if (selectedElement is not None) and (selectedElement is not WorkingPage.CurrentElement):
         WorkingPage.ElementHistory.insert(selectedElement)
