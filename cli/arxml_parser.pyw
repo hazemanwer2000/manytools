@@ -1,7 +1,5 @@
 
 import automatey.GUI.GElements as GElements
-import automatey.GUI.GConcurrency as GConcurrency
-import automatey.Base.TimeUtils as TimeUtils
 import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
@@ -14,12 +12,17 @@ class ElementQueryWidget(GElements.CustomWidget):
     def __init__(self):
         self.rootLayout = GElements.Layouts.GridLayout(3, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
         self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
-        super().__init__(GElements.Widgets.Decorators.Outline(self.rootWidget, AbstractGraphics.SymmetricMargin(5)))
+        super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, 
+                                                             "Element-Query",
+                                                             elementMargin=AbstractGraphics.SymmetricMargin(5),
+                                                             elementSpacing=5,
+                                                             isOuterOutline=True,
+                                                             isInnerOutline=True))
         
         # ? Create (sub-)widget(s).
-        self.lineEdit_QueryPath = GElements.Widgets.Basics.LineEdit(placeholder='Element-Path', isEditable=True, isMonospaced=True)
-        self.lineEdit_QueryType = GElements.Widgets.Basics.LineEdit(placeholder='Element-Type', isEditable=True, isMonospaced=True)
-        self.button_Query = GElements.Widgets.Basics.Button(text='Query')
+        self.lineEdit_QueryPath = GElements.Widgets.Basics.LineEdit(placeholder=':Path', isEditable=True, isMonospaced=True)
+        self.lineEdit_QueryType = GElements.Widgets.Basics.LineEdit(placeholder=':Type', isEditable=True, isMonospaced=True)
+        self.button_Query = GElements.Widgets.Basics.Button(text='Search')
         
         # ? Set layout widget(s).
         rowIdx = -1
