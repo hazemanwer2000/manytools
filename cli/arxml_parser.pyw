@@ -107,14 +107,6 @@ def viewAsXML(flag:bool):
 def openExternally():
     pass
 
-def executeQueryStringConditionalConstructor(element:ARXML.Element, queryString:str):
-    queryString = queryString.replace(' ', '')
-    if '*' in queryString:
-        queryString = queryString.replace('*', '.*')
-        conditional = lambda element: StringUtils.Regex.findAll(queryString, element.getPath())
-    else:
-        conditional = lambda element: StringUtils.Regex.findAll(queryString, element.getPath())
-
 def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:bool=True):
     
     # ? Remove all white-space characters.
@@ -140,7 +132,7 @@ def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:boo
     return queryConditional
 
 def executeQueryConditionalConstructor(queryPath:str, queryType:str):
-    pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitve=True)
+    pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitve=('*' not in queryPath))
     typeConditional = executeQueryStringConditionalConstructor(queryType, isCaseSensitve=False)
     return lambda element: (pathConditional(element.getPath()) and typeConditional(element.getType()))
 
@@ -148,10 +140,10 @@ def executeQuery():
     queryPath, queryType = elementQueryWidget.getQueryArgs()
     queryConditional = executeQueryConditionalConstructor(queryPath, queryType)
     elementsQueried = arxmlParser.getElements(conditional=queryConditional)
-    
-    for elementQueried in elementsQueried:
-        print(elementQueried.getType())
-    print(len(elementsQueried))
+    elementsQueried.sort(key=lambda element: (element.getType(), element.getPath()))
+    elementsQueriedSummary = [(element.getType() + ': ' + element.getPath()) for element in elementsQueried]    
+    selectedElementIdx = GElements.StandardDialog.selectFromList('Select Element', elementsQueriedSummary, constants['gui']['dialog']['min-size'])
+    print(selectedElementIdx)
 
 # ? Setup event handler(s).
 

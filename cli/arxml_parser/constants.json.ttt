@@ -9,6 +9,9 @@
     "gui" : {
         "window" : {
             "min-size" : [800, 600]
+        },
+        "dialog" : {
+            "min-size" : [600, 400]
         }
     }
 }
