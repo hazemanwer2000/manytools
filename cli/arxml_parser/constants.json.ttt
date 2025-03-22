@@ -1,0 +1,13 @@
+{
+    "title" : "ARXML'Parser",
+    "path" : {
+        "icon" : {
+            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/doc.png"
+        }
+    },
+    "gui" : {
+        "window" : {
+            "min-size" : [800, 600]
+        }
+    }
+}
