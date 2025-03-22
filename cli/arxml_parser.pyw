@@ -115,35 +115,34 @@ def executeQueryStringConditionalConstructor(element:ARXML.Element, queryString:
     else:
         conditional = lambda element: StringUtils.Regex.findAll(queryString, element.getPath())
 
+def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:bool=True):
+    
+    # ? Remove all white-space characters.
+    queryString = queryString.replace(' ', '')
+    
+    # ? ? If empty, match anything.
+    if queryString == '':
+        queryString = '*'
+    
+    if isCaseSensitve:
+        textModifier = lambda text: text
+    else:
+        queryString = queryString.lower()
+        textModifier = lambda text: text.lower()
+    
+    # ? ? Use regex if '*' is present.
+    if '*' in queryString:
+        queryString = '^' + queryString.replace('*', '.*') + '$'
+        queryConditional = lambda text: len(StringUtils.Regex.findAll(queryString, textModifier(text))) > 0
+    else:
+        queryConditional = lambda text: queryString == textModifier(text)
+    
+    return queryConditional
+
 def executeQueryConditionalConstructor(queryPath:str, queryType:str):
-    
-    # ? Setup Path Conditional.
-    # ? ? Remove all white-space characters.
-    queryPath = queryPath.replace(' ', '')
-    # ? ? If empty, match anything.
-    if queryPath == '':
-        queryPath = '*'
-    # ? ? Use regex if '*' is present.
-    if '*' in queryPath:
-        queryPath = '^' + queryPath.replace('*', '.*') + '$'
-        pathConditional = lambda element: len(StringUtils.Regex.findAll(queryPath, element.getPath())) > 0
-    else:
-        pathConditional = lambda element: queryPath == element.getPath()
-    
-    # ? Setup Path Conditional.
-    # ? ? Remove all white-space characters, and put into lower-case (i.e., case-insensitve search).
-    queryType = queryType.replace(' ', '').lower()
-    # ? ? If empty, match anything.
-    if queryType == '':
-        queryType = '*'
-    # ? ? Use regex if '*' is present.
-    if '*' in queryType:
-        queryType = '^' + queryType.replace('*', '.*') + '$'
-        typeConditional = lambda element: len(StringUtils.Regex.findAll(queryType, element.getType().lower())) > 0
-    else:
-        typeConditional = lambda element: queryType == element.getType().lower()
-    
-    return lambda element: (pathConditional(element) and typeConditional(element))
+    pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitve=True)
+    typeConditional = executeQueryStringConditionalConstructor(queryType, isCaseSensitve=False)
+    return lambda element: (pathConditional(element.getPath()) and typeConditional(element.getType()))
 
 def executeQuery():
     queryPath, queryType = elementQueryWidget.getQueryArgs()
