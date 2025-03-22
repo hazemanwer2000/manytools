@@ -140,10 +140,24 @@ def executeQuery():
     queryPath, queryType = elementQueryWidget.getQueryArgs()
     queryConditional = executeQueryConditionalConstructor(queryPath, queryType)
     elementsQueried = arxmlParser.getElements(conditional=queryConditional)
-    elementsQueried.sort(key=lambda element: (element.getType(), element.getPath()))
-    elementsQueriedSummary = [(element.getType() + ': ' + element.getPath()) for element in elementsQueried]    
-    selectedElementIdx = GElements.StandardDialog.selectFromList('Select Element', elementsQueriedSummary, constants['gui']['dialog']['min-size'])
-    print(selectedElementIdx)
+    
+    selectedElement = None
+    selectElementThreshold = constants['settings']['select-element-threshold']
+    
+    if len(elementsQueried) == 0:
+        GElements.StandardDialog.Message.Announce.Error("No matching elements found.")
+    elif len(elementsQueried) == 1:
+        selectedElement = elementsQueried[0]
+    elif len(elementsQueried) > selectElementThreshold:
+        GElements.StandardDialog.Message.Announce.Error(f"Too many matching elements found ({len(elementsQueried)} > {selectElementThreshold}).")
+    else:
+        elementsQueried.sort(key=lambda element: (element.getType(), element.getPath()))
+        elementsQueriedSummary = [(element.getType() + ': ' + element.getPath()) for element in elementsQueried]
+        selectedElementIdx = GElements.StandardDialog.selectFromList(f'Select from {len(elementsQueried)} elements', elementsQueriedSummary, constants['gui']['dialog']['min-size'])
+        selectedElement = elementsQueried[selectedElementIdx]
+    
+    if selectedElement is not None:
+        print('Found')
 
 # ? Setup event handler(s).
 

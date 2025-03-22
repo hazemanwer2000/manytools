@@ -8,10 +8,13 @@
     },
     "gui" : {
         "window" : {
-            "min-size" : [800, 600]
+            "min-size" : [1000, 700]
         },
         "dialog" : {
-            "min-size" : [600, 400]
+            "min-size" : [800, 600]
         }
+    },
+    "settings" : {
+        "select-element-threshold" : 100
     }
 }
