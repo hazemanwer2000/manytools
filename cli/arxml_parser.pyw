@@ -36,8 +36,7 @@ class Constants:
     WindowTitle = constants['title']
 
 class WorkingPage:
-    
-    CurrentElement:ARXML.Element = None
+
     IsRenderXML:bool = True
     ElementHistory = DataStructure.History(constants['settings']['element-select-threshold'])
 
@@ -105,21 +104,22 @@ def renderCurrentElement():
     
     packagePath = None
     text = None
+    currentElement = WorkingPage.ElementHistory.current()
 
     # ? Fetch text.
-    if WorkingPage.CurrentElement is not None:
-        packagePath = WorkingPage.CurrentElement.getPackagePath()
+    if currentElement is not None:
+        packagePath = currentElement.getPackagePath()
         if WorkingPage.IsRenderXML:
-            text = WorkingPage.CurrentElement.getXML().toString(indent=Constants.XMLIndentation)
+            text = currentElement.getXML().toString(indent=Constants.XMLIndentation)
         else:
-            elementModel = WorkingPage.CurrentElement.getModel()
+            elementModel = currentElement.getModel()
             if elementModel is None:
-                text = f"#ERROR: No model found ({WorkingPage.CurrentElement.getType()})."
+                text = f"#ERROR: No model found ({currentElement.getType()})."
             else:
                 text = str(elementModel)
 
     # ? Setup text.
-    windowTitleExtension = '' if (packagePath is None) else f" [{WorkingPage.CurrentElement.getPackagePath()}]"
+    windowTitleExtension = '' if (packagePath is None) else f" [{currentElement.getPackagePath()}]"
     text = '' if (text is None) else text
 
     # ? Render (...)
@@ -127,31 +127,17 @@ def renderCurrentElement():
     window.setTitle(f"{Constants.WindowTitle}{windowTitleExtension}")
 
 def navigateToPreviousElement():
-    print(WorkingPage.ElementHistory)
-    print(WorkingPage.CurrentElement)
-    
-    if WorkingPage.CurrentElement is None:
+    if WorkingPage.ElementHistory.current() is None:
         GElements.StandardDialog.Message.Announce.Information("No previous element in history.")
     else:
-        WorkingPage.CurrentElement = WorkingPage.ElementHistory.previous()
+        WorkingPage.ElementHistory.previous()
         renderCurrentElement()
-
-    print(WorkingPage.ElementHistory)
-    print(WorkingPage.CurrentElement)
 
 def navigateToNextElement():
-    print(WorkingPage.ElementHistory)
-    print(WorkingPage.CurrentElement)
-        
-    nextElement = WorkingPage.ElementHistory.next()
-    if nextElement is None:
+    if WorkingPage.ElementHistory.next() is None:
         GElements.StandardDialog.Message.Announce.Information("No next element in history.")
     else:
-        WorkingPage.CurrentElement = nextElement
         renderCurrentElement()
-        
-    print(WorkingPage.ElementHistory)
-    print(WorkingPage.CurrentElement)
 
 def viewAsXML(flag:bool):
     WorkingPage.IsRenderXML = flag
@@ -211,9 +197,8 @@ def executeQuery():
         if selectedElementIdx != -1:
             selectedElement = elementsQueried[selectedElementIdx]
     
-    if (selectedElement is not None) and (selectedElement is not WorkingPage.CurrentElement):
+    if (selectedElement is not None) and (selectedElement is not WorkingPage.ElementHistory.current()):
         WorkingPage.ElementHistory.insert(selectedElement)
-        WorkingPage.CurrentElement = selectedElement
         renderCurrentElement()
 
 # ? Setup event handler(s).
