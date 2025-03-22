@@ -1,11 +1,14 @@
 {
-    "title" : "ARXML'Parser",
+    "title-pretty" : "ARXML'Parser",
+    "title" : "arxml-parser",
+
     "path" : {
         "icon" : {
             "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/doc.png",
             "xml" : "{{{CURRENT-DIRECTORY}}}/resources/icon/xml.png"
         }
     },
+    
     "gui" : {
         "window" : {
             "min-size" : [1000, 700]
@@ -14,9 +17,13 @@
             "min-size" : [800, 600]
         }
     },
+    
     "settings" : {
         "element-select-threshold" : 1000,
         "element-history-capacity" : 100,
-        "indent-spaces-count" : 2
+        "indent-spaces-count" : 2,
+
+        "xml-viewer" : {{{BIN-NOTEPAD-PLUS-PLUS}}},
+        "default-viewer" : {{{BIN-VSCODE}}}
     }
 }

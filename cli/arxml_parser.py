@@ -3,6 +3,7 @@ import automatey.GUI.GElements as GElements
 import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
+import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Formats.JSON as JSON
 import automatey.Formats.ARXML as ARXML
 import automatey.Utils.ExceptionUtils as ExceptionUtils
@@ -29,11 +30,29 @@ f_appDir = FileUtils.File(__file__).traverseDirectory('..', f_this.getNameWithou
 f_constants = f_appDir.traverseDirectory('constants.json')
 constants = JSON.fromFile(f_constants)
 
+# ? ? Construct temporary file(s).
+f_tmpXML = FileUtils.File.Utils.getTemporaryFile('xml', prefix=constants['title'] + '-')
+f_tmpGeneric = FileUtils.File.Utils.getTemporaryFile('txt', prefix=constants['title'] + '-')
+f_tmpFiles = [
+    f_tmpXML,
+    f_tmpGeneric
+]
+
 class Constants:
     
     XMLIndentation = constants['settings']['indent-spaces-count'] * ' '
     ElementSelectThreshold = constants['settings']['element-select-threshold']
-    WindowTitle = constants['title']
+    WindowTitle = constants['title-pretty']
+    Extension2ExternalView = {
+        'xml' : {
+            'viewer' : constants['settings']['xml-viewer'],
+            'f_tmp' : f_tmpXML,
+        },
+        '*' : {
+            'viewer' : constants['settings']['default-viewer'],
+            'f_tmp' : f_tmpGeneric,
+        },
+    }
 
 class WorkingPage:
 
@@ -144,7 +163,18 @@ def viewAsXML(flag:bool):
     renderCurrentElement()
 
 def openExternally():
-    pass
+    if WorkingPage.ElementHistory.current() is None:
+        GElements.StandardDialog.Message.Announce.Information("Currently, no element selected.")
+    else:
+        text = textEdit_ARXML.getText()
+        extension = 'xml' if WorkingPage.IsRenderXML else '*'
+        externalView = Constants.Extension2ExternalView[extension]
+        externalView['f_tmp'].quickWrite(text, 't')
+        proc = ProcessUtils.Process(
+            externalView['viewer'],
+            str(externalView['f_tmp'])
+        )
+        proc.run()
 
 # ? Helper.
 def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:bool=True):
@@ -237,3 +267,8 @@ window.createToolbar(GUtils.Menu([
 # ? Run GUI loop.
 window.show()
 application.run()
+
+# ? Clean-up.
+for f_tmpFile in f_tmpFiles:
+    if f_tmpFile.isExists():
+        FileUtils.File.Utils.recycle(f_tmpFile)

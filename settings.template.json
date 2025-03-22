@@ -1,6 +1,8 @@
 {
     "global-macros" : {
         "bin-pythonw" : "",
-        "bin-python" : ""
+        "bin-python" : "",
+        "bin-vscode" : "",
+        "bin-notepad-plus-plus" : ""
     }
 }
