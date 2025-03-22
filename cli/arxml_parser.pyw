@@ -192,7 +192,7 @@ def executeQuery():
         GElements.StandardDialog.Message.Announce.Information(f"Too many matching elements found ({len(elementsQueried)} > {Constants.ElementSelectThreshold}).")
     else:
         elementsQueried.sort(key=lambda element: (element.getType(), element.getPath()))
-        elementsQueriedSummary = [(element.getType() + ': ' + element.getPath()) for element in elementsQueried]
+        elementsQueriedSummary = [str(element) for element in elementsQueried]
         selectedElementIdx = GElements.StandardDialog.selectFromList(f'Select from {len(elementsQueried)} elements', elementsQueriedSummary, constants['gui']['dialog']['min-size'])
         if selectedElementIdx != -1:
             selectedElement = elementsQueried[selectedElementIdx]
