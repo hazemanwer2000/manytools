@@ -4,12 +4,21 @@ import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
+import automatey.Formats.ARXML as ARXML
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Resources as Resources
+import automatey.Utils.StringUtils as StringUtils
 
 from pprint import pprint
+import sys
 
 # ? Initialize useful object(s).
+
+# ? ? Initialize ARXML parser.
+f_arxmls = [FileUtils.File(path) for path in sys.argv[1].split(',')]
+arxmlParser = ARXML.Parser()
+for f_arxml in f_arxmls:
+    arxmlParser.processFile(f_arxml)
 
 # ? ? Get app's root directory.
 f_this = FileUtils.File(__file__)
@@ -58,6 +67,11 @@ class ElementQueryWidget(GElements.CustomWidget):
             self.rootLayout.setRowMinimumSize(rowIdx, 0)
         self.rootLayout.setColumnMinimumSize(1, 0)
     
+    def getQueryArgs(self):
+        queryPath = self.lineEdit_QueryPath.getText()
+        queryType = self.lineEdit_QueryType.getText()
+        return (queryPath, queryType)
+    
     def setEventHandler(self, eventHandler:GUtils.EventHandler):
         if isinstance(eventHandler, GUtils.EventHandlers.ClickEventHandler):
             self.button_Query.setEventHandler(eventHandler)
@@ -93,8 +107,52 @@ def viewAsXML(flag:bool):
 def openExternally():
     pass
 
+def executeQueryStringConditionalConstructor(element:ARXML.Element, queryString:str):
+    queryString = queryString.replace(' ', '')
+    if '*' in queryString:
+        queryString = queryString.replace('*', '.*')
+        conditional = lambda element: StringUtils.Regex.findAll(queryString, element.getPath())
+    else:
+        conditional = lambda element: StringUtils.Regex.findAll(queryString, element.getPath())
+
+def executeQueryConditionalConstructor(queryPath:str, queryType:str):
+    
+    # ? Setup Path Conditional.
+    # ? ? Remove all white-space characters.
+    queryPath = queryPath.replace(' ', '')
+    # ? ? If empty, match anything.
+    if queryPath == '':
+        queryPath = '*'
+    # ? ? Use regex if '*' is present.
+    if '*' in queryPath:
+        queryPath = queryPath.replace('*', '.*')
+        pathConditional = lambda element: len(StringUtils.Regex.findAll(queryPath, element.getPath())) > 0
+    else:
+        pathConditional = lambda element: element.getPath() == queryPath
+    
+    # ? Setup Path Conditional.
+    # ? ? Remove all white-space characters, and put into lower-case.
+    queryType = queryType.replace(' ', '').lower()
+    # ? ? If empty, match anything.
+    if queryType == '':
+        queryType = '*'
+    # ? ? Use regex if '*' is present.
+    if '*' in queryType:
+        queryType = queryType.replace('*', '.*')
+        typeConditional = lambda element: len(StringUtils.Regex.findAll(queryType, element.getType().lower())) > 0
+    else:
+        typeConditional = lambda element: element.getType() == queryType
+    
+    return lambda element: (pathConditional(element) and typeConditional(element))
+
 def executeQuery():
-    pass
+    queryPath, queryType = elementQueryWidget.getQueryArgs()
+    queryConditional = executeQueryConditionalConstructor(queryPath, queryType)
+    elementsQueried = arxmlParser.getElements(conditional=queryConditional)
+    
+    for elementQueried in elementsQueried:
+        print(elementQueried.getType())
+    print(len(elementsQueried))
 
 # ? Setup event handler(s).
 
