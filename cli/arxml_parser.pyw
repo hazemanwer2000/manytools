@@ -125,23 +125,23 @@ def executeQueryConditionalConstructor(queryPath:str, queryType:str):
         queryPath = '*'
     # ? ? Use regex if '*' is present.
     if '*' in queryPath:
-        queryPath = queryPath.replace('*', '.*')
+        queryPath = '^' + queryPath.replace('*', '.*') + '$'
         pathConditional = lambda element: len(StringUtils.Regex.findAll(queryPath, element.getPath())) > 0
     else:
-        pathConditional = lambda element: element.getPath() == queryPath
+        pathConditional = lambda element: queryPath == element.getPath()
     
     # ? Setup Path Conditional.
-    # ? ? Remove all white-space characters, and put into lower-case.
+    # ? ? Remove all white-space characters, and put into lower-case (i.e., case-insensitve search).
     queryType = queryType.replace(' ', '').lower()
     # ? ? If empty, match anything.
     if queryType == '':
         queryType = '*'
     # ? ? Use regex if '*' is present.
     if '*' in queryType:
-        queryType = queryType.replace('*', '.*')
+        queryType = '^' + queryType.replace('*', '.*') + '$'
         typeConditional = lambda element: len(StringUtils.Regex.findAll(queryType, element.getType().lower())) > 0
     else:
-        typeConditional = lambda element: element.getType() == queryType
+        typeConditional = lambda element: queryType == element.getType().lower()
     
     return lambda element: (pathConditional(element) and typeConditional(element))
 
