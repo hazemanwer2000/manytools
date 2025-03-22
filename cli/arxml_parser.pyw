@@ -33,6 +33,7 @@ class Constants:
     
     XMLIndentation = constants['settings']['element-xml-indent-spaces'] * ' '
     ElementSelectThreshold = constants['settings']['element-select-threshold']
+    WindowTitle = constants['title']
 
 class WorkingPage:
     
@@ -93,7 +94,7 @@ rootLayout.setWidget(textEdit_ARXML, 0, 0)
 rootLayout.setWidget(elementQueryWidget, 1, 0)
 rootLayout.setRowMinimumSize(1, 0)
 
-window = GElements.Window(title=constants['title'],
+window = GElements.Window(title=Constants.WindowTitle,
                           rootLayout=rootLayout,
                           minimumSize=constants['gui']['window']['min-size'])
 
@@ -101,9 +102,13 @@ window = GElements.Window(title=constants['title'],
 
 # ? Helper.
 def renderCurrentElement():
-    if WorkingPage.CurrentElement is None:
-        text = ''
-    else:
+    
+    packagePath = None
+    text = None
+
+    # ? Fetch text.
+    if WorkingPage.CurrentElement is not None:
+        packagePath = WorkingPage.CurrentElement.getPackagePath()
         if WorkingPage.IsRenderXML:
             text = WorkingPage.CurrentElement.getXML().toString(indent=Constants.XMLIndentation)
         else:
@@ -112,7 +117,14 @@ def renderCurrentElement():
                 text = f"#ERROR: No model found ({WorkingPage.CurrentElement.getType()})."
             else:
                 text = str(elementModel)
-        textEdit_ARXML.setText(text)
+
+    # ? Setup text.
+    windowTitleExtension = '' if (packagePath is None) else f" [{WorkingPage.CurrentElement.getPackagePath()}]"
+    text = '' if (text is None) else text
+
+    # ? Render (...)
+    textEdit_ARXML.setText(text)
+    window.setTitle(f"{Constants.WindowTitle}{windowTitleExtension}")
 
 def navigateToPreviousElement():
     pass
@@ -199,6 +211,7 @@ window.createToolbar(GUtils.Menu([
         fcn=navigateToNextElement,
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-right.png'))),
     ),
+    GUtils.Menu.Separator(),
     GUtils.Menu.EndPoint(
         text='View as XML',
         fcn=viewAsXML,
@@ -206,6 +219,7 @@ window.createToolbar(GUtils.Menu([
         isCheckable=True,
         isChecked=WorkingPage.IsRenderXML,
     ),
+    GUtils.Menu.Separator(),
     GUtils.Menu.EndPoint(
         text='Open Externally',
         fcn=openExternally,
