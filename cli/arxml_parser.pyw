@@ -4,8 +4,30 @@ import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
+import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Resources as Resources
 
 from pprint import pprint
+
+# ? Initialize useful object(s).
+
+# ? ? Get app's root directory.
+f_this = FileUtils.File(__file__)
+f_appDir = FileUtils.File(__file__).traverseDirectory('..', f_this.getNameWithoutExtension())
+
+# ? ? Read constant(s).
+f_constants = f_appDir.traverseDirectory('constants.json')
+constants = JSON.fromFile(f_constants)
+
+class ElementHistory:
+    
+    @staticmethod
+    def initialize():
+        pass
+
+ElementHistory.initialize()
+
+# ? Construct GUI.
 
 class ElementQueryWidget(GElements.CustomWidget):
     
@@ -35,16 +57,12 @@ class ElementQueryWidget(GElements.CustomWidget):
         for rowIdx in range(rowCount):
             self.rootLayout.setRowMinimumSize(rowIdx, 0)
         self.rootLayout.setColumnMinimumSize(1, 0)
-
-# ? Get app's root directory.
-f_this = FileUtils.File(__file__)
-f_appDir = FileUtils.File(__file__).traverseDirectory('..', f_this.getNameWithoutExtension())
-
-# ? Read constant(s).
-f_constants = f_appDir.traverseDirectory('constants.json')
-constants = JSON.fromFile(f_constants)
-
-# ? Construct GUI.
+    
+    def setEventHandler(self, eventHandler:GUtils.EventHandler):
+        if isinstance(eventHandler, GUtils.EventHandlers.ClickEventHandler):
+            self.button_Query.setEventHandler(eventHandler)
+        else:
+            raise ExceptionUtils.ValidationErrorError('Unsupported event handler type.')
 
 application = GElements.Application()
 application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app'])))
@@ -60,6 +78,53 @@ rootLayout.setRowMinimumSize(1, 0)
 window = GElements.Window(title=constants['title'],
                           rootLayout=rootLayout,
                           minimumSize=constants['gui']['window']['min-size'])
+
+# ? Event handler(s).
+
+def navigateToPreviousElement():
+    pass
+
+def navigateToNextElement():
+    pass
+
+def viewAsXML(flag:bool):
+    pass
+
+def openExternally():
+    pass
+
+def executeQuery():
+    pass
+
+# ? Setup event handler(s).
+
+elementQueryWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(executeQuery))
+
+# ? Setup toolbar.
+
+window.createToolbar(GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text='Previous Element',
+        fcn=navigateToPreviousElement,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-left.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='Next Element',
+        fcn=navigateToNextElement,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-arrow-right.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='View as XML',
+        fcn=viewAsXML,
+        icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['xml'])),
+        isCheckable=True,
+    ),
+    GUtils.Menu.EndPoint(
+        text='Open Externally',
+        fcn=openExternally,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-share.png'))),
+    ),
+]))
 
 # ? Run GUI loop.
 window.show()

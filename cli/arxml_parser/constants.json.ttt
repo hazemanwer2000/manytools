@@ -2,7 +2,8 @@
     "title" : "ARXML'Parser",
     "path" : {
         "icon" : {
-            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/doc.png"
+            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/doc.png",
+            "xml" : "{{{CURRENT-DIRECTORY}}}/resources/icon/xml.png"
         }
     },
     "gui" : {
