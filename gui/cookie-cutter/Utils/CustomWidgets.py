@@ -3,7 +3,7 @@ import automatey.GUI.GElements as GElements
 import automatey.GUI.GConcurrency as GConcurrency
 import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
-import automatey.Base.ColorUtils as ColorUtils
+import automatey.Utils.ColorUtils as ColorUtils
 
 import collections
 

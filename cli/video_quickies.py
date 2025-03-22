@@ -8,7 +8,7 @@ import shlex
 import automatey.OS.FileUtils as FileUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.Abstract.Graphics as AbstractGraphics
-import automatey.Base.ColorUtils as ColorUtils
+import automatey.Utils.ColorUtils as ColorUtils
 import automatey.Media.VideoUtils as VideoUtils
 import automatey.Media.ImageUtils as ImageUtils
 import automatey.Utils.MathUtils as MathUtils

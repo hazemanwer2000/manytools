@@ -5,7 +5,7 @@ import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
 import automatey.Formats.ARXML as ARXML
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Resources as Resources
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Utils.DataStructure as DataStructure
@@ -31,7 +31,7 @@ constants = JSON.fromFile(f_constants)
 
 class Constants:
     
-    XMLIndentation = constants['settings']['element-xml-indent-spaces'] * ' '
+    XMLIndentation = constants['settings']['indent-spaces-count'] * ' '
     ElementSelectThreshold = constants['settings']['element-select-threshold']
     WindowTitle = constants['title']
 

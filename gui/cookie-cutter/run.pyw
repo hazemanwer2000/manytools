@@ -5,7 +5,7 @@ import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.TimeUtils as TimeUtils
 import automatey.Utils.PyUtils as PyUtils
 import automatey.Resources as Resources
 import automatey.Utils.MathUtils as MathUtils

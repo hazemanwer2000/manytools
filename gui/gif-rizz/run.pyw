@@ -1,7 +1,7 @@
 
 import automatey.GUI.GElements as GElements
 import automatey.GUI.GConcurrency as GConcurrency
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.TimeUtils as TimeUtils
 import automatey.GUI.GUtils as GUtils
 import automatey.Abstract.Graphics as AbstractGraphics
 import automatey.OS.FileUtils as FileUtils

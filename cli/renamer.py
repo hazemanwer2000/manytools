@@ -4,7 +4,7 @@ import traceback
 from pprint import pprint
 
 import automatey.OS.FileUtils as FileUtils
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.Validation as Validation
 import automatey.OS.Specific.Windows as Windows
 

@@ -3,10 +3,10 @@ import automatey.GUI.GConcurrency as GConcurrency
 import automatey.OS.FileUtils as FileUtils
 import automatey.Media.VideoUtils as VideoUtils
 import automatey.OS.ProcessUtils as ProcessUtils
-import automatey.Base.ColorUtils as ColorUtils
+import automatey.Utils.ColorUtils as ColorUtils
 import automatey.Abstract.Graphics as AbstractGraphics
-import automatey.Base.TimeUtils as TimeUtils
-import automatey.Base.ExceptionUtils as ExceptionUtils
+import automatey.Utils.TimeUtils as TimeUtils
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.Validation as Validation
 import automatey.Utils.StringUtils as StringUtils
 

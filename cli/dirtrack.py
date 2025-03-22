@@ -8,8 +8,8 @@ import shlex
 import automatey.OS.FileUtils as FileUtils
 import automatey.OS.Specific.Windows as Windows
 import automatey.Abstract.Graphics as Graphics
-import automatey.Base.ColorUtils as ColorUtils
-import automatey.Base.TimeUtils as TimeUtils
+import automatey.Utils.ColorUtils as ColorUtils
+import automatey.Utils.TimeUtils as TimeUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Formats.JSON as JSON
 import automatey.Utils.Cryptography as Cryptography
