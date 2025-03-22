@@ -79,10 +79,14 @@ class ElementQueryWidget(GElements.CustomWidget):
         self.lineEdit_QueryType = GElements.Widgets.Basics.LineEdit(placeholder=':Type', isEditable=True, isMonospaced=True)
         self.button_Query = GElements.Widgets.Basics.Button(text='Search')
         
+        # ? (Must-reference-)Decorators.
+        self.lineEditEraser_QueryPath = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryPath)
+        self.lineEditEraser_QueryType = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryType)
+        
         # ? Set layout widget(s).
         rowIdx = -1
-        self.rootLayout.setWidget(self.lineEdit_QueryPath, (rowIdx := rowIdx + 1), 0, colSpan=2)
-        self.rootLayout.setWidget(self.lineEdit_QueryType, (rowIdx := rowIdx + 1), 0, colSpan=2)
+        self.rootLayout.setWidget(self.lineEditEraser_QueryPath, (rowIdx := rowIdx + 1), 0, colSpan=2)
+        self.rootLayout.setWidget(self.lineEditEraser_QueryType, (rowIdx := rowIdx + 1), 0, colSpan=2)
         self.rootLayout.setWidget(self.button_Query, (rowIdx := rowIdx + 1), 1)
         
         # ? Configure layout row/column size(s).
