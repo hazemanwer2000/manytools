@@ -8,6 +8,7 @@ import automatey.Formats.ARXML as ARXML
 import automatey.Base.ExceptionUtils as ExceptionUtils
 import automatey.Resources as Resources
 import automatey.Utils.StringUtils as StringUtils
+import automatey.Utils.DataStructure as DataStructure
 
 from pprint import pprint
 import sys
@@ -28,13 +29,16 @@ f_appDir = FileUtils.File(__file__).traverseDirectory('..', f_this.getNameWithou
 f_constants = f_appDir.traverseDirectory('constants.json')
 constants = JSON.fromFile(f_constants)
 
-class ElementHistory:
+class Constants:
     
-    @staticmethod
-    def initialize():
-        pass
+    XMLIndentation = constants['settings']['element-xml-indent-spaces'] * ' '
+    ElementSelectThreshold = constants['settings']['element-select-threshold']
 
-ElementHistory.initialize()
+class WorkingPage:
+    
+    CurrentElement:ARXML.Element = None
+    IsRenderXML:bool = True
+    ElementHistory = DataStructure.History(constants['settings']['element-select-threshold'])
 
 # ? Construct GUI.
 
@@ -95,6 +99,21 @@ window = GElements.Window(title=constants['title'],
 
 # ? Event handler(s).
 
+# ? Helper.
+def renderCurrentElement():
+    if WorkingPage.CurrentElement is None:
+        text = ''
+    else:
+        if WorkingPage.IsRenderXML:
+            text = WorkingPage.CurrentElement.getXML().toString(indent=Constants.XMLIndentation)
+        else:
+            elementModel = WorkingPage.CurrentElement.getModel()
+            if elementModel is None:
+                text = f"#ERROR: No model found ({WorkingPage.CurrentElement.getType()})."
+            else:
+                text = str(elementModel)
+        textEdit_ARXML.setText(text)
+
 def navigateToPreviousElement():
     pass
 
@@ -102,11 +121,13 @@ def navigateToNextElement():
     pass
 
 def viewAsXML(flag:bool):
-    pass
+    WorkingPage.IsRenderXML = flag
+    renderCurrentElement()
 
 def openExternally():
     pass
 
+# ? Helper.
 def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:bool=True):
     
     # ? Remove all white-space characters.
@@ -131,6 +152,7 @@ def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:boo
     
     return queryConditional
 
+# ? Helper.
 def executeQueryConditionalConstructor(queryPath:str, queryType:str):
     pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitve=('*' not in queryPath))
     typeConditional = executeQueryStringConditionalConstructor(queryType, isCaseSensitve=False)
@@ -142,22 +164,23 @@ def executeQuery():
     elementsQueried = arxmlParser.getElements(conditional=queryConditional)
     
     selectedElement = None
-    selectElementThreshold = constants['settings']['select-element-threshold']
     
     if len(elementsQueried) == 0:
         GElements.StandardDialog.Message.Announce.Error("No matching elements found.")
     elif len(elementsQueried) == 1:
         selectedElement = elementsQueried[0]
-    elif len(elementsQueried) > selectElementThreshold:
-        GElements.StandardDialog.Message.Announce.Error(f"Too many matching elements found ({len(elementsQueried)} > {selectElementThreshold}).")
+    elif len(elementsQueried) > Constants.ElementSelectThreshold:
+        GElements.StandardDialog.Message.Announce.Error(f"Too many matching elements found ({len(elementsQueried)} > {Constants.ElementSelectThreshold}).")
     else:
         elementsQueried.sort(key=lambda element: (element.getType(), element.getPath()))
         elementsQueriedSummary = [(element.getType() + ': ' + element.getPath()) for element in elementsQueried]
         selectedElementIdx = GElements.StandardDialog.selectFromList(f'Select from {len(elementsQueried)} elements', elementsQueriedSummary, constants['gui']['dialog']['min-size'])
         selectedElement = elementsQueried[selectedElementIdx]
     
-    if selectedElement is not None:
-        print('Found')
+    if (selectedElement is not None) and (selectedElement is not WorkingPage.CurrentElement):
+        WorkingPage.ElementHistory.insert(selectedElement)
+        WorkingPage.CurrentElement = selectedElement
+        renderCurrentElement()
 
 # ? Setup event handler(s).
 
@@ -181,6 +204,7 @@ window.createToolbar(GUtils.Menu([
         fcn=viewAsXML,
         icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['xml'])),
         isCheckable=True,
+        isChecked=WorkingPage.IsRenderXML,
     ),
     GUtils.Menu.EndPoint(
         text='Open Externally',

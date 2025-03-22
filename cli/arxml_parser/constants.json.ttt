@@ -15,6 +15,8 @@
         }
     },
     "settings" : {
-        "select-element-threshold" : 100
+        "element-select-threshold" : 100,
+        "element-history-capacity" : 100,
+        "element-xml-indent-spaces" : 2
     }
 }
