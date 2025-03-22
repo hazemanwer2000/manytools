@@ -13,6 +13,7 @@ import automatey.Utils.DataStructure as DataStructure
 
 from pprint import pprint
 import sys
+import subprocess
 
 # ? Initialize useful object(s).
 
@@ -162,19 +163,23 @@ def viewAsXML(flag:bool):
     WorkingPage.IsRenderXML = flag
     renderCurrentElement()
 
+# ? Helper.
+def openExternallyGeneric(text, extension:str):
+    externalView = Constants.Extension2ExternalView[extension]
+    externalView['f_tmp'].quickWrite(text, 't')
+    cmdArgs = [externalView['viewer'], str(externalView['f_tmp'])]
+    subprocess.Popen(cmdArgs, creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
+
 def openExternally():
     if WorkingPage.ElementHistory.current() is None:
         GElements.StandardDialog.Message.Announce.Information("Currently, no element selected.")
     else:
         text = textEdit_ARXML.getText()
         extension = 'xml' if WorkingPage.IsRenderXML else '*'
-        externalView = Constants.Extension2ExternalView[extension]
-        externalView['f_tmp'].quickWrite(text, 't')
-        proc = ProcessUtils.Process(
-            externalView['viewer'],
-            str(externalView['f_tmp'])
-        )
-        proc.run()
+        openExternallyGeneric(text, extension)
+
+def viewElementSummary():
+    openExternallyGeneric(arxmlParser.summarize(), '*')
 
 # ? Helper.
 def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:bool=True):
@@ -261,6 +266,11 @@ window.createToolbar(GUtils.Menu([
         text='Open Externally',
         fcn=openExternally,
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-share.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='View Summary',
+        fcn=viewElementSummary,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-info.png'))),
     ),
 ]))
 
