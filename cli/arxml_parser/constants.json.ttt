@@ -23,7 +23,7 @@
         "element-history-capacity" : 100,
         "indent-spaces-count" : 2,
 
-        "xml-viewer" : {{{BIN-NOTEPAD-PLUS-PLUS}}},
-        "default-viewer" : {{{BIN-VSCODE}}}
+        "xml-viewer" : "{{{BIN-NOTEPAD-PLUS-PLUS}}}",
+        "default-viewer" : "{{{BIN-VSCODE}}}"
     }
 }
