@@ -19,7 +19,7 @@
     },
     
     "settings" : {
-        "element-select-threshold" : 1000,
+        "element-select-threshold" : 50000,
         "element-history-capacity" : 100,
         "indent-spaces-count" : 2,
 
