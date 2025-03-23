@@ -62,6 +62,23 @@ class WorkingPage:
 
 # ? Construct GUI.
 
+class EditCaseSensitive(GElements.CustomWidget):
+    
+    def __init__(self, editWidget):
+        self.rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+        self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+        super().__init__(self.rootWidget)
+        
+        self.button_CaseSensitive = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-text.png'))),
+                                                                    toolTip='Match Case',
+                                                                    isCheckable=True)
+        self.rootLayout.setWidget(editWidget, 0, 0)
+        self.rootLayout.setWidget(self.button_CaseSensitive, 0, 1)
+        self.rootLayout.setColumnMinimumSize(1, 0)
+    
+    def isMatchCase(self) -> bool:
+        return self.button_CaseSensitive.isChecked()
+
 class ElementQueryWidget(GElements.CustomWidget):
     
     def __init__(self):
@@ -83,13 +100,15 @@ class ElementQueryWidget(GElements.CustomWidget):
         # ? (Must-reference-)Decorators.
         self.lineEditEraser_QueryPath = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryPath)
         self.lineEditEraser_QueryType = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryType)
+        # ? ? (...)
         self.lineEditEraser_QueryContains = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryContains)
+        self.lineEditCS_QueryContains = EditCaseSensitive(self.lineEditEraser_QueryContains)
         
         # ? Set layout widget(s).
         rowIdx = -1
         self.rootLayout.setWidget(self.lineEditEraser_QueryPath, (rowIdx := rowIdx + 1), 0, colSpan=2)
         self.rootLayout.setWidget(self.lineEditEraser_QueryType, (rowIdx := rowIdx + 1), 0, colSpan=2)
-        self.rootLayout.setWidget(self.lineEditEraser_QueryContains, (rowIdx := rowIdx + 1), 0, colSpan=2)
+        self.rootLayout.setWidget(self.lineEditCS_QueryContains, (rowIdx := rowIdx + 1), 0, colSpan=2)
         self.rootLayout.setWidget(self.button_Query, (rowIdx := rowIdx + 1), 1)
         
         # ? Configure layout row/column size(s).
@@ -101,7 +120,7 @@ class ElementQueryWidget(GElements.CustomWidget):
     def getQueryArgs(self):
         queryPath = self.lineEdit_QueryPath.getText()
         queryType = self.lineEdit_QueryType.getText()
-        queryContains = self.lineEdit_QueryContains.getText()
+        queryContains = (self.lineEdit_QueryContains.getText(), self.lineEditCS_QueryContains.isMatchCase())
         return (queryPath, queryType, queryContains)
     
     def setEventHandler(self, eventHandler:GUtils.EventHandler):
@@ -243,10 +262,10 @@ def executeQueryContainsConditionalConstructor(queryContains:str, isCaseSensitiv
     return queryConditional
 
 # ? Helper.
-def executeQueryConditionalConstructor(queryPath:str, queryType:str, queryContains:str):
+def executeQueryConditionalConstructor(queryPath:str, queryType:str, queryContains:tuple):
     pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitive=('*' not in queryPath))
     typeConditional = executeQueryStringConditionalConstructor(queryType, isCaseSensitive=False)
-    containsConditional = executeQueryContainsConditionalConstructor(queryContains, isCaseSensitive=False)
+    containsConditional = executeQueryContainsConditionalConstructor(queryContains[0], isCaseSensitive=queryContains[1])
     return lambda element: (pathConditional(element.getPath()) and typeConditional(element.getType()) and containsConditional(element))
 
 def executeQuery():
