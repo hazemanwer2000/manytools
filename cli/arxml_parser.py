@@ -202,7 +202,10 @@ def openExternallyGeneric(text, extension:str):
     externalView = Constants.Extension2ExternalView[extension]
     externalView['f_tmp'].quickWrite(text, 't')
     cmdArgs = [externalView['viewer'], str(externalView['f_tmp'])]
-    subprocess.Popen(cmdArgs, creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP)
+    subprocess.Popen(cmdArgs,
+                     creationflags=subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP,
+                     stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL)
 
 def openExternally():
     if WorkingPage.ElementHistory.current() is None:
