@@ -65,7 +65,7 @@ class WorkingPage:
 class ElementQueryWidget(GElements.CustomWidget):
     
     def __init__(self):
-        self.rootLayout = GElements.Layouts.GridLayout(3, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+        self.rootLayout = GElements.Layouts.GridLayout(4, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
         self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
         super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, 
                                                              "Element-Query",
@@ -77,16 +77,19 @@ class ElementQueryWidget(GElements.CustomWidget):
         # ? Create (sub-)widget(s).
         self.lineEdit_QueryPath = GElements.Widgets.Basics.LineEdit(placeholder=':Path', isEditable=True, isMonospaced=True)
         self.lineEdit_QueryType = GElements.Widgets.Basics.LineEdit(placeholder=':Type', isEditable=True, isMonospaced=True)
+        self.lineEdit_QueryContains = GElements.Widgets.Basics.LineEdit(placeholder=':Contains', isEditable=True, isMonospaced=True)
         self.button_Query = GElements.Widgets.Basics.Button(text='Search')
         
         # ? (Must-reference-)Decorators.
         self.lineEditEraser_QueryPath = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryPath)
         self.lineEditEraser_QueryType = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryType)
+        self.lineEditEraser_QueryContains = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryContains)
         
         # ? Set layout widget(s).
         rowIdx = -1
         self.rootLayout.setWidget(self.lineEditEraser_QueryPath, (rowIdx := rowIdx + 1), 0, colSpan=2)
         self.rootLayout.setWidget(self.lineEditEraser_QueryType, (rowIdx := rowIdx + 1), 0, colSpan=2)
+        self.rootLayout.setWidget(self.lineEditEraser_QueryContains, (rowIdx := rowIdx + 1), 0, colSpan=2)
         self.rootLayout.setWidget(self.button_Query, (rowIdx := rowIdx + 1), 1)
         
         # ? Configure layout row/column size(s).
@@ -98,7 +101,8 @@ class ElementQueryWidget(GElements.CustomWidget):
     def getQueryArgs(self):
         queryPath = self.lineEdit_QueryPath.getText()
         queryType = self.lineEdit_QueryType.getText()
-        return (queryPath, queryType)
+        queryContains = self.lineEdit_QueryContains.getText()
+        return (queryPath, queryType, queryContains)
     
     def setEventHandler(self, eventHandler:GUtils.EventHandler):
         if isinstance(eventHandler, GUtils.EventHandlers.ClickEventHandler):
@@ -124,6 +128,20 @@ window = GElements.Window(title=Constants.WindowTitle,
 # ? Event handler(s).
 
 # ? Helper.
+def element2text(element:ARXML.Element):
+    
+    if WorkingPage.IsRenderXML:
+        text = element.getXML().toString(indent=Constants.XMLIndentation)
+    else:
+        elementModel = element.getModel()
+        if elementModel is None:
+            text = f"#ERROR: No model found ({element.getType()})."
+        else:
+            text = str(elementModel)
+    
+    return text
+
+# ? Helper.
 def renderCurrentElement():
     
     packagePath = None
@@ -133,14 +151,7 @@ def renderCurrentElement():
     # ? Fetch text.
     if currentElement is not None:
         packagePath = currentElement.getPackagePath()
-        if WorkingPage.IsRenderXML:
-            text = currentElement.getXML().toString(indent=Constants.XMLIndentation)
-        else:
-            elementModel = currentElement.getModel()
-            if elementModel is None:
-                text = f"#ERROR: No model found ({currentElement.getType()})."
-            else:
-                text = str(elementModel)
+        text = element2text(currentElement)
 
     # ? Setup text.
     windowTitleExtension = '' if (packagePath is None) else f" [{currentElement.getPackagePath()}]"
@@ -186,22 +197,23 @@ def viewElementSummary():
     openExternallyGeneric(arxmlParser.summarize(), '*')
 
 # ? Helper.
-def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:bool=True):
+def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitive:bool=True):
     
     # ? Remove all white-space characters.
     queryString = queryString.replace(' ', '')
     
-    # ? ? If empty, match anything.
+    # ? If empty, match anything.
     if queryString == '':
         queryString = '*'
     
-    if isCaseSensitve:
+    # ? Handle case-sensitive option.
+    if isCaseSensitive:
         textModifier = lambda text: text
     else:
         queryString = queryString.lower()
         textModifier = lambda text: text.lower()
     
-    # ? ? Use regex if '*' is present.
+    # ? Use regex if '*' is present.
     if '*' in queryString:
         queryString = '^' + queryString.replace('*', '.*') + '$'
         queryConditional = lambda text: len(StringUtils.Regex.findAll(queryString, textModifier(text))) > 0
@@ -211,14 +223,35 @@ def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitve:boo
     return queryConditional
 
 # ? Helper.
-def executeQueryConditionalConstructor(queryPath:str, queryType:str):
-    pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitve=('*' not in queryPath))
-    typeConditional = executeQueryStringConditionalConstructor(queryType, isCaseSensitve=False)
-    return lambda element: (pathConditional(element.getPath()) and typeConditional(element.getType()))
+def executeQueryContainsConditionalConstructor(queryContains:str, isCaseSensitive:bool):
+    
+    # ? Match all elements, if query is unspecified.
+    if queryContains == '':
+        queryConditional = lambda element: True
+    else:
+        # ? Handle case-sensitive option.
+        if isCaseSensitive:
+            textModifier = lambda text: text
+        else:
+            queryContains = queryContains.lower()
+            textModifier = lambda text: text.lower()
+        
+        # ? Always use 'RegEx'.
+        queryContains = queryContains.replace('*', '[^\n]*')
+        queryConditional = lambda element: len(StringUtils.Regex.findAll(queryContains, textModifier(element2text(element)))) > 0
+    
+    return queryConditional
+
+# ? Helper.
+def executeQueryConditionalConstructor(queryPath:str, queryType:str, queryContains:str):
+    pathConditional = executeQueryStringConditionalConstructor(queryPath, isCaseSensitive=('*' not in queryPath))
+    typeConditional = executeQueryStringConditionalConstructor(queryType, isCaseSensitive=False)
+    containsConditional = executeQueryContainsConditionalConstructor(queryContains, isCaseSensitive=False)
+    return lambda element: (pathConditional(element.getPath()) and typeConditional(element.getType()) and containsConditional(element))
 
 def executeQuery():
-    queryPath, queryType = elementQueryWidget.getQueryArgs()
-    queryConditional = executeQueryConditionalConstructor(queryPath, queryType)
+    queryPath, queryType, queryContains = elementQueryWidget.getQueryArgs()
+    queryConditional = executeQueryConditionalConstructor(queryPath, queryType, queryContains)
     elementsQueried = arxmlParser.getElements(conditional=queryConditional)
     
     selectedElement = None
