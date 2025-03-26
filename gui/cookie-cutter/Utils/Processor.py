@@ -55,7 +55,7 @@ class INTERNAL:
         
         @staticmethod
         def asXY(XandY):
-            found = StringUtils.Regex.findAll('\((-?[0-9]+), (-?[0-9]+)\)', XandY)
+            found = StringUtils.Regex.findAll('(-?[0-9]+),[ ]*(-?[0-9]+)', XandY)
             if len(found) != 1:
                 raise ExceptionUtils.ValidationError("'(X, Y)' structure is not matched.")
             return [int(found[0][0]), int(found[0][1])]
