@@ -326,7 +326,15 @@ class CommandHandler:
             # ? Clean-up (...)
             FileUtils.File.Utils.recycle(f_tmpDir)
 
-@click.group()
+class CustomGroup(click.Group):
+    def invoke(self, ctx):
+        Utils.initialize()
+        try:
+            super().invoke(ctx)
+        finally:
+            Utils.cleanUp()
+
+@click.group(cls=CustomGroup)
 def cli():
     '''
     Execute different video-edit command(s), quickly.
@@ -348,9 +356,7 @@ def black_and_white(input, crf, threshold):
     '''
     Forces all pixel(s) to turn, either black or white, based on a threshold value.
     '''
-    Utils.initialize()
     CommandHandler.Filter.BlackAndWhite.run(FileUtils.File(input), crf, threshold)
-    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input directory.')
@@ -358,9 +364,7 @@ def concat(input):
     '''
     Concat multiple (video) file(s).
     '''
-    Utils.initialize()
     CommandHandler.Concat.run(FileUtils.File(input))
-    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
@@ -371,9 +375,7 @@ def convert(input, crf, width, height):
     '''
     Convert a video, or a directory of video(s), into '.mp4' file(s).
     '''
-    Utils.initialize()
     CommandHandler.Convert.run(FileUtils.File(input), crf, width, height)
-    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
@@ -385,11 +387,9 @@ def thumbnail(input, rows, cols, timestamps, aspect_ratio):
     '''
     Create a thumbnail for a (video) file.
     '''
-    Utils.initialize()
     if aspect_ratio != None:
         aspect_ratio = float(eval(aspect_ratio))
     CommandHandler.Thumbnail.run(FileUtils.File(input), rows, cols, timestamps, aspect_ratio)
-    Utils.cleanUp()
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
@@ -403,11 +403,9 @@ def thumbnails(input, rows, cols, timestamps, aspect_ratio, force, flat):
     '''
     Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called '.Thumbnails' present in the same directory as the video.
     '''
-    Utils.initialize()
     if aspect_ratio != None:
         aspect_ratio = float(eval(aspect_ratio))
     CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, timestamps, aspect_ratio, force, flat)
-    Utils.cleanUp()
 
 if __name__ == '__main__':
     cli()
