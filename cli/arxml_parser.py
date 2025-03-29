@@ -62,82 +62,78 @@ class WorkingPage:
 
 # ? Construct GUI.
 
-class EditCaseSensitive(GElements.CustomWidget):
-    
-    def __init__(self, editWidget):
-        self.rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-        self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
-        super().__init__(self.rootWidget)
-        
-        self.button_CaseSensitive = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-text.png'))),
-                                                                    toolTip='Match Case',
-                                                                    isCheckable=True)
-        self.rootLayout.setWidget(editWidget, 0, 0)
-        self.rootLayout.setWidget(self.button_CaseSensitive, 0, 1)
-        self.rootLayout.setColumnMinimumSize(1, 0)
-    
-    def isMatchCase(self) -> bool:
-        return self.button_CaseSensitive.isChecked()
+class CustomWidgets:
 
-class ElementQueryWidget(GElements.CustomWidget):
-    
-    def __init__(self):
-        self.rootLayout = GElements.Layouts.GridLayout(4, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
-        self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
-        super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, 
-                                                             "Element-Query",
-                                                             elementMargin=AbstractGraphics.SymmetricMargin(5),
-                                                             elementSpacing=5,
-                                                             isOuterOutline=True,
-                                                             isInnerOutline=True))
+    class EditCaseSensitive(GElements.CustomWidget):
         
-        # ? Create (sub-)widget(s).
-        self.lineEdit_QueryPath = GElements.Widgets.Basics.LineEdit(placeholder=':Path', isEditable=True, isMonospaced=True)
-        self.lineEdit_QueryType = GElements.Widgets.Basics.LineEdit(placeholder=':Type', isEditable=True, isMonospaced=True)
-        self.lineEdit_QueryContains = GElements.Widgets.Basics.LineEdit(placeholder=':Contains', isEditable=True, isMonospaced=True)
-        self.button_Query = GElements.Widgets.Basics.Button(text='Search')
+        def __init__(self, editWidget):
+            self.rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+            self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+            super().__init__(self.rootWidget)
+            
+            self.button_CaseSensitive = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-text.png'))),
+                                                                        toolTip='Match Case',
+                                                                        isCheckable=True)
+            self.rootLayout.setWidget(editWidget, 0, 0)
+            self.rootLayout.setWidget(self.button_CaseSensitive, 0, 1)
+            self.rootLayout.setColumnMinimumSize(1, 0)
         
-        # ? (Must-reference-)Decorators.
-        self.lineEditEraser_QueryPath = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryPath)
-        self.lineEditEraser_QueryType = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryType)
-        # ? ? (...)
-        self.lineEditEraser_QueryContains = GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryContains)
-        self.lineEditCS_QueryContains = EditCaseSensitive(self.lineEditEraser_QueryContains)
+        def isMatchCase(self) -> bool:
+            return self.button_CaseSensitive.isChecked()
+
+    class ElementQuery(GElements.CustomWidget):
         
-        # ? Set layout widget(s).
-        rowIdx = -1
-        self.rootLayout.setWidget(self.lineEditEraser_QueryPath, (rowIdx := rowIdx + 1), 0, colSpan=2)
-        self.rootLayout.setWidget(self.lineEditEraser_QueryType, (rowIdx := rowIdx + 1), 0, colSpan=2)
-        self.rootLayout.setWidget(self.lineEditCS_QueryContains, (rowIdx := rowIdx + 1), 0, colSpan=2)
-        self.rootLayout.setWidget(self.button_Query, (rowIdx := rowIdx + 1), 1)
+        def __init__(self):
+            self.rootLayout = GElements.Layouts.GridLayout(4, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+            self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+            super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, 
+                                                                "Element-Query",
+                                                                elementMargin=AbstractGraphics.SymmetricMargin(5),
+                                                                elementSpacing=5,
+                                                                isOuterOutline=True,
+                                                                isInnerOutline=True))
+            
+            # ? Create (sub-)widget(s).
+            self.lineEdit_QueryPath = GElements.Widgets.Basics.LineEdit(placeholder=':Path', isEditable=True, isMonospaced=True)
+            self.lineEdit_QueryType = GElements.Widgets.Basics.LineEdit(placeholder=':Type', isEditable=True, isMonospaced=True)
+            self.lineEdit_QueryContains = GElements.Widgets.Basics.LineEdit(placeholder=':Contains', isEditable=True, isMonospaced=True)
+            self.lineEditCS_QueryContains = CustomWidgets.EditCaseSensitive(GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryContains))
+            self.button_Query = GElements.Widgets.Basics.Button(text='Search')
+            
+            # ? Set layout widget(s).
+            rowIdx = -1
+            self.rootLayout.setWidget(GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryPath), (rowIdx := rowIdx + 1), 0, colSpan=2)
+            self.rootLayout.setWidget(GElements.Widgets.Decorators.LineEditEraser(self.lineEdit_QueryType), (rowIdx := rowIdx + 1), 0, colSpan=2)
+            self.rootLayout.setWidget(self.lineEditCS_QueryContains, (rowIdx := rowIdx + 1), 0, colSpan=2)
+            self.rootLayout.setWidget(self.button_Query, (rowIdx := rowIdx + 1), 1)
+            
+            # ? Configure layout row/column size(s).
+            rowCount = rowIdx + 1
+            for rowIdx in range(rowCount):
+                self.rootLayout.setRowMinimumSize(rowIdx, 0)
+            self.rootLayout.setColumnMinimumSize(1, 0)
         
-        # ? Configure layout row/column size(s).
-        rowCount = rowIdx + 1
-        for rowIdx in range(rowCount):
-            self.rootLayout.setRowMinimumSize(rowIdx, 0)
-        self.rootLayout.setColumnMinimumSize(1, 0)
-    
-    def getQueryArgs(self):
-        queryPath = self.lineEdit_QueryPath.getText()
-        queryType = self.lineEdit_QueryType.getText()
-        queryContains = (self.lineEdit_QueryContains.getText(), self.lineEditCS_QueryContains.isMatchCase())
-        return (queryPath, queryType, queryContains)
-    
-    def setEventHandler(self, eventHandler:GUtils.EventHandler):
-        if isinstance(eventHandler, GUtils.EventHandlers.ClickEventHandler):
-            self.button_Query.setEventHandler(eventHandler)
-        else:
-            raise ExceptionUtils.ValidationErrorError('Unsupported event handler type.')
+        def getQueryArgs(self):
+            queryPath = self.lineEdit_QueryPath.getText()
+            queryType = self.lineEdit_QueryType.getText()
+            queryContains = (self.lineEdit_QueryContains.getText(), self.lineEditCS_QueryContains.isMatchCase())
+            return (queryPath, queryType, queryContains)
+        
+        def setEventHandler(self, eventHandler:GUtils.EventHandler):
+            if isinstance(eventHandler, GUtils.EventHandlers.ClickEventHandler):
+                self.button_Query.setEventHandler(eventHandler)
+            else:
+                raise ExceptionUtils.ValidationErrorError('Unsupported event handler type.')
 
 application = GElements.Application()
 application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app'])))
 
 textEdit_ARXML = GElements.Widgets.Basics.TextEdit(isEditable=False, isMonospaced=True)
-elementQueryWidget = ElementQueryWidget()
+customWidget_elementQuery = CustomWidgets.ElementQuery()
 
 rootLayout = GElements.Layouts.GridLayout(2, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
 rootLayout.setWidget(textEdit_ARXML, 0, 0)
-rootLayout.setWidget(elementQueryWidget, 1, 0)
+rootLayout.setWidget(customWidget_elementQuery, 1, 0)
 rootLayout.setRowMinimumSize(1, 0)
 
 window = GElements.Window(title=Constants.WindowTitle,
@@ -272,7 +268,7 @@ def executeQueryConditionalConstructor(queryPath:str, queryType:str, queryContai
     return lambda element: (pathConditional(element.getPath()) and typeConditional(element.getType()) and containsConditional(element))
 
 def executeQuery():
-    queryPath, queryType, queryContains = elementQueryWidget.getQueryArgs()
+    queryPath, queryType, queryContains = customWidget_elementQuery.getQueryArgs()
     queryConditional = executeQueryConditionalConstructor(queryPath, queryType, queryContains)
     elementsQueried = arxmlParser.getElements(conditional=queryConditional)
     
@@ -297,7 +293,7 @@ def executeQuery():
 
 # ? Setup event handler(s).
 
-elementQueryWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(executeQuery))
+customWidget_elementQuery.setEventHandler(GUtils.EventHandlers.ClickEventHandler(executeQuery))
 
 # ? Setup toolbar.
 
