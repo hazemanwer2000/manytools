@@ -7,20 +7,27 @@ import automatey.OS.FileUtils as FileUtils
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.Validation as Validation
 import automatey.OS.Specific.Windows as Windows
+import automatey.Utils.CLI as CLI
 
-fileConditional = {
-    True : (lambda x: x.isFile()),
-    False : (lambda x: True),
-}
+conditionals = [
+    {
+        'conditional' : (lambda x: x.isFile()),
+        'name' : 'Files'
+    },
+    {
+        'conditional' : (lambda x: x.isDirectory()),
+        'name' : 'Directories'
+    }
+]
 
 try:
 
-    prefix = input('Prefix [Optional]: ').strip()
-    suffix = input('Suffix [Optional]: ').strip()
-    isFilesOnly = Validation.asBool(input('Process files only? (yes/no): ').strip())
+    prefix = CLI.Input.getString('Prefix [Optional]: ')
+    suffix = CLI.Input.getString('Suffix [Optional]: ')
+    fileClass = CLI.Input.Repeater(lambda: CLI.Input.getOption('Process which class of files? [Select Option]', [x['name'] for x in conditionals]))
 
     f_srcDir = FileUtils.File(sys.argv[1])
-    f_fileList = f_srcDir.listDirectory(conditional=fileConditional[isFilesOnly])
+    f_fileList = f_srcDir.listDirectory(conditional=conditionals[fileClass]['conditional'])
     Windows.Utils.sort(f_fileList, lambda x: str(x))
 
     code = input("Do you really want to? [Say 'yesido']: ").strip()
