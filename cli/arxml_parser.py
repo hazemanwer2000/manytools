@@ -52,18 +52,31 @@ class Constants:
     }
 
 # ? ? Initialize ARXML parser.
-CLI.echo('Parsing XML file(s)\n')
+CLI.echo('Parsing file(s)\n')
 
 arxmlParser = ARXML.Parser()
 f_arxmls = [FileUtils.File(path) for path in sys.argv[1].split(',')]
 for f_arxml in f_arxmls:
     arxmlParser.processFile(f_arxml)
 
-# ? ? Optimization: Convert all XML to text, upon load up.
+# ? ? Optimization: Convert all element(s) to text, upon load up.
 element2XMLText = {}
+element2ModelText = {}
 with CLI.ProgressBar.create(arxmlParser.getElements(), 'Processing element(s)') as iterator:
     for element in iterator:
+        # ? ? ? Get XML text.
         element2XMLText[element] = element.getXML().toString(indent=Constants.XMLIndentation)
+        # ? ? ? Get Model text.
+        elementModel = element.getModel()
+        if elementModel is None:
+            text = f"#ERROR: No model found ({element.getType()})."
+        else:
+            text = str(elementModel)
+        element2ModelText[element] = text
+
+# ? ? Optimization: Construct summary (of elements) upon load up.
+CLI.echo('Summarizing element(s)\n')
+elementsSummary = arxmlParser.summarize()
 
 class WorkingPage:
 
@@ -158,11 +171,7 @@ def element2text(element:ARXML.Element):
     if WorkingPage.IsRenderXML:
         text = element2XMLText[element]
     else:
-        elementModel = element.getModel()
-        if elementModel is None:
-            text = f"#ERROR: No model found ({element.getType()})."
-        else:
-            text = str(elementModel)
+        text = element2ModelText[element]
     
     return text
 
@@ -222,7 +231,7 @@ def openExternally():
         openExternallyGeneric(text, extension)
 
 def viewElementSummary():
-    openExternallyGeneric(arxmlParser.summarize(), '*')
+    openExternallyGeneric(elementsSummary, '*')
 
 # ? Helper.
 def executeQueryStringConditionalConstructor(queryString:str, isCaseSensitive:bool=True):
