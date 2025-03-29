@@ -10,18 +10,14 @@ import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Resources as Resources
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Utils.DataStructure as DataStructure
+import automatey.Utils.CLI as CLI
+import automatey.Utils.ColorUtils as ColorUtils
 
 from pprint import pprint
 import sys
 import subprocess
 
 # ? Initialize useful object(s).
-
-# ? ? Initialize ARXML parser.
-f_arxmls = [FileUtils.File(path) for path in sys.argv[1].split(',')]
-arxmlParser = ARXML.Parser()
-for f_arxml in f_arxmls:
-    arxmlParser.processFile(f_arxml)
 
 # ? ? Get app's root directory.
 f_this = FileUtils.File(__file__)
@@ -54,6 +50,20 @@ class Constants:
             'f_tmp' : f_tmpGeneric,
         },
     }
+
+# ? ? Initialize ARXML parser.
+CLI.echo('Parsing XML file(s)\n')
+
+arxmlParser = ARXML.Parser()
+f_arxmls = [FileUtils.File(path) for path in sys.argv[1].split(',')]
+for f_arxml in f_arxmls:
+    arxmlParser.processFile(f_arxml)
+
+# ? ? Optimization: Convert all XML to text, upon load up.
+element2XMLText = {}
+with CLI.ProgressBar.create(arxmlParser.getElements(), 'Processing element(s)') as iterator:
+    for element in iterator:
+        element2XMLText[element] = element.getXML().toString(indent=Constants.XMLIndentation)
 
 class WorkingPage:
 
@@ -146,7 +156,7 @@ window = GElements.Window(title=Constants.WindowTitle,
 def element2text(element:ARXML.Element):
     
     if WorkingPage.IsRenderXML:
-        text = element.getXML().toString(indent=Constants.XMLIndentation)
+        text = element2XMLText[element]
     else:
         elementModel = element.getModel()
         if elementModel is None:
