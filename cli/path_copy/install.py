@@ -12,12 +12,15 @@ f_app = f_appDir.traverseDirectory('..', appName + '.py')
 f_constants = f_appDir.traverseDirectory('constants.json')
 constants = JSON.fromFile(f_constants)
 
+# ? Setup some constant(s).
+f_pythonw = FileUtils.File(constants['global-macros']['pythonw'])
+
 # ? Add registry-key for context-menu.
 
 command_name = constants['context-menu']['name']
 command = ' '.join([
-    '"' + constants['global-macros']['pythonw'].replace('/', '\\') + '"',
-    str(f_app).replace('/', '\\'),
+    Windows.Utils.File2Path(f_pythonw, isDoubleQuoted=True),
+    Windows.Utils.File2Path(f_app, isDoubleQuoted=True),
     '"%V"'
 ])
 
