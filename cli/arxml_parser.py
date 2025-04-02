@@ -12,6 +12,7 @@ import automatey.Utils.StringUtils as StringUtils
 import automatey.Utils.DataStructure as DataStructure
 import automatey.Utils.CLI as CLI
 import automatey.Utils.ColorUtils as ColorUtils
+import automatey.OS.Clipboard as Clipboard
 
 from pprint import pprint
 import sys
@@ -178,17 +179,17 @@ def element2text(element:ARXML.Element):
 # ? Helper.
 def renderCurrentElement():
     
-    packagePath = None
+    currentElementPath = None
     text = None
     currentElement = WorkingPage.ElementHistory.current()
 
     # ? Fetch text.
     if currentElement is not None:
-        packagePath = currentElement.getPackagePath()
+        currentElementPath = currentElement.getPath()
         text = element2text(currentElement)
 
     # ? Setup text.
-    windowTitleExtension = '' if (packagePath is None) else f" [{currentElement.getPackagePath()}]"
+    windowTitleExtension = '' if (currentElementPath is None) else f" [{currentElementPath}]"
     text = '' if (text is None) else text
 
     # ? Render (...)
@@ -310,6 +311,16 @@ def executeQuery():
         WorkingPage.ElementHistory.insert(selectedElement)
         renderCurrentElement()
 
+def copyElementPath():
+
+    currentElement = WorkingPage.ElementHistory.current()
+
+    # ? Fetch text.
+    if currentElement is None:
+        GElements.StandardDialog.Message.Announce.Information("Currently, no element selected.")
+    else:
+        Clipboard.copy(currentElement.getPath())
+
 # ? Setup event handler(s).
 
 customWidget_elementQuery.setEventHandler(GUtils.EventHandlers.ClickEventHandler(executeQuery))
@@ -334,6 +345,12 @@ window.createToolbar(GUtils.Menu([
         icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['xml'])),
         isCheckable=True,
         isChecked=WorkingPage.IsRenderXML,
+    ),
+    GUtils.Menu.Separator(),
+    GUtils.Menu.EndPoint(
+        text='Copy Element Path',
+        fcn=copyElementPath,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-clone.png'))),
     ),
     GUtils.Menu.Separator(),
     GUtils.Menu.EndPoint(
