@@ -29,7 +29,7 @@ class CommandHandler:
         
         @staticmethod
         def run(f_inputDir:FileUtils.File, extension:str, rows:int, cols:int):
-            f_list = f_inputDir.listDirectory(conditional=lambda x: ImageUtils.Image.Utils.isImage(f_inputDir))
+            f_list = f_inputDir.listDirectory(conditional=lambda x: ImageUtils.Image.Utils.isImage(x))
             Windows.Utils.sort(f_list, key=lambda x: str(x))
             img_tiled = ImageUtils.Image.createByTiling(f_list, rows, cols)
             f_outputBase = f_inputDir.traverseDirectory('..', f_inputDir.getName() + '.' + extension)
