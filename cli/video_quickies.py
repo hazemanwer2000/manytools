@@ -369,8 +369,8 @@ def concat(input):
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--crf', required=True, help='CRF value.', type=int)
-@click.option('--width', required=True, help="Width. '-1' for auto-calculation, based on aspect ratio.", type=int, default=-1)
-@click.option('--height', required=True, help="Height. '-1' for auto-calculation, based on aspect ratio.", type=int, default=-1)
+@click.option('--width', required=False, help="Width. '-1' for auto-calculation, based on aspect ratio.", type=int, default=-1)
+@click.option('--height', required=False, help="Height. '-1' for auto-calculation, based on aspect ratio.", type=int, default=-1)
 def convert(input, crf, width, height):
     '''
     Convert a video, or a directory of video(s), into '.mp4' file(s).
