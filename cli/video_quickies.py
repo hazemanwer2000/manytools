@@ -329,7 +329,7 @@ class CommandHandler:
     class Screenshots:
         
         @staticmethod
-        def run(f_input:FileUtils.File, N:int):
+        def run(f_input:FileUtils.File, offset:float):
             
             # ? Derive output directory.
             f_outputDirBase = f_input.traverseDirectory('..', f_input.getNameWithoutExtension())
@@ -337,6 +337,7 @@ class CommandHandler:
 
             # ? Generate thumbnails.
             video = VideoUtils.Video(f_input)
+            N = int(video.getDuration().toSeconds() / offset) - 1
             video.generateThumbnails(f_outputDir, N)
 
 class CustomGroup(click.Group):
@@ -422,12 +423,12 @@ def thumbnails(input, rows, cols, timestamps, aspect_ratio, force, flat):
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
-@click.option('--n', required=True, help='Number of screenshot(s).', type=int)
-def screenshots(input, n):
+@click.option('--offset', required=True, help='Offset between every screenshot, in seconds.', type=float)
+def screenshots(input, offset):
     '''
     Create 'N' screenshots of a video.
     '''
-    CommandHandler.Screenshots.run(FileUtils.File(input), n)
+    CommandHandler.Screenshots.run(FileUtils.File(input), offset)
 
 if __name__ == '__main__':
     cli()
