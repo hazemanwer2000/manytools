@@ -1,4 +1,16 @@
 
+# Overview
+
+`arxml_parser` is a GUI tool for navigating through ARXML file(s), efficiently.
+
+It is invoked in the CLI by passing in a comma-separated list of ARMXL file path(s).
+
+For example,
+
+```
+arxml_parser.py FILE-1.arxml,FILE-2.arxml,..
+```
+
 ## Element-Query Syntax
 ### `:Path`
 *Definition*: Full path of an element (e.g., nested AR-Package(s), and short name).

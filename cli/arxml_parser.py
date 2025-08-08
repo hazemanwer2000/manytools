@@ -274,6 +274,10 @@ def executeQueryContainsConditionalConstructor(queryContains:str, isCaseSensitiv
             queryContains = queryContains.lower()
             textModifier = lambda text: text.lower()
         
+        # ? Remove '*' tokens at the beginning/end.
+        queryContains = StringUtils.Regex.replaceAll(r'^\*+', '', queryContains)
+        queryContains = StringUtils.Regex.replaceAll(r'\*+$', '', queryContains)
+
         # ? Always use 'RegEx'.
         queryContains = queryContains.replace('*', '[^\n]*')
         queryConditional = lambda element: len(StringUtils.Regex.findAll(queryContains, textModifier(element2text(element)))) > 0
