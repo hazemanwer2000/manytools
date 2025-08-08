@@ -326,6 +326,19 @@ class CommandHandler:
             # ? Clean-up (...)
             FileUtils.File.Utils.recycle(f_tmpDir)
 
+    class Screenshots:
+        
+        @staticmethod
+        def run(f_input:FileUtils.File, N:int):
+            
+            # ? Derive output directory.
+            f_outputDirBase = f_input.traverseDirectory('..', f_input.getNameWithoutExtension())
+            f_outputDir = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_outputDirBase)))
+
+            # ? Generate thumbnails.
+            video = VideoUtils.Video(f_input)
+            video.generateThumbnails(f_outputDir, N)
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -406,6 +419,15 @@ def thumbnails(input, rows, cols, timestamps, aspect_ratio, force, flat):
     if aspect_ratio != None:
         aspect_ratio = float(eval(aspect_ratio))
     CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, timestamps, aspect_ratio, force, flat)
+
+@cli.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--n', required=True, help='Number of screenshot(s).', type=int)
+def screenshots(input, n):
+    '''
+    Create 'N' screenshots of a video.
+    '''
+    CommandHandler.Screenshots.run(FileUtils.File(input), n)
 
 if __name__ == '__main__':
     cli()
