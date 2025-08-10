@@ -5,6 +5,7 @@ import subprocess
 import os
 import shlex
 from pprint import pprint
+import typing
 
 import automatey.OS.FileUtils as FileUtils
 import automatey.OS.ProcessUtils as ProcessUtils
@@ -18,6 +19,7 @@ import automatey.Utils.CLI as CLI
 import automatey.Utils.StringUtils as StringUtils
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.OS.Specific.Windows as Windows
+import automatey.Utils.TimeUtils as TimeUtils
 
 # ? Get app's root directory.
 f_this = FileUtils.File(__file__)
@@ -108,6 +110,29 @@ class FFMPEG:
             r'{{{OUTPUT-FILE}}}',
         ),
     }
+
+    @staticmethod
+    def writeChaptersMetadata(chapters:typing.List['str'],
+                              startTimes:typing.List['TimeUtils.Time'],
+                              endTimes:typing.List['TimeUtils.Time']) -> str:
+        
+        # ? Setup writer.
+        writer = StringUtils.Writer()
+        # ? ? FFMPEG's first version of its metadata format.
+        writer.write(';FFMETADATA1')
+
+        # ? For each chapter (...)
+        for i in range(len(chapters)):
+            writer.writeLines([
+                '[CHAPTER]',
+                'TIMEBASE=1/1000',
+                f"START={str(int(startTimes[i].toMilliseconds()))}",
+                f"END={str(int(endTimes[i].toMilliseconds()))}",
+                f"TITLE={chapters[i]}",
+                ''
+            ])
+
+        return str(writer).strip()
 
 class CommandHandler:
     
@@ -344,7 +369,31 @@ class CommandHandler:
 
         @staticmethod
         def run(f_input:FileUtils.File, f_chapters:FileUtils.File):
-            pass
+
+            # Extract video duration.
+            video = VideoUtils.Video(f_input)
+            videoDuration = video.getDuration()
+            
+            # Extract chapters info.
+            txt_chapters = StringUtils.Normalize.asParagraph(f_chapters.quickRead('t'))
+            chapters, timestamps = [], []
+            for i, entry in enumerate(txt_chapters.split('\n')):
+                if i % 2 == 0:
+                    chapters.append(entry)
+                else:
+                    timestamps.append(TimeUtils.Time.createFromString(entry))
+            
+            # Calculate start/end times.
+            timestamps.insert(0, TimeUtils.Time.createFromSeconds(0))
+            startTimes, endTimes = timestamps, []
+            for i in range(len(startTimes)):
+                if i < (len(startTimes) - 1):
+                    endTimes.append(startTimes[i + 1])
+                else:
+                    endTimes.append(videoDuration)
+            
+            txt_metadata = FFMPEG.writeChaptersMetadata(chapters, startTimes, endTimes)
+            print(txt_metadata)
 
 class CustomGroup(click.Group):
     def invoke(self, ctx):
@@ -438,7 +487,7 @@ def screenshots(input, offset):
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
-@click.option('--chapters', required=True, help='Text file listing the chapters.', type=float)
+@click.option('--chapters', required=True, help='Text file listing the chapters')
 def chapters(input, chapters):
     '''
     Specify the chapters in a video.
@@ -448,7 +497,7 @@ def chapters(input, chapters):
     chapters are specified consecutively, each occupying a new line, and,
     a line with a timestamp shall separate each chapter. 
     '''
-    CommandHandler.Chapters.run(input, chapters)
+    CommandHandler.Chapters.run(FileUtils.File(input), FileUtils.File(chapters))
 
 if __name__ == '__main__':
     cli()
