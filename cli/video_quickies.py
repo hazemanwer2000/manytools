@@ -340,6 +340,12 @@ class CommandHandler:
             N = int(video.getDuration().toSeconds() / offset) - 1
             video.generateThumbnails(f_outputDir, N)
 
+    class Chapters:
+
+        @staticmethod
+        def run(f_input:FileUtils.File, f_chapters:FileUtils.File):
+            pass
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -429,6 +435,20 @@ def screenshots(input, offset):
     Create 'N' screenshots of a video.
     '''
     CommandHandler.Screenshots.run(FileUtils.File(input), offset)
+
+@cli.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--chapters', required=True, help='Text file listing the chapters.', type=float)
+def chapters(input, chapters):
+    '''
+    Specify the chapters in a video.
+    
+    In the text file listing the chapters,
+    lines with white-space characters are ignored,
+    chapters are specified consecutively, each occupying a new line, and,
+    a line with a timestamp shall separate each chapter. 
+    '''
+    CommandHandler.Chapters.run(input, chapters)
 
 if __name__ == '__main__':
     cli()
