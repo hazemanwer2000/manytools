@@ -20,6 +20,7 @@ import automatey.Utils.StringUtils as StringUtils
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.OS.Specific.Windows as Windows
 import automatey.Utils.TimeUtils as TimeUtils
+import automatey.Formats.SRT as SRT
 
 # ? Get app's root directory.
 f_this = FileUtils.File(__file__)
@@ -112,23 +113,23 @@ class FFMPEG:
     }
 
     @staticmethod
-    def writeChaptersMetadata(chapters:typing.List['str'],
-                              startTimes:typing.List['TimeUtils.Time'],
-                              endTimes:typing.List['TimeUtils.Time']) -> str:
-        
+    def writeMetadata(chapters:typing.List['SRT.Subtitle']) -> str:
+        '''
+        Write the metadata of a video, in FFMPEG's specific metadata format.
+        '''
         # ? Setup writer.
         writer = StringUtils.Writer()
         # ? ? FFMPEG's first version of its metadata format.
         writer.write(';FFMETADATA1')
 
         # ? For each chapter (...)
-        for i in range(len(chapters)):
+        for chapter in chapters:
             writer.writeLines([
                 '[CHAPTER]',
                 'TIMEBASE=1/1000',
-                f"START={str(int(startTimes[i].toMilliseconds()))}",
-                f"END={str(int(endTimes[i].toMilliseconds()))}",
-                f"TITLE={chapters[i]}",
+                f"START={str(int(chapter.getStartTime().toMilliseconds()))}",
+                f"END={str(int(chapter.getEndTime().toMilliseconds()))}",
+                f"TITLE={chapter.getText()}",
                 ''
             ])
 
@@ -375,24 +376,9 @@ class CommandHandler:
             videoDuration = video.getDuration()
             
             # Extract chapters info.
-            txt_chapters = StringUtils.Normalize.asParagraph(f_chapters.quickRead('t'))
-            chapters, timestamps = [], []
-            for i, entry in enumerate(txt_chapters.split('\n')):
-                if i % 2 == 0:
-                    chapters.append(entry)
-                else:
-                    timestamps.append(TimeUtils.Time.createFromString(entry))
+            srt = SRT.Parser(f_chapters)
             
-            # Calculate start/end times.
-            timestamps.insert(0, TimeUtils.Time.createFromSeconds(0))
-            startTimes, endTimes = timestamps, []
-            for i in range(len(startTimes)):
-                if i < (len(startTimes) - 1):
-                    endTimes.append(startTimes[i + 1])
-                else:
-                    endTimes.append(videoDuration)
-            
-            txt_metadata = FFMPEG.writeChaptersMetadata(chapters, startTimes, endTimes)
+            txt_metadata = FFMPEG.writeMetadata(srt.getSubtitles())
             print(txt_metadata)
 
 class CustomGroup(click.Group):
@@ -487,15 +473,10 @@ def screenshots(input, offset):
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
-@click.option('--chapters', required=True, help='Text file listing the chapters')
+@click.option('--chapters', required=True, help='SRT chapters file.')
 def chapters(input, chapters):
     '''
     Specify the chapters in a video.
-    
-    In the text file listing the chapters,
-    lines with white-space characters are ignored,
-    chapters are specified consecutively, each occupying a new line, and,
-    a line with a timestamp shall separate each chapter. 
     '''
     CommandHandler.Chapters.run(FileUtils.File(input), FileUtils.File(chapters))
 
