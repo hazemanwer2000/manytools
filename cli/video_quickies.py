@@ -107,6 +107,16 @@ class FFMPEG:
             r'-codec copy',
             r'{{{OUTPUT-FILE}}}',
         ),
+        'VideoNoMetadata' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-loglevel error',
+            r'-i {{{INPUT-FILE}}}',
+            r'-map_metadata -1',
+            r'-map_chapters -1',
+            r'-codec copy',
+            r'{{{OUTPUT-FILE}}}',
+        ),
         'VideoFilter:BlackAndWhite' : ProcessUtils.CommandTemplate(
             r'ffmpeg',
             r'-hide_banner',
@@ -404,6 +414,21 @@ class CommandHandler:
             # ? Clean-up (...)
             FileUtils.File.Utils.recycle(f_tmpDir)
 
+    class NoMetadata:
+
+        @staticmethod
+        def run(f_input:FileUtils.File):
+
+            # ? Derive output file.
+            f_outputBase = f_input.traverseDirectory('..', f_input.getName())
+            f_output = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_outputBase)))
+
+            # ? Generate (concat-video) file.
+            commandFormatter = FFMPEG.CommandTemplates['VideoNoMetadata'].createFormatter()
+            commandFormatter.assertParameter('input-file', str(f_input))
+            commandFormatter.assertParameter('output-file', str(f_output))
+            Utils.executeCommand(str(commandFormatter))
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -502,6 +527,14 @@ def chapters(input, chapters):
     Specify the chapters in a video.
     '''
     CommandHandler.Chapters.run(FileUtils.File(input), FileUtils.File(chapters))
+
+@cli.command()
+@click.option('--input', required=True, help='Input (video) file.')
+def no_metadata(input):
+    '''
+    Remove all metadata from video.
+    '''
+    CommandHandler.NoMetadata.run(FileUtils.File(input))
 
 if __name__ == '__main__':
     cli()
