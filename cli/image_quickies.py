@@ -54,6 +54,20 @@ class Utils:
                     img.blackWhite()
                     img.saveAs(f_dst)
 
+            @staticmethod
+            def grayscale(f_src:FileUtils.File, f_dst:FileUtils.File):
+                if ImageUtils.Image.Utils.isImage(f_src):
+                    img = ImageUtils.Image(f_src)
+                    img.grayscale()
+                    img.saveAs(f_dst)
+
+            @staticmethod
+            def sepia_tone(f_src:FileUtils.File, f_dst:FileUtils.File):
+                if ImageUtils.Image.Utils.isImage(f_src):
+                    img = ImageUtils.Image(f_src)
+                    img.sepiaTone()
+                    img.saveAs(f_dst)
+
 class CommandHandler:
 
     class Tile:
@@ -115,6 +129,22 @@ def black_and_white(input):
     A black-and-white filter.
     '''
     Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.black_and_white)
+
+@filter.command()
+@click.option('--input', required=True, help='Input file, or directory.')
+def sepia_tone(input):
+    '''
+    A sepia-tone filter.
+    '''
+    Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.sepia_tone)
+
+@filter.command()
+@click.option('--input', required=True, help='Input file, or directory.')
+def grayscale(input):
+    '''
+    A grayscale filter.
+    '''
+    Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.grayscale)
 
 if __name__ == '__main__':
     cli()
