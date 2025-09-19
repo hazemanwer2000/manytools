@@ -26,13 +26,13 @@ class Utils:
     class Replicator:
 
         @staticmethod
-        def run(f_input:FileUtils.File, mappingFcn):
+        def run(f_input:FileUtils.File, mappingFcn, kwargs:dict):
             if f_input.isDirectory():
                 f_outputDir = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_input)))
-                FileUtils.File.Utils.mapDirectoryFiles(f_input, f_outputDir, mappingFcn)
+                FileUtils.File.Utils.mapDirectoryFiles(f_input, f_outputDir, mappingFcn, kwargs)
             else:
                 f_output = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_input)))
-                mappingFcn(f_input, f_output)
+                mappingFcn(f_input, f_output, **kwargs)
 
     class MappingFcns:
 
@@ -66,6 +66,24 @@ class Utils:
                 if ImageUtils.Image.Utils.isImage(f_src):
                     img = ImageUtils.Image(f_src)
                     img.sepiaTone()
+                    img.saveAs(f_dst)
+
+            @staticmethod
+            def pixelate(f_src:FileUtils.File, f_dst:FileUtils.File, factor:float=1.0):
+                if ImageUtils.Image.Utils.isImage(f_src):
+                    img = ImageUtils.Image(f_src)
+                    img.pixelate(factor)
+                    img.saveAs(f_dst)
+
+            @staticmethod
+            def adjust(f_src:FileUtils.File, f_dst:FileUtils.File, brightness:float=1.0, contrast:float=1.0, sharpen:float=1.0):
+                if ImageUtils.Image.Utils.isImage(f_src):
+                    img = ImageUtils.Image(f_src)
+                    if (brightness != 1.0) or (contrast != 1.0):
+                        img.brightnessContrast(brightness, contrast)
+                    if sharpen != 1.0:
+                        print(sharpen)
+                        img.sharpen(sharpen)
                     img.saveAs(f_dst)
 
 class CommandHandler:
@@ -145,6 +163,34 @@ def grayscale(input):
     A grayscale filter.
     '''
     Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.grayscale)
+
+@filter.command()
+@click.option('--input', required=True, help='Input file, or directory.')
+@click.option('--factor', required=True, help='Factor.', type=float)
+def pixelate(input, factor):
+    '''
+    Pixelate.
+    '''
+    kwargs = {
+        'factor' : factor
+    }
+    Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.pixelate, kwargs)
+
+@filter.command()
+@click.option('--input', required=True, help='Input file, or directory.')
+@click.option('--brightness', required=False, help='Brightness factor.', default=1.0, type=float)
+@click.option('--contrast', required=False, help='Contrast factor.', default=1.0, type=float)
+@click.option('--sharpen', required=False, help="Sharpen' factor.", default=1.0, type=float)
+def adjust(input, brightness, contrast, sharpen):
+    '''
+    Adjust brightness and contrast, and/or sharpen.
+    '''
+    kwargs = {
+        'brightness' : brightness,
+        'contrast' : contrast,
+        'sharpen' : sharpen,
+    }
+    Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.adjust, kwargs)
 
 if __name__ == '__main__':
     cli()
