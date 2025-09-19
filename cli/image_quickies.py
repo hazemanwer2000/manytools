@@ -23,6 +23,37 @@ class Utils:
         '''
         pass
 
+    class Replicator:
+
+        @staticmethod
+        def run(f_input:FileUtils.File, mappingFcn):
+            if f_input.isDirectory():
+                f_outputDir = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_input)))
+                FileUtils.File.Utils.mapDirectoryFiles(f_input, f_outputDir, mappingFcn)
+            else:
+                f_output = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_input)))
+                mappingFcn(f_input, f_output)
+
+    class MappingFcns:
+
+        class Filter:
+
+            @staticmethod
+            def shades_of_grey(f_src:FileUtils.File, f_dst:FileUtils.File):
+                if ImageUtils.Image.Utils.isImage(f_src):
+                    img = ImageUtils.Image(f_src)
+                    img.blackWhite()
+                    img.grayscale()
+                    img.saveAs(f_dst)
+
+            @staticmethod
+            def black_and_white(f_src:FileUtils.File, f_dst:FileUtils.File):
+                if ImageUtils.Image.Utils.isImage(f_src):
+                    img = ImageUtils.Image(f_src)
+                    img.grayscale()
+                    img.blackWhite()
+                    img.saveAs(f_dst)
+
 class CommandHandler:
 
     class Tile:
@@ -61,6 +92,29 @@ def tile(input, extension, rows, cols):
     Concat multiple (video) file(s).
     '''
     CommandHandler.Tile.run(FileUtils.File(input), extension, rows, cols)
+
+@cli.group()
+def filter():
+    '''
+    Apply different filter(s).
+    '''
+    pass
+
+@filter.command()
+@click.option('--input', required=True, help='Input file, or directory.')
+def shades_of_grey(input):
+    '''
+    A black-and-white filter, followed by a grayscale filter.
+    '''
+    Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.shades_of_grey)
+
+@filter.command()
+@click.option('--input', required=True, help='Input file, or directory.')
+def black_and_white(input):
+    '''
+    A black-and-white filter.
+    '''
+    Utils.Replicator.run(FileUtils.File(input), Utils.MappingFcns.Filter.black_and_white)
 
 if __name__ == '__main__':
     cli()
