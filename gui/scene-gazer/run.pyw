@@ -49,7 +49,7 @@ class Utils:
 
     class CustomWidget:
 
-        class DescriptiveTimestamp(GElements.CustomWidget):
+        class Chapter(GElements.CustomWidget):
 
             def __init__(self, entry:dict):
 
@@ -91,21 +91,21 @@ class Utils:
                 if (self.videoRenderer is not None):
                     self.videoRenderer.seekPosition(self.timestamp)
 
-        class DescriptiveTimestamps(GElements.CustomWidget):
+        class Chapters(GElements.CustomWidget):
 
             def __init__(self, entries:typing.List[dict]):
 
                 self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
 
-                self.instances:typing.List['Utils.CustomWidget.DescriptiveTimestamp'] = []
+                self.instances:typing.List['Utils.CustomWidget.Chapter'] = []
 
                 for entry in entries:
-                    instance = Utils.CustomWidget.DescriptiveTimestamp(entry)
+                    instance = Utils.CustomWidget.Chapter(entry)
                     self.instances.append(instance)
                     self.rootWidget.getLayout().insertWidget(instance)
             
-            def getInstances(self) -> typing.List['Utils.CustomWidget.DescriptiveTimestamp']:
+            def getInstances(self) -> typing.List['Utils.CustomWidget.Chapter']:
                 return self.instances
             
             def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
@@ -180,7 +180,7 @@ videoPlayer.load(f_video)
 
 tagsWidget = Utils.CustomWidget.Tags(tags)
 
-chaptersWidget = Utils.CustomWidget.DescriptiveTimestamps(chapters)
+chaptersWidget = Utils.CustomWidget.Chapters(chapters)
 chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
@@ -206,7 +206,7 @@ window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
 
 # ? ? Setup timer (i.e., for recurrent activities).
 
-previousChapterWidget:Utils.CustomWidget.DescriptiveTimestamp = None
+previousChapterWidget:Utils.CustomWidget.Chapter = None
 
 def performRecurrentActivities():
     videoPosition = videoPlayer.getRenderer().getPosition()
@@ -233,7 +233,7 @@ def performRecurrentActivities():
             break
 
     # ? ? Get corresponding chapter widget.
-    currentChapterWidget:Utils.CustomWidget.DescriptiveTimestamp = None
+    currentChapterWidget:Utils.CustomWidget.Chapter = None
     if currentChapterIdx is not None:
         currentChapterWidget = chaptersWidget.getInstances()[currentChapterIdx]
     
