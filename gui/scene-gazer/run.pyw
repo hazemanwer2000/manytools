@@ -227,9 +227,9 @@ def performRecurrentActivities():
     
     # ? ? Determine current chapter.
     currentChapterIdx = None
-    for chapterIdx, chapter in reversed(list(enumerate(chapters))):
-        if videoPosition >= chapter['timestamp']:
-            currentChapterIdx = chapterIdx
+    for idx in range(len(chapters)-1, -1, -1):
+        if videoPosition >= chapters[idx]['timestamp']:
+            currentChapterIdx = idx
             break
 
     # ? ? Get corresponding chapter widget.
