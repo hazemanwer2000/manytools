@@ -30,11 +30,12 @@ class Utils:
             
             chapters = []
 
-            for rawChapter in metadata['chapters']:
+            for idx, rawChapter in enumerate(metadata['chapters']):
 
                 chapter = {}
                 chapter['description'] = str(rawChapter['description'])
                 chapter['timestamp'] = TimeUtils.Time.createFromString(rawChapter['timestamp'])
+                chapter['index'] = idx + 1
 
                 chapters.append(chapter)
             
@@ -52,20 +53,38 @@ class Utils:
 
             def __init__(self, entry:dict):
 
-                self.rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                # ? Setup GUI.
+
+                self.rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
-                super().__init__(self.rootWidget)
+                super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, str(entry['index']), isInnerOutline=True, isOuterOutline=True))
 
                 self.rootLayout.setColumnMinimumSize(0, 0)
                 self.rootLayout.setRowMinimumSize(0, 0)
-
+                
                 self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
                 self.textEdit.setText(entry['description'])
+                self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: print("h")))
 
-                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_UnSelected, (10, 100))
+                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_NotSelected, (5, 80))
 
                 self.rootLayout.setWidget(self.colorBlock, 0, 0)
                 self.rootLayout.setWidget(self.textEdit, 0, 1)
+
+                # ? Setup other variable(s).
+
+                self.videoRenderer = None
+
+                self.timestamp = entry['timestamp']
+
+            def attachVideoPlayer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
+                self.videoRenderer = videoRenderer
+
+            def select(self):
+                self.colorBlock.setColor(Constants.Color_Selected)
+
+            def deselect(self):
+                self.colorBlock.setColor(Constants.Color_NotSelected)
 
         class DescriptiveTimestamps(GElements.CustomWidget):
 
@@ -106,8 +125,8 @@ class Constants:
 
     ErrorDialogSize = (1000, 400)
 
-    Color_Selected = ColorUtils.Color.fromHEX("#ffffff")
-    Color_UnSelected = ColorUtils.Color.fromHEX("#000000")
+    Color_Selected = ColorUtils.Color.fromHEX("#FFFFFF")
+    Color_NotSelected = ColorUtils.Color.fromHEX("#1E1E1E")
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
