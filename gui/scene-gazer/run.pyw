@@ -22,13 +22,22 @@ class Utils:
         @staticmethod
         def parseTags(metadata:dict) -> typing.List[str]:
             
-            tags = metadata['tags']
-
-            # ? Check if all tag value(s) are string(s).
-            if True != all([(type(tag) is str) for tag in tags]):
-                raise ExceptionUtils.ValidationError("A non-string tag value was found.")
+            return [str(tag) for tag in metadata['tags']]
+        
+        @staticmethod
+        def parseChapters(metadata:dict) -> typing.List[str]:
             
-            return tags
+            chapters = []
+
+            for rawChapter in metadata['chapters']:
+
+                chapter = {}
+                chapter['description'] = str(rawChapter['description'])
+                chapter['timestamp'] = TimeUtils.Time.createFromString(rawChapter['timestamp'])
+
+                chapters.append(chapter)
+            
+            return chapters
 
     class Dialog:
 
@@ -38,7 +47,24 @@ class Utils:
 
     class CustomWidget:
 
-        class TagsWidget(GElements.CustomWidget):
+        class DescriptiveTimestamp(GElements.CustomWidget):
+
+            def __init__(self, entry:dict):
+
+                pass
+
+        class DescriptiveTimestamps(GElements.CustomWidget):
+
+            def __init__(self, entries:typing.List[dict]):
+
+                self.rootLayout = GElements.Layouts.VerticalLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+                super().__init__(self.rootWidget)
+
+                for entry in entries:
+                    print(entry)
+
+        class Tags(GElements.CustomWidget):
 
             def __init__(self, tags:typing.List[str]):
 
@@ -89,6 +115,7 @@ try:
     metadata = JSON.fromFile(f_metadata)
 
     tags = Utils.Metadata.parseTags(metadata)
+    chapters = Utils.Metadata.parseChapters(metadata)
 
 except Exception as e:
 
@@ -100,12 +127,13 @@ except Exception as e:
 videoPlayer = GElements.Widgets.Complex.VideoPlayer()
 videoPlayer.load(f_video)
 
-tagsWidget = Utils.CustomWidget.TagsWidget(tags)
+tagsWidget = Utils.CustomWidget.Tags(tags)
+chaptersWidget = Utils.CustomWidget.DescriptiveTimestamps(chapters)
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
     tabNames=Constants.TabNames,
     widgets=[
-        GElements.Widgets.Basics.Null(),
+        chaptersWidget,
         GElements.Widgets.Basics.Null(),
         tagsWidget
     ]
