@@ -8,6 +8,7 @@ import automatey.Formats.JSON as JSON
 import automatey.Utils.TimeUtils as TimeUtils
 import automatey.Resources as Resources
 import automatey.Utils.ExceptionUtils as ExceptionUtils
+import automatey.Utils.ColorUtils as ColorUtils
 import automatey.OS.Clipboard as Clipboard
 
 import traceback
@@ -51,18 +52,34 @@ class Utils:
 
             def __init__(self, entry:dict):
 
-                pass
+                self.rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+                super().__init__(self.rootWidget)
+
+                self.rootLayout.setColumnMinimumSize(0, 0)
+                self.rootLayout.setRowMinimumSize(0, 0)
+
+                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
+                self.textEdit.setText(entry['description'])
+
+                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_UnSelected, (10, 100))
+
+                self.rootLayout.setWidget(self.colorBlock, 0, 0)
+                self.rootLayout.setWidget(self.textEdit, 0, 1)
 
         class DescriptiveTimestamps(GElements.CustomWidget):
 
             def __init__(self, entries:typing.List[dict]):
 
-                self.rootLayout = GElements.Layouts.VerticalLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
-                self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
-                super().__init__(self.rootWidget)
+                self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
+
+                self.widgets = []
 
                 for entry in entries:
-                    print(entry)
+                    widget = Utils.CustomWidget.DescriptiveTimestamp(entry)
+                    self.widgets.append(widget)
+                    self.rootWidget.getLayout().insertWidget(widget)
 
         class Tags(GElements.CustomWidget):
 
@@ -88,6 +105,9 @@ class Constants:
     MetadataDirectoryName = '.metadata'
 
     ErrorDialogSize = (1000, 400)
+
+    Color_Selected = ColorUtils.Color.fromHEX("#ffffff")
+    Color_UnSelected = ColorUtils.Color.fromHEX("#000000")
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
