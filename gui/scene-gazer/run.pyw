@@ -9,6 +9,7 @@ import automatey.Utils.TimeUtils as TimeUtils
 import automatey.Resources as Resources
 import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.ColorUtils as ColorUtils
+import automatey.Utils.MathUtils as MathUtils
 import automatey.OS.Clipboard as Clipboard
 
 import traceback
@@ -130,30 +131,34 @@ class Utils:
 
         class Highlight(GElements.CustomWidget):
 
-            def __init__(self, entry:dict):
+            def __init__(self, entry:dict, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
+
+                # ? Setup other variable(s).
+
+                self.videoRenderer = videoRenderer
+
+                self.timestamp = entry['timestamp']
 
                 # ? Setup GUI.
 
-                self.rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                self.rootLayout = GElements.Layouts.GridLayout(2, 1, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
                 super().__init__(GElements.Widgets.Decorators.Outline(self.rootWidget, elementMargin=AbstractGraphics.SymmetricMargin(5)))
 
                 self.rootLayout.setRowMinimumSize(0, 0)
+                self.rootLayout.setRowMinimumSize(1, 0)
                 
                 self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
                 self.textEdit.setText(entry['description'])
                 self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
 
+                sliderRangeFrom = [0, int(self.videoRenderer.getDuration())]
+                sliderRangeTo = [0, 1000000]
+                sliderInitValue = int(MathUtils.mapValue(int(self.timestamp), sliderRangeFrom, sliderRangeTo))
+                self.slider = GElements.Widgets.Basics.Slider(sliderRangeTo, sliderInitValue)
+
                 self.rootLayout.setWidget(self.textEdit, 0, 0)
-
-                # ? Setup other variable(s).
-
-                self.videoRenderer = None
-
-                self.timestamp = entry['timestamp']
-
-            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
-                self.videoRenderer = videoRenderer
+                self.rootLayout.setWidget(self.slider, 1, 0)
 
             def INTERNAL_onSelect(self):
                 if (self.videoRenderer is not None):
@@ -161,7 +166,7 @@ class Utils:
 
         class Highlights(GElements.CustomWidget):
 
-            def __init__(self, entries:typing.List[dict]):
+            def __init__(self, entries:typing.List[dict], videoRenderer:GElements.Widgets.Basics.VideoRenderer):
 
                 self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
@@ -169,16 +174,12 @@ class Utils:
                 self.instances:typing.List['Utils.CustomWidget.Highlight'] = []
 
                 for entry in entries:
-                    instance = Utils.CustomWidget.Highlight(entry)
+                    instance = Utils.CustomWidget.Highlight(entry, videoRenderer)
                     self.instances.append(instance)
                     self.rootWidget.getLayout().insertWidget(instance)
             
             def getInstances(self) -> typing.List['Utils.CustomWidget.Highlight']:
                 return self.instances
-            
-            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
-                for instance in self.instances:
-                    instance.attachvideoRenderer(videoRenderer)
 
         class Tags(GElements.CustomWidget):
 
@@ -247,13 +248,16 @@ except Exception as e:
 videoPlayer = GElements.Widgets.Complex.VideoPlayer()
 videoPlayer.load(f_video)
 
+# ? ? Wait until video is loaded.
+while int(videoPlayer.getRenderer().getDuration()) == 0:
+    pass
+
 tagsWidget = Utils.CustomWidget.Tags(tags)
 
 chaptersWidget = Utils.CustomWidget.Chapters(chapters)
 chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
 
-highlightsWidget = Utils.CustomWidget.Highlights(highlights)
-highlightsWidget.attachvideoRenderer(videoPlayer.getRenderer())
+highlightsWidget = Utils.CustomWidget.Highlights(highlights, videoPlayer.getRenderer())
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
     tabNames=Constants.TabNames,
