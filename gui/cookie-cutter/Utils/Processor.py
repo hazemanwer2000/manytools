@@ -285,6 +285,9 @@ class INTERNAL:
                 resultInfo = ''
                 
                 try:
+
+                    # ? Clear all previously registered action(s).
+                    INTERNAL.video.clearActions()
                     
                     # ? Clean-up arguments.
                     
@@ -322,7 +325,7 @@ class INTERNAL:
                     for option in commandStruct['Options']:
                         INTERNAL.CommandHandler.Generate.OptionProcess.__dict__[option['Name'].replace('-', '')](option['Cfg'], struct)
                     
-                    # ? ? ? Fix: Because micro-seconds are neglected by the video-player, must increment by 1-ms when exporting by finding nearest (previous) key-frame.
+                    # ? ? ? Fix: Must increment by 50-ms when exporting by finding nearest (previous) key-frame.
                     if struct['is-nearest-keyframe']:
                         for trimTimeEntry in commandStruct['Trim-Times']:
                             if not (trimTimeEntry['Start-Time'] is None):
@@ -370,7 +373,6 @@ class INTERNAL:
                         FileUtils.File.Utils.Path.modifyName(str(INTERNAL.Parameters.f_video), extension=ext_dst)
                     ))
                     INTERNAL.video.saveAs(f_dst)
-                    INTERNAL.video.clearActions()
                 
                 except:
                     resultStatus = 1
