@@ -77,13 +77,16 @@ class Utils:
 
                 self.timestamp = entry['timestamp']
 
-            def attachVideoPlayer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
+            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
                 self.videoRenderer = videoRenderer
 
             def highlight(self, flag:bool):
                 color = Constants.Color_Highlight if flag else Constants.Color_NoHighlight
                 self.colorBlock.setColor(color)
-            
+
+            def getTimestamp(self) -> TimeUtils.Time:
+                return self.timestamp
+
             def INTERNAL_onSelect(self):
                 if (self.videoRenderer is not None):
                     self.videoRenderer.seekPosition(self.timestamp)
@@ -95,12 +98,19 @@ class Utils:
                 self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
 
-                self.widgets = []
+                self.instances:typing.List['Utils.CustomWidget.DescriptiveTimestamp'] = []
 
                 for entry in entries:
-                    widget = Utils.CustomWidget.DescriptiveTimestamp(entry)
-                    self.widgets.append(widget)
-                    self.rootWidget.getLayout().insertWidget(widget)
+                    instance = Utils.CustomWidget.DescriptiveTimestamp(entry)
+                    self.instances.append(instance)
+                    self.rootWidget.getLayout().insertWidget(instance)
+            
+            def getInstances(self):
+                return self.instances
+            
+            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
+                for instance in self.instances:
+                    instance.attachvideoRenderer(videoRenderer)
 
         class Tags(GElements.CustomWidget):
 
@@ -169,7 +179,9 @@ videoPlayer = GElements.Widgets.Complex.VideoPlayer()
 videoPlayer.load(f_video)
 
 tagsWidget = Utils.CustomWidget.Tags(tags)
+
 chaptersWidget = Utils.CustomWidget.DescriptiveTimestamps(chapters)
+chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
     tabNames=Constants.TabNames,
