@@ -103,9 +103,6 @@ class Utils:
                 color = Constants.Color_Highlight if flag else Constants.Color_NoHighlight
                 self.colorBlock.setColor(color)
 
-            def getTimestamp(self) -> TimeUtils.Time:
-                return self.timestamp
-
             def INTERNAL_onSelect(self):
                 if (self.videoRenderer is not None):
                     self.videoRenderer.seekPosition(self.timestamp)
@@ -125,6 +122,58 @@ class Utils:
                     self.rootWidget.getLayout().insertWidget(instance)
             
             def getInstances(self) -> typing.List['Utils.CustomWidget.Chapter']:
+                return self.instances
+            
+            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
+                for instance in self.instances:
+                    instance.attachvideoRenderer(videoRenderer)
+
+        class Highlight(GElements.CustomWidget):
+
+            def __init__(self, entry:dict):
+
+                # ? Setup GUI.
+
+                self.rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
+                self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+                super().__init__(GElements.Widgets.Decorators.Outline(self.rootWidget, elementMargin=AbstractGraphics.SymmetricMargin(5)))
+
+                self.rootLayout.setRowMinimumSize(0, 0)
+                
+                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
+                self.textEdit.setText(entry['description'])
+                self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
+
+                self.rootLayout.setWidget(self.textEdit, 0, 0)
+
+                # ? Setup other variable(s).
+
+                self.videoRenderer = None
+
+                self.timestamp = entry['timestamp']
+
+            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
+                self.videoRenderer = videoRenderer
+
+            def INTERNAL_onSelect(self):
+                if (self.videoRenderer is not None):
+                    self.videoRenderer.seekPosition(self.timestamp)
+
+        class Highlights(GElements.CustomWidget):
+
+            def __init__(self, entries:typing.List[dict]):
+
+                self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
+
+                self.instances:typing.List['Utils.CustomWidget.Highlight'] = []
+
+                for entry in entries:
+                    instance = Utils.CustomWidget.Highlight(entry)
+                    self.instances.append(instance)
+                    self.rootWidget.getLayout().insertWidget(instance)
+            
+            def getInstances(self) -> typing.List['Utils.CustomWidget.Highlight']:
                 return self.instances
             
             def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
@@ -203,11 +252,14 @@ tagsWidget = Utils.CustomWidget.Tags(tags)
 chaptersWidget = Utils.CustomWidget.Chapters(chapters)
 chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
 
+highlightsWidget = Utils.CustomWidget.Highlights(highlights)
+highlightsWidget.attachvideoRenderer(videoPlayer.getRenderer())
+
 tabWidget = GElements.Widgets.Containers.TabContainer(
     tabNames=Constants.TabNames,
     widgets=[
         chaptersWidget,
-        GElements.Widgets.Basics.Null(),
+        highlightsWidget,
         tagsWidget
     ]
 )
