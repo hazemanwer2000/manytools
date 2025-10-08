@@ -1,0 +1,22 @@
+{
+    "title" : "Cookie'Cutter",
+    "path" : {
+        "icon" : {
+            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/video.png"
+        }
+    },
+    "gui" : {
+        "window" : {
+            "min-size" : [1000, 600]
+        }
+    },
+
+    "context-menu" : {
+        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/video-16.ico",
+        "name" : "Open with SceneGazer"
+    },
+    
+    "global-macros" : {
+        "pythonw" : "{{{BIN-PYTHONW}}}"
+    }
+}
