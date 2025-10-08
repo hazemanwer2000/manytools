@@ -156,8 +156,9 @@ class Utils:
                 sliderRangeTo = [0, 1000000]
                 sliderInitValue = int(MathUtils.mapValue(int(self.timestamp), sliderRangeFrom, sliderRangeTo))
                 self.slider = GElements.Widgets.Basics.Slider(sliderRangeTo, sliderInitValue)
+                self.slider.setEditable(False)
 
-                self.rootLayout.setWidget(self.textEdit, 0, 0)
+                self.rootLayout.setWidget(GElements.Widgets.Decorators.Margin(self.textEdit, AbstractGraphics.Margin(10, 0, 0, 10)), 0, 0)
                 self.rootLayout.setWidget(self.slider, 1, 0)
 
             def INTERNAL_onSelect(self):
