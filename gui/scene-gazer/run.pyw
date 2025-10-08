@@ -105,7 +105,7 @@ class Utils:
                     self.instances.append(instance)
                     self.rootWidget.getLayout().insertWidget(instance)
             
-            def getInstances(self):
+            def getInstances(self) -> typing.List['Utils.CustomWidget.DescriptiveTimestamp']:
                 return self.instances
             
             def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
@@ -206,6 +206,8 @@ window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
 
 # ? ? Setup timer (i.e., for recurrent activities).
 
+previousChapterWidget:Utils.CustomWidget.DescriptiveTimestamp = None
+
 def performRecurrentActivities():
     videoPosition = videoPlayer.getRenderer().getPosition()
     videoMousePosition = videoPlayer.getRenderer().getMousePosition()
@@ -219,21 +221,35 @@ def performRecurrentActivities():
     ])
     window.setStatus(statusText)
 
+    # ? Highlight current chapter.
+
+    global previousChapterWidget
+    
+    # ? ? Determine current chapter.
+    currentChapterIdx = None
+    for chapterIdx, chapter in reversed(list(enumerate(chapters))):
+        if videoPosition >= chapter['timestamp']:
+            currentChapterIdx = chapterIdx
+            break
+
+    # ? ? Get corresponding chapter widget.
+    currentChapterWidget:Utils.CustomWidget.DescriptiveTimestamp = None
+    if currentChapterIdx is not None:
+        currentChapterWidget = chaptersWidget.getInstances()[currentChapterIdx]
+    
+    # ? ? Check if necessary to change highlighted chapter.
+    if currentChapterWidget is not previousChapterWidget:
+        
+        if previousChapterWidget is not None:
+            previousChapterWidget.highlight(False)
+
+        if currentChapterWidget is not None:
+            currentChapterWidget.highlight(True)
+
+        previousChapterWidget = currentChapterWidget
+
 timer = GConcurrency.Timer(performRecurrentActivities, TimeUtils.Time.createFromMilliseconds(50))
 timer.start()
-
-# ? ? Construct window toolbar.
-
-def reloadMetadata():
-    pass
-
-window.createToolbar(GUtils.Menu([
-    GUtils.Menu.EndPoint(
-        text='Reload Metadata',
-        fcn=reloadMetadata,
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-reload.png'))),
-    ),
-]))
 
 # ? Run GUI loop.
 window.show()
