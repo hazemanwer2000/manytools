@@ -30,16 +30,35 @@ class Utils:
             
             chapters = []
 
-            for idx, rawChapter in enumerate(metadata['chapters']):
+            for rawChapter in metadata['chapters']:
 
                 chapter = {}
                 chapter['description'] = str(rawChapter['description'])
                 chapter['timestamp'] = TimeUtils.Time.createFromString(rawChapter['timestamp'])
-                chapter['index'] = idx + 1
 
                 chapters.append(chapter)
+
+            chapters.sort(key=lambda chapter: chapter['timestamp'])
+
+            for idx, chapter in enumerate(chapters):
+                chapter['index'] = idx + 1
             
             return chapters
+        
+        @staticmethod
+        def parseHighlights(metadata:dict) -> typing.List[str]:
+            
+            highlights = []
+
+            for rawHighlight in metadata['highlights']:
+
+                highlight = {}
+                highlight['description'] = str(rawHighlight['description'])
+                highlight['timestamp'] = TimeUtils.Time.createFromString(rawHighlight['timestamp'])
+
+                highlights.append(highlight)
+            
+            return highlights
 
     class Dialog:
 
@@ -167,6 +186,7 @@ try:
 
     tags = Utils.Metadata.parseTags(metadata)
     chapters = Utils.Metadata.parseChapters(metadata)
+    highlights = Utils.Metadata.parseHighlights(metadata)
 
 except Exception as e:
 

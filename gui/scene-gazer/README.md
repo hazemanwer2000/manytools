@@ -1,4 +1,26 @@
 
 # Overview
 
-`cookie-cutter` is a video editor, that can be invoked on a specific video via the context menu.
+`scene-gazer` is a video renderer, that is able to load video metadata.
+
+## Example: Metadata File
+
+```
+{
+    "tags": [
+        "La-bla!"
+    ],
+    "chapters": [
+        {
+            "description": "La-bla!",
+            "timestamp": "00:00:00.000"
+        }
+    ],
+    "highlights": [
+        {
+            "description": "La-bla!",
+            "timestamp": "00:00:00.000"
+        }
+    ]
+}
+```
