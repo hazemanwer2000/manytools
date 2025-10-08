@@ -64,9 +64,9 @@ class Utils:
                 
                 self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
                 self.textEdit.setText(entry['description'])
-                self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda: print("h")))
+                self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
 
-                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_NotSelected, (5, 80))
+                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_NoHighlight, (5, 80))
 
                 self.rootLayout.setWidget(self.colorBlock, 0, 0)
                 self.rootLayout.setWidget(self.textEdit, 0, 1)
@@ -80,11 +80,13 @@ class Utils:
             def attachVideoPlayer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
                 self.videoRenderer = videoRenderer
 
-            def select(self):
-                self.colorBlock.setColor(Constants.Color_Selected)
-
-            def deselect(self):
-                self.colorBlock.setColor(Constants.Color_NotSelected)
+            def highlight(self, flag:bool):
+                color = Constants.Color_Highlight if flag else Constants.Color_NoHighlight
+                self.colorBlock.setColor(color)
+            
+            def INTERNAL_onSelect(self):
+                if (self.videoRenderer is not None):
+                    self.videoRenderer.seekPosition(self.timestamp)
 
         class DescriptiveTimestamps(GElements.CustomWidget):
 
@@ -125,8 +127,8 @@ class Constants:
 
     ErrorDialogSize = (1000, 400)
 
-    Color_Selected = ColorUtils.Color.fromHEX("#FFFFFF")
-    Color_NotSelected = ColorUtils.Color.fromHEX("#1E1E1E")
+    Color_Highlight = ColorUtils.Color.fromHEX("#FFFFFF")
+    Color_NoHighlight = ColorUtils.Color.fromHEX("#1E1E1E")
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
