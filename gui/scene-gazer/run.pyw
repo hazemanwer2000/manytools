@@ -82,11 +82,11 @@ class Utils:
                 self.rootLayout.setColumnMinimumSize(0, 0)
                 self.rootLayout.setRowMinimumSize(0, 0)
                 
-                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
+                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False, height=Constants.TextEditHeight)
                 self.textEdit.setText(entry['description'])
                 self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
 
-                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_NoHighlight, (5, 80))
+                self.colorBlock = GElements.Widgets.Basics.ColorBlock(Constants.Color_NoHighlight, (5, int(Constants.TextEditHeight * 0.667)))
 
                 self.rootLayout.setWidget(self.colorBlock, 0, 0)
                 self.rootLayout.setWidget(self.textEdit, 0, 1)
@@ -148,7 +148,7 @@ class Utils:
                 self.rootLayout.setRowMinimumSize(0, 0)
                 self.rootLayout.setRowMinimumSize(1, 0)
                 
-                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False)
+                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False, height=Constants.TextEditHeight)
                 self.textEdit.setText(entry['description'])
                 self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
 
@@ -206,6 +206,8 @@ class Constants:
     MetadataDirectoryName = '.metadata'
 
     ErrorDialogSize = (1000, 400)
+
+    TextEditHeight = 80
 
     Color_Highlight = ColorUtils.Color.fromHEX("#FFFFFF")
     Color_NoHighlight = ColorUtils.Color.fromHEX("#1E1E1E")
