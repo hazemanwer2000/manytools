@@ -16,6 +16,7 @@ import traceback
 import sys
 import typing
 from pprint import pprint
+import os
 
 class Utils:
 
@@ -329,6 +330,19 @@ def performRecurrentActivities():
 
 timer = GConcurrency.Timer(performRecurrentActivities, TimeUtils.Time.createFromMilliseconds(50))
 timer.start()
+
+# ? Create Tool-Bar.
+
+def reload():
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
+window.createToolbar(GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text='Reload',
+        fcn=reload,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-reload.png'))),
+    ),
+]))
 
 # ? Run GUI loop.
 window.show()
