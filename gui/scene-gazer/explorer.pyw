@@ -29,7 +29,7 @@ class Utils:
 
         class Tree:
 
-            Headers = ['Name', 'Size']
+            Headers = ['Name', 'Extension', 'Size']
 
             class Node(GElements.Widgets.Basics.Tree.Node):
 
@@ -39,9 +39,11 @@ class Utils:
                     self.children = [Utils.CustomWidget.Tree.Node(x) for x in pseudoNode.getChildren()]
 
                     # ? Construct attribute(s).
-                    field_name = pseudoNode.f_root.getNameWithoutExtension()
-                    field_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
-                    self.attributes = [field_name, field_size]
+                    attribute_name = pseudoNode.f_root.getNameWithoutExtension()
+                    attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
+                    extension = pseudoNode.f_root.getExtension()
+                    attribute_extension = extension.upper() if (extension is not None) else ''
+                    self.attributes = [attribute_name, attribute_extension, attribute_size]
 
                 def getChildren(self):
                     return self.children
@@ -114,8 +116,7 @@ rootLayout.setWidget(treeWidget, 0, 0)
 
 window = GElements.Window(title=constants['title'] + '  |  ' + str(f_root),
                           rootLayout=rootLayout,
-                          minimumSize=constants['gui']['window']['min-size'],
-                          isEnableStatusBar=True)
+                          minimumSize=constants['gui']['window']['min-size'])
 
 # ? Run GUI loop.
 window.show()
