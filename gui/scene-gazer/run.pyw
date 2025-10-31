@@ -167,8 +167,6 @@ class Constants:
 
     TabWidth = 350
 
-    MetadataDirectoryName = '.metadata'
-
     ErrorDialogSize = (1000, 400)
 
     TextEditHeight = 50
