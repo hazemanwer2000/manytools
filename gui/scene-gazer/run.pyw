@@ -17,6 +17,7 @@ import sys
 import typing
 from pprint import pprint
 import os
+from collections import OrderedDict
 
 class Utils:
 
@@ -24,8 +25,38 @@ class Utils:
 
         @staticmethod
         def parseTags(metadata:dict) -> typing.List[str]:
+            '''
+            Parses tag(s) from metadata.
+
+            Returns `None` if not defined.
+            '''
             
-            return [str(tag) for tag in metadata['tags']]
+            result = None
+
+            if 'tags' in metadata:
+                
+                result = OrderedDict()
+                
+                # ? Parse tag(s).
+                for tag in metadata['tags']:                    
+                    
+                    tagCategory, tagLabel = tag.split('/')
+                    tagLabel = tagLabel.strip()
+                    
+                    if tagCategory not in result:
+                        result[tagCategory] = set()
+                    
+                    result[tagCategory].add(tagLabel)
+                
+                # ? Sort tag(s) alphabetically.
+                # ? ? Sort tag categories.
+                result = OrderedDict(sorted(result.items(), key=lambda x: x[0]))
+                # ? ? Sort tag categories content.
+                for key in result:
+                    result[key] = list(result[key])
+                    result[key].sort()
+
+            return result
         
         @staticmethod
         def parseChapters(metadata:dict) -> typing.List[str]:
@@ -256,20 +287,22 @@ videoPlayer.load(f_video)
 while int(videoPlayer.getRenderer().getDuration()) == 0:
     pass
 
-tagsWidget = Utils.CustomWidget.Tags(tags)
+tabsWidgets = []
+
+if tags is not None:
+    tagsWidget = Utils.CustomWidget.Tags(tags)
+    tabsWidgets.append(tagsWidget)
 
 chaptersWidget = Utils.CustomWidget.Chapters(chapters)
 chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
+tabsWidgets.append(chaptersWidget)
 
 highlightsWidget = Utils.CustomWidget.Highlights(highlights, videoPlayer.getRenderer())
+tabsWidgets.append(highlightsWidget)
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
     tabNames=Constants.TabNames,
-    widgets=[
-        chaptersWidget,
-        highlightsWidget,
-        tagsWidget
-    ]
+    widgets=tabsWidgets
 )
 
 rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)

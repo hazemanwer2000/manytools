@@ -8,7 +8,7 @@
 ```
 {
     "tags": [
-        "La-bla!"
+        "Cateogry / Label"
     ],
     "chapters": [
         {
