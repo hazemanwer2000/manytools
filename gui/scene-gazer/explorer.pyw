@@ -31,7 +31,7 @@ class Utils:
 
         class Tree:
 
-            Headers = ['Name', 'Extension', 'Size']
+            Headers = ['Name', 'Extension', 'Size', '']
 
             class Node(GElements.Widgets.Basics.Tree.Node):
 
@@ -45,7 +45,7 @@ class Utils:
                     attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
                     extension = pseudoNode.f_root.getExtension()
                     attribute_extension = extension.upper() if (extension is not None) else ''
-                    self.attributes = [attribute_name, attribute_extension, attribute_size]
+                    self.attributes = [attribute_name, attribute_extension, attribute_size, '■']
 
                 def getChildren(self):
                     return self.children
@@ -82,6 +82,8 @@ class Utils:
 
 class Constants:
 
+    TreeColumnOffset = 20
+
     class Commands:
 
         OpenWith = {
@@ -116,7 +118,7 @@ treeWidget = GElements.Widgets.Basics.Tree(
     header=Utils.CustomWidget.Tree.Headers
 )
 treeWidget.expandAll()
-treeWidget.resizeColumnsToContents()
+treeWidget.resizeColumnsToContents(Constants.TreeColumnOffset)
 
 # ? ? Construct Root Layout.
 
@@ -137,7 +139,6 @@ def openWith(commandKey):
     if f_selected.isFile():
         commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
         commandFormatter.assertParameter("file-path", str(f_selected))
-        print(commandFormatter)
         subprocess.Popen(str(commandFormatter), shell=True)
 
 fileContextMenu = GUtils.Menu([
