@@ -99,15 +99,23 @@ class Utils:
         
         @staticmethod
         def parseHighlights(metadata:dict) -> typing.List[str]:
-            
-            highlights = []
+            '''
+            Parses highlights(s) from metadata.
 
-            for rawHighlight in metadata['highlights']:
+            Returns `None` if not defined.
+            '''
+            highlights = None
 
-                highlight = {}
-                highlight['description'] = str(rawHighlight['description'])
-                highlight['timestamp'] = TimeUtils.Time.createFromString(rawHighlight['timestamp'])
+            if 'highlights' in metadata:
 
-                highlights.append(highlight)
+                highlights = []
+
+                for rawHighlight in metadata['highlights']:
+
+                    highlight = {}
+                    highlight['description'] = str(rawHighlight['description'])
+                    highlight['timestamp'] = TimeUtils.Time.createFromString(rawHighlight['timestamp'])
+
+                    highlights.append(highlight)
             
             return highlights
