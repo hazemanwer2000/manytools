@@ -193,17 +193,21 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 
 # ? Parse (video) metadata.
 
+tags = None
+chapters = None
+highlights = None
+
 try:
+
     f_metadata = f_video.traverseDirectory('..', Constants.MetadataDirectoryName, f_video.getNameWithoutExtension() + '.json')
     
-    if not f_metadata.isExists():
-        raise ExceptionUtils.ValidationError("Metadata file does not exist.")
+    if f_metadata.isExists():
     
-    metadata = JSON.fromFile(f_metadata)
+        metadata = JSON.fromFile(f_metadata)
 
-    tags = Shared.Utils.Metadata.parseTags(metadata)
-    chapters = Shared.Utils.Metadata.parseChapters(metadata)
-    highlights = Shared.Utils.Metadata.parseHighlights(metadata)
+        tags = Shared.Utils.Metadata.parseTags(metadata)
+        chapters = Shared.Utils.Metadata.parseChapters(metadata)
+        highlights = Shared.Utils.Metadata.parseHighlights(metadata)
 
 except Exception as e:
 
@@ -237,15 +241,22 @@ if tags is not None:
     tabWidgets.append(tagsWidget)
     tabNames.append("Tags")
 
-tabWidget = GElements.Widgets.Containers.TabContainer(
-    tabNames=tabNames,
-    widgets=tabWidgets
-)
+if len(tabWidgets) > 0:
 
-rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
-rootLayout.setWidget(videoPlayer, 0, 0)
-rootLayout.setWidget(tabWidget, 0, 1)
-rootLayout.setColumnMinimumSize(1, Constants.TabWidth)
+    tabWidget = GElements.Widgets.Containers.TabContainer(
+        tabNames=tabNames,
+        widgets=tabWidgets
+    )
+
+    rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+    rootLayout.setWidget(videoPlayer, 0, 0)
+    rootLayout.setWidget(tabWidget, 0, 1)
+    rootLayout.setColumnMinimumSize(1, Constants.TabWidth)
+
+else:
+
+    rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+    rootLayout.setWidget(videoPlayer, 0, 0)
 
 window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
                           rootLayout=rootLayout,
@@ -273,30 +284,32 @@ def performRecurrentActivities():
 
     # ? Highlight current chapter.
 
-    global previousChapterWidget
-    
-    # ? ? Determine current chapter.
-    currentChapterIdx = None
-    for idx in range(len(chapters)-1, -1, -1):
-        if videoPosition >= chapters[idx]['timestamp']:
-            currentChapterIdx = idx
-            break
+    if chapters is not None:
 
-    # ? ? Get corresponding chapter widget.
-    currentChapterWidget:Utils.CustomWidget.Chapter = None
-    if currentChapterIdx is not None:
-        currentChapterWidget = chaptersWidget.getInstances()[currentChapterIdx]
-    
-    # ? ? Check if necessary to change highlighted chapter.
-    if currentChapterWidget is not previousChapterWidget:
+        global previousChapterWidget
         
-        if previousChapterWidget is not None:
-            previousChapterWidget.highlight(False)
+        # ? ? Determine current chapter.
+        currentChapterIdx = None
+        for idx in range(len(chapters)-1, -1, -1):
+            if videoPosition >= chapters[idx]['timestamp']:
+                currentChapterIdx = idx
+                break
 
-        if currentChapterWidget is not None:
-            currentChapterWidget.highlight(True)
+        # ? ? Get corresponding chapter widget.
+        currentChapterWidget:Utils.CustomWidget.Chapter = None
+        if currentChapterIdx is not None:
+            currentChapterWidget = chaptersWidget.getInstances()[currentChapterIdx]
+        
+        # ? ? Check if necessary to change highlighted chapter.
+        if currentChapterWidget is not previousChapterWidget:
+            
+            if previousChapterWidget is not None:
+                previousChapterWidget.highlight(False)
 
-        previousChapterWidget = currentChapterWidget
+            if currentChapterWidget is not None:
+                currentChapterWidget.highlight(True)
+
+            previousChapterWidget = currentChapterWidget
 
 timer = GConcurrency.Timer(performRecurrentActivities, TimeUtils.Time.createFromMilliseconds(50))
 timer.start()
