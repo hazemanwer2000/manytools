@@ -39,7 +39,7 @@ class Utils:
 
                 self.rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(0), elementSpacing=5)
                 self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
-                super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, str(entry['index']), isInnerOutline=True, isOuterOutline=True))
+                super().__init__(GElements.Widgets.Decorators.Titled(self.rootWidget, str(entry['index']), isInnerOutline=True, isOuterOutline=False))
 
                 self.rootLayout.setColumnMinimumSize(0, 0)
                 self.rootLayout.setRowMinimumSize(0, 0)
@@ -171,7 +171,7 @@ class Constants:
 
     ErrorDialogSize = (1000, 400)
 
-    TextEditHeight = 80
+    TextEditHeight = 50
 
     Color_Highlight = ColorUtils.Color.fromHEX("#FFFFFF")
     Color_NoHighlight = ColorUtils.Color.fromHEX("#1E1E1E")
