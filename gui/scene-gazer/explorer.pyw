@@ -118,6 +118,48 @@ window = GElements.Window(title=constants['title'] + '  |  ' + str(f_root),
                           rootLayout=rootLayout,
                           minimumSize=constants['gui']['window']['min-size'])
 
+# ? ? Create Tree Context-Menu.
+
+def openWith():
+    node = treeWidget.getContextInfo()
+    f_selected = node.pseudoNode.f_root
+    if f_selected.isFile():
+        print(f_selected)
+
+treeWidget.setContextMenu(GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text=f'Open with Default Handler',
+        fcn=openWith,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text=f'Open with {constants['title']}',
+        fcn=openWith,
+        icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app']))
+    )
+]))
+
+# ? ? Create Tool-Bar.
+
+def collapseAll():
+    treeWidget.collapseAll()
+
+def expandAll():
+    treeWidget.expandAll()
+
+window.createToolbar(GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text='Collapse All',
+        fcn=collapseAll,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-minus.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text='Expand All',
+        fcn=expandAll,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-plus.png'))),
+    )
+]))
+
 # ? Run GUI loop.
 window.show()
 application.run()
