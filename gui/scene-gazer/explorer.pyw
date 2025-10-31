@@ -11,6 +11,7 @@ import automatey.Utils.ExceptionUtils as ExceptionUtils
 import automatey.Utils.ColorUtils as ColorUtils
 import automatey.Utils.MathUtils as MathUtils
 import automatey.Media.VideoUtils as VideoUtils
+import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.Clipboard as Clipboard
 
 import traceback
@@ -28,7 +29,7 @@ class Utils:
 
         class Tree:
 
-            Headers = ['Name']
+            Headers = ['Name', 'Size']
 
             class Node(GElements.Widgets.Basics.Tree.Node):
 
@@ -36,7 +37,11 @@ class Utils:
                     
                     self.pseudoNode = pseudoNode
                     self.children = [Utils.CustomWidget.Tree.Node(x) for x in pseudoNode.getChildren()]
-                    self.attributes = [pseudoNode.f_root.getNameWithoutExtension()]
+
+                    # ? Construct attribute(s).
+                    field_name = pseudoNode.f_root.getNameWithoutExtension()
+                    field_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
+                    self.attributes = [field_name, field_size]
 
                 def getChildren(self):
                     return self.children
@@ -61,7 +66,15 @@ class Utils:
                     return self.children
                 
                 def prune(self):
-                    pass
+
+                    idx = 0
+                    while idx < len(self.children):
+                        child = self.children[idx]
+                        if child.f_root.isDirectory() and (len(child.children) == 0):
+                            del self.children[idx]
+                        else:
+                            child.prune()
+                            idx += 1
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
@@ -90,6 +103,7 @@ treeWidget = GElements.Widgets.Basics.Tree(
     header=Utils.CustomWidget.Tree.Headers
 )
 treeWidget.expandAll()
+treeWidget.resizeColumnsToContents()
 
 # ? ? Construct Root Layout.
 
