@@ -1,5 +1,7 @@
 
 import automatey.Utils.TimeUtils as TimeUtils
+import automatey.OS.FileUtils as FileUtils
+import automatey.Formats.JSON as JSON
 
 import typing
 from pprint import pprint
@@ -119,3 +121,19 @@ class Utils:
                     highlights.append(highlight)
             
             return highlights
+
+        @staticmethod
+        def find(f_video:FileUtils.File) -> dict:
+            '''
+            Returns `metadata` that corresponds to a specific video file.
+
+            If not available, `None` is returned.
+            '''
+
+            metadata = None
+
+            f_metadata = f_video.traverseDirectory('..', '.metadata', f_video.getNameWithoutExtension() + '.json')
+            if f_metadata.isExists():
+                metadata = JSON.fromFile(f_metadata)
+            
+            return metadata

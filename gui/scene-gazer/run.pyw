@@ -199,11 +199,9 @@ highlights = None
 
 try:
 
-    f_metadata = f_video.traverseDirectory('..', Constants.MetadataDirectoryName, f_video.getNameWithoutExtension() + '.json')
-    
-    if f_metadata.isExists():
-    
-        metadata = JSON.fromFile(f_metadata)
+    metadata = Shared.Utils.Metadata.find(f_video)
+
+    if metadata is not None:
 
         tags = Shared.Utils.Metadata.parseTags(metadata)
         chapters = Shared.Utils.Metadata.parseChapters(metadata)
