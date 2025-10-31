@@ -8,7 +8,7 @@
 ```
 {
     "tags": [
-        "Cateogry / Label"
+        "Category / Label"
     ],
     "chapters": [
         {

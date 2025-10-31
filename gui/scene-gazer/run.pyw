@@ -23,6 +23,28 @@ class Utils:
 
     class Metadata:
 
+        class Tag:
+
+            @staticmethod
+            def construct(category:str, label:str) -> str:
+                '''
+                Constructs `tag` from `category` and `label`.
+                '''
+
+                return f"{category} / {label}"
+            
+            @staticmethod
+            def split(tag) -> str:
+                '''
+                Splits `tag` into `(category, label)`.
+                '''
+                
+                tagCategory, tagLabel = tag.split('/')
+                tagLabel = tagLabel.strip()
+                tagCategory = tagCategory.strip()
+
+                return (tagCategory, tagLabel)
+
         @staticmethod
         def parseTags(metadata:dict) -> typing.List[str]:
             '''
@@ -40,8 +62,7 @@ class Utils:
                 # ? Parse tag(s).
                 for tag in metadata['tags']:                    
                     
-                    tagCategory, tagLabel = tag.split('/')
-                    tagLabel = tagLabel.strip()
+                    tagCategory, tagLabel = Utils.Metadata.Tag.split(tag)
                     
                     if tagCategory not in result:
                         result[tagCategory] = set()
@@ -219,13 +240,13 @@ class Utils:
             def __init__(self, tagCategory:str, tagLabels:typing.List[str]):
 
                 self.rootLayout = GElements.Layouts.FlowLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
-                self.rootWidget = GElements.Widgets.Decorators.Titled(GElements.Widget.fromLayout(self.rootLayout), tagCategory, isInnerOutline=True, isOuterOutline=True)
+                self.rootWidget = GElements.Widgets.Decorators.Titled(GElements.Widget.fromLayout(self.rootLayout), tagCategory, isInnerOutline=True)
                 
                 super().__init__(self.rootWidget)
 
                 for tagLabel in tagLabels:
                     tagLabelWidget = GElements.Widgets.Basics.Button(tagLabel)
-                    tagLabelWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda tagLabel=tagLabel: print(tagLabel)))
+                    tagLabelWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda tagLabel=tagLabel: Clipboard.copy(tagLabel)))
                     self.rootLayout.insertWidget(tagLabelWidget)
 
         class Tags(GElements.CustomWidget):
