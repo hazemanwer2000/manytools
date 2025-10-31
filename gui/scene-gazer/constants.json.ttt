@@ -17,6 +17,12 @@
     },
     
     "global-macros" : {
-        "pythonw" : "{{{BIN-PYTHONW}}}"
+        "pythonw" : "{{{BIN-PYTHONW}}}",
+        "python" : "{{{BIN-PYTHON}}}"
+    },
+
+    "runners" : {
+        "viewer" : "run.pyw",
+        "explorer" : "explorer.pyw"
     }
 }
