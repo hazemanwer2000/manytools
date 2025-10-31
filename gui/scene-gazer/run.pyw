@@ -81,21 +81,33 @@ class Utils:
         
         @staticmethod
         def parseChapters(metadata:dict) -> typing.List[str]:
-            
-            chapters = []
+            '''
+            Parses chapter(s) from metadata.
 
-            for rawChapter in metadata['chapters']:
+            Returns `None` if not defined.
+            '''
 
-                chapter = {}
-                chapter['description'] = str(rawChapter['description'])
-                chapter['timestamp'] = TimeUtils.Time.createFromString(rawChapter['timestamp'])
+            chapters = None
 
-                chapters.append(chapter)
+            if 'chapters' in metadata:
 
-            chapters.sort(key=lambda chapter: chapter['timestamp'])
+                chapters = []
 
-            for idx, chapter in enumerate(chapters):
-                chapter['index'] = idx + 1
+                # ? For each chapter (...)
+                for rawChapter in metadata['chapters']:
+
+                    chapter = {}
+                    chapter['description'] = str(rawChapter['description'])
+                    chapter['timestamp'] = TimeUtils.Time.createFromString(rawChapter['timestamp'])
+
+                    chapters.append(chapter)
+
+                # ? Sort.
+                chapters.sort(key=lambda chapter: chapter['timestamp'])
+
+                # ? Add 'index' field.
+                for idx, chapter in enumerate(chapters):
+                    chapter['index'] = idx + 1
             
             return chapters
         
@@ -124,7 +136,7 @@ class Utils:
 
         class Chapter(GElements.CustomWidget):
 
-            def __init__(self, entry:dict):
+            def __init__(self, entry:dict, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
 
                 # ? Setup GUI.
 
@@ -146,12 +158,9 @@ class Utils:
 
                 # ? Setup other variable(s).
 
-                self.videoRenderer = None
+                self.videoRenderer = videoRenderer
 
                 self.timestamp = entry['timestamp']
-
-            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
-                self.videoRenderer = videoRenderer
 
             def highlight(self, flag:bool):
                 color = Constants.Color_Highlight if flag else Constants.Color_NoHighlight
@@ -163,7 +172,7 @@ class Utils:
 
         class Chapters(GElements.CustomWidget):
 
-            def __init__(self, entries:typing.List[dict]):
+            def __init__(self, entries:typing.List[dict], videoRenderer:GElements.Widgets.Basics.VideoRenderer):
 
                 self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
@@ -171,16 +180,12 @@ class Utils:
                 self.instances:typing.List['Utils.CustomWidget.Chapter'] = []
 
                 for entry in entries:
-                    instance = Utils.CustomWidget.Chapter(entry)
+                    instance = Utils.CustomWidget.Chapter(entry, videoRenderer)
                     self.instances.append(instance)
                     self.rootWidget.getLayout().insertWidget(instance)
             
             def getInstances(self) -> typing.List['Utils.CustomWidget.Chapter']:
                 return self.instances
-            
-            def attachvideoRenderer(self, videoRenderer:GElements.Widgets.Basics.VideoRenderer):
-                for instance in self.instances:
-                    instance.attachvideoRenderer(videoRenderer)
 
         class Highlight(GElements.CustomWidget):
 
@@ -320,19 +325,20 @@ while int(videoPlayer.getRenderer().getDuration()) == 0:
 tabWidgets = []
 tabNames = []
 
+if chapters is not None:
+    chaptersWidget = Utils.CustomWidget.Chapters(chapters, videoPlayer.getRenderer())
+    tabWidgets.append(chaptersWidget)
+    tabNames.append("Chapters")
+
+if highlights is not None:
+    highlightsWidget = Utils.CustomWidget.Highlights(highlights, videoPlayer.getRenderer())
+    tabWidgets.append(highlightsWidget)
+    tabNames.append("Highlights")
+
 if tags is not None:
     tagsWidget = Utils.CustomWidget.Tags(tags)
     tabWidgets.append(tagsWidget)
     tabNames.append("Tags")
-
-chaptersWidget = Utils.CustomWidget.Chapters(chapters)
-chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
-tabWidgets.append(chaptersWidget)
-tabNames.append("Chapters")
-
-highlightsWidget = Utils.CustomWidget.Highlights(highlights, videoPlayer.getRenderer())
-tabWidgets.append(highlightsWidget)
-tabNames.append("Highlights")
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
     tabNames=tabNames,
