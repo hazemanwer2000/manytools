@@ -214,25 +214,34 @@ class Utils:
             def getInstances(self) -> typing.List['Utils.CustomWidget.Highlight']:
                 return self.instances
 
-        class Tags(GElements.CustomWidget):
+        class TagCategory(GElements.CustomWidget):
 
-            def __init__(self, tags:typing.List[str]):
+            def __init__(self, tagCategory:str, tagLabels:typing.List[str]):
 
                 self.rootLayout = GElements.Layouts.FlowLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
-                self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+                self.rootWidget = GElements.Widgets.Decorators.Titled(GElements.Widget.fromLayout(self.rootLayout), tagCategory, isInnerOutline=True, isOuterOutline=True)
+                
                 super().__init__(self.rootWidget)
 
-                self.tagWidgets = []
+                for tagLabel in tagLabels:
+                    tagLabelWidget = GElements.Widgets.Basics.Button(tagLabel)
+                    tagLabelWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda tagLabel=tagLabel: print(tagLabel)))
+                    self.rootLayout.insertWidget(tagLabelWidget)
 
-                for tag in tags:
-                    tagWidget = GElements.Widgets.Basics.Button(tag)
-                    tagWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(lambda tag=tag: Clipboard.copy(tag)))
-                    self.tagWidgets.append(tagWidget)
-                    self.rootLayout.insertWidget(tagWidget)
+        class Tags(GElements.CustomWidget):
+                
+            def __init__(self, tags:typing.OrderedDict[str, list]):
+
+                self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
+
+                for tagCategory in tags:
+
+                    tagCategoryWidget = Utils.CustomWidget.TagCategory(tagCategory, tags[tagCategory])
+                    self.rootWidget.getLayout().insertWidget(tagCategoryWidget)
 
 class Constants:
 
-    TabNames = ['Chapters', 'Highlights', 'Tags']
     TabWidth = 350
 
     MetadataDirectoryName = '.metadata'
@@ -287,22 +296,26 @@ videoPlayer.load(f_video)
 while int(videoPlayer.getRenderer().getDuration()) == 0:
     pass
 
-tabsWidgets = []
+tabWidgets = []
+tabNames = []
 
 if tags is not None:
     tagsWidget = Utils.CustomWidget.Tags(tags)
-    tabsWidgets.append(tagsWidget)
+    tabWidgets.append(tagsWidget)
+    tabNames.append("Tags")
 
 chaptersWidget = Utils.CustomWidget.Chapters(chapters)
 chaptersWidget.attachvideoRenderer(videoPlayer.getRenderer())
-tabsWidgets.append(chaptersWidget)
+tabWidgets.append(chaptersWidget)
+tabNames.append("Chapters")
 
 highlightsWidget = Utils.CustomWidget.Highlights(highlights, videoPlayer.getRenderer())
-tabsWidgets.append(highlightsWidget)
+tabWidgets.append(highlightsWidget)
+tabNames.append("Highlights")
 
 tabWidget = GElements.Widgets.Containers.TabContainer(
-    tabNames=Constants.TabNames,
-    widgets=tabsWidgets
+    tabNames=tabNames,
+    widgets=tabWidgets
 )
 
 rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
