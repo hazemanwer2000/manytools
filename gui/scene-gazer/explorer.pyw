@@ -34,6 +34,8 @@ class Utils:
 
             Headers = ['Name', 'Extension', 'Size', '']
 
+            SelectionColumnIdx = 3
+
             class Node(GElements.Widgets.Basics.Tree.Node):
 
                 def __init__(self, pseudoNode:"Utils.CustomWidget.Tree.PseudoNode"):
@@ -46,7 +48,7 @@ class Utils:
                     attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
                     extension = pseudoNode.f_root.getExtension()
                     attribute_extension = extension.upper() if (extension is not None) else ''
-                    self.attributes = [attribute_name, attribute_extension, attribute_size, '■']
+                    self.attributes = [attribute_name, attribute_extension, attribute_size, Constants.DeselectedText]
 
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
@@ -74,6 +76,17 @@ class Utils:
                     
                     return unionizedTags
                 
+                def filter(self, selectedTags:OrderedDict):
+
+                    if self.pseudoNode.f_root.isFile():
+                        if len(selectedTags.keys()) == 0:
+                            self.attributes[Utils.CustomWidget.Tree.SelectionColumnIdx] = Constants.DeselectedText
+                        else:
+                            self.attributes[Utils.CustomWidget.Tree.SelectionColumnIdx] = Constants.SelectedText
+
+                    for subNode in self.children:
+                        subNode.filter(selectedTags)
+
             class PseudoNode:
 
                 def __init__(self, f_root:FileUtils.File):
@@ -197,6 +210,9 @@ class Constants:
     TabWidth = 350
     WindowSize = (1100, 600)
 
+    SelectedText = '■'
+    DeselectedText = ''
+
     class Commands:
 
         OpenWith = {
@@ -242,7 +258,8 @@ tabNames = []
 
 def onFilter():
     selectedTags = tagsWidget.getSelectedTags()
-    print(selectedTags)
+    rootNode.filter(selectedTags)
+    treeWidget.refresh(rootNode, isRecursive=True)
 
 # ? ? ? Construct Tags Widget.
 unionizedTags = rootNode.getUnionizedTags()
