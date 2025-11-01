@@ -114,6 +114,9 @@ class Utils:
                 
                 super().__init__(self.rootWidget)
 
+                self.tagCategory = tagCategory
+                self.tagLabels = tagLabels
+
                 self.tagLabelWidgets = []
                 for tagLabel in tagLabels:
                     tagLabelWidget = GElements.Widgets.Basics.Button(tagLabel, isCheckable=True)
@@ -123,6 +126,20 @@ class Utils:
             def deselectAll(self):
                 for tagLabelWidget in self.tagLabelWidgets:
                     tagLabelWidget.setChecked(False)
+
+            def getSelectedTags(self) -> OrderedDict:
+                
+                result = OrderedDict()
+
+                selectedTagLabels = []
+                for idx, tagLabelWidget in enumerate(self.tagLabelWidgets):
+                    if tagLabelWidget.isChecked():
+                        selectedTagLabels.append(self.tagLabels[idx])
+                
+                if len(selectedTagLabels) > 0:
+                    result[self.tagCategory] = selectedTagLabels
+
+                return result
 
         class Tags(GElements.CustomWidget):
                 
@@ -140,6 +157,12 @@ class Utils:
             def deselectAll(self):
                 for tagCategoryWidget in self.tagCategoryWidgets:
                     tagCategoryWidget.deselectAll()
+
+            def getSelectedTags(self) -> OrderedDict:
+                result = OrderedDict()
+                for tagCategoryWidget in self.tagCategoryWidgets:
+                    result.update(tagCategoryWidget.getSelectedTags())
+                return result
 
         class TagsContainer(GElements.CustomWidget):
 
@@ -172,7 +195,7 @@ class Constants:
 
     TreeColumnOffset = 20
     TabWidth = 350
-    WindowSize = (800, 600)
+    WindowSize = (1100, 600)
 
     class Commands:
 
@@ -218,7 +241,8 @@ tabWidgets = []
 tabNames = []
 
 def onFilter():
-    print("Filtering...")
+    selectedTags = tagsWidget.getSelectedTags()
+    print(selectedTags)
 
 # ? ? ? Construct Tags Widget.
 unionizedTags = rootNode.getUnionizedTags()
