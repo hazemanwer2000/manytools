@@ -6,6 +6,7 @@ import automatey.Formats.JSON as JSON
 import typing
 from pprint import pprint
 from collections import OrderedDict
+import copy
 
 class Utils:
 
@@ -34,7 +35,7 @@ class Utils:
                 return (tagCategory, tagLabel)
 
         @staticmethod
-        def parseTags(metadata:dict) -> typing.List[str]:
+        def parseTags(metadata:dict) -> OrderedDict[str, list]:
             '''
             Parses tag(s) from metadata.
 
@@ -67,6 +68,34 @@ class Utils:
 
             return result
         
+        @staticmethod
+        def unionizeTags(baseTags, extraTags) -> OrderedDict[str, list]:
+            '''
+            Return the union of two (sets of) tags.
+            '''
+            resultTags = copy.deepcopy(baseTags)
+
+            # ? Convert 'list' to 'set'.
+            for resultTagCategory in resultTags:
+                resultTags[resultTagCategory] = set(resultTags[resultTagCategory])
+
+            for extraTagCategory in extraTags:
+
+                if extraTagCategory not in resultTags:
+                    resultTags[extraTagCategory] = set(extraTags[extraTagCategory])
+                else:
+                    resultTags[extraTagCategory] = resultTags[extraTagCategory].union(set(extraTags[extraTagCategory]))
+
+            # ? Sort tag(s) alphabetically.
+            # ? ? Sort tag categories.
+            resultTags = OrderedDict(sorted(resultTags.items(), key=lambda x: x[0]))
+            # ? ? Sort tag categories content.
+            for resultTagCategory in resultTags:
+                resultTags[resultTagCategory] = list(resultTags[resultTagCategory])
+                resultTags[resultTagCategory].sort()
+
+            return resultTags
+
         @staticmethod
         def parseChapters(metadata:dict) -> typing.List[str]:
             '''

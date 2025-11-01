@@ -47,11 +47,31 @@ class Utils:
                     attribute_extension = extension.upper() if (extension is not None) else ''
                     self.attributes = [attribute_name, attribute_extension, attribute_size, '■']
 
+                    # ? Fetch tag(s) (metadata).
+                    self.tags = None
+                    if self.pseudoNode.f_root.isFile():
+                        metadata = Shared.Utils.Metadata.find(pseudoNode.f_root)
+                        if metadata is not None:
+                            self.tags = Shared.Utils.Metadata.parseTags(metadata)
+
                 def getChildren(self):
                     return self.children
             
                 def getAttributes(self):
                     return self.attributes
+                
+                def getUnionizedTags(self):
+
+                    unionizedTags = self.tags
+
+                    for child in self.getChildren():
+                        extraTags = child.getUnionizedTags()
+                        if unionizedTags is None:
+                            unionizedTags = extraTags
+                        elif extraTags is not None:
+                            unionizedTags = Shared.Utils.Metadata.unionizeTags(unionizedTags, extraTags)
+                    
+                    return unionizedTags
                 
             class PseudoNode:
 
@@ -116,8 +136,13 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 pseudoRootNode=Utils.CustomWidget.Tree.PseudoNode(f_root)
 pseudoRootNode.prune()
 
+rootNode = Utils.CustomWidget.Tree.Node(pseudoRootNode)
+unionizedTags = rootNode.getUnionizedTags()
+
+print(unionizedTags)
+
 treeWidget = GElements.Widgets.Basics.Tree(
-    rootNode=Utils.CustomWidget.Tree.Node(pseudoRootNode),
+    rootNode=rootNode,
     header=Utils.CustomWidget.Tree.Headers
 )
 treeWidget.expandAll()
