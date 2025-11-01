@@ -114,9 +114,15 @@ class Utils:
                 
                 super().__init__(self.rootWidget)
 
+                self.tagLabelWidgets = []
                 for tagLabel in tagLabels:
                     tagLabelWidget = GElements.Widgets.Basics.Button(tagLabel, isCheckable=True)
+                    self.tagLabelWidgets.append(tagLabelWidget)
                     self.rootLayout.insertWidget(tagLabelWidget)
+
+            def deselectAll(self):
+                for tagLabelWidget in self.tagLabelWidgets:
+                    tagLabelWidget.setChecked(False)
 
         class Tags(GElements.CustomWidget):
                 
@@ -125,14 +131,19 @@ class Utils:
                 self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
 
+                self.tagCategoryWidgets = []
                 for tagCategory in tags:
-
                     tagCategoryWidget = Utils.CustomWidget.TagCategory(tagCategory, tags[tagCategory])
+                    self.tagCategoryWidgets.append(tagCategoryWidget)
                     self.rootWidget.getLayout().insertWidget(tagCategoryWidget)
+
+            def deselectAll(self):
+                for tagCategoryWidget in self.tagCategoryWidgets:
+                    tagCategoryWidget.deselectAll()
 
         class TagsContainer(GElements.CustomWidget):
 
-            def __init__(self, tagsWidget:"Utils.CustomWidget.Tags"):
+            def __init__(self, tagsWidget:"Utils.CustomWidget.Tags", onFilter):
 
                 self.rootLayout = GElements.Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), 0)
                 self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
@@ -152,6 +163,10 @@ class Utils:
                 self.rootLayout.setWidget(tagsWidget, 0, 0)
                 self.rootLayout.setWidget(self.controlWidget, 1, 0)
                 self.rootLayout.setRowMinimumSize(1, 0)
+
+                # ? Set event handler(s).
+                self.clearButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(tagsWidget.deselectAll))
+                self.filterButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(onFilter))
 
 class Constants:
 
@@ -202,11 +217,14 @@ treeWidget.resizeColumnsToContents(Constants.TreeColumnOffset)
 tabWidgets = []
 tabNames = []
 
+def onFilter():
+    print("Filtering...")
+
 # ? ? ? Construct Tags Widget.
 unionizedTags = rootNode.getUnionizedTags()
 if unionizedTags is not None:
     tagsWidget = Utils.CustomWidget.Tags(unionizedTags)
-    tagsContainerWidget = Utils.CustomWidget.TagsContainer(tagsWidget)
+    tagsContainerWidget = Utils.CustomWidget.TagsContainer(tagsWidget, onFilter)
     tabWidgets.append(tagsContainerWidget)
     tabNames.append("Tags")
 
