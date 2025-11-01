@@ -169,6 +169,8 @@ class Constants:
 
     ErrorDialogSize = (1000, 400)
 
+    WindowSize = (1000, 600)
+
     TextEditHeight = 50
 
     Color_Highlight = ColorUtils.Color.fromHEX("#FFFFFF")
@@ -256,7 +258,7 @@ else:
 
 window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
                           rootLayout=rootLayout,
-                          minimumSize=constants['gui']['window']['min-size'],
+                          minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)
 
 # ? Setup event handler(s).

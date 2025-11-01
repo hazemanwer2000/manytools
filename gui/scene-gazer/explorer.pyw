@@ -8,6 +8,7 @@ import automatey.Resources as Resources
 import automatey.Media.VideoUtils as VideoUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.ProcessUtils as ProcessUtils
+import automatey.OS.Specific.Windows as Windows
 
 import traceback
 import sys
@@ -83,6 +84,7 @@ class Utils:
                     if f_root.isDirectory():
 
                         f_list = f_root.listDirectory(conditional=lambda x: x.isDirectory() or VideoUtils.Video.Utils.isVideo(x))
+                        Windows.Utils.sort(f_list, lambda x: x.getName())
                         for f in f_list:
                             self.children.append(Utils.CustomWidget.Tree.PseudoNode(f))
 
@@ -154,8 +156,8 @@ class Utils:
 class Constants:
 
     TreeColumnOffset = 20
-
     TabWidth = 350
+    WindowSize = (800, 600)
 
     class Commands:
 
@@ -229,7 +231,7 @@ else:
 
 window = GElements.Window(title=constants['title'] + '  |  ' + str(f_root),
                           rootLayout=rootLayout,
-                          minimumSize=constants['gui']['window']['min-size'])
+                          minimumSize=Constants.WindowSize)
 
 # ? ? Create Tree Context-Menu.
 
