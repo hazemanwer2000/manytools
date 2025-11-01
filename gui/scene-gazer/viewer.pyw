@@ -163,6 +163,17 @@ class Utils:
                     tagCategoryWidget = Utils.CustomWidget.TagCategory(tagCategory, tags[tagCategory])
                     self.rootWidget.getLayout().insertWidget(tagCategoryWidget)
 
+        class Description(GElements.CustomWidget):
+
+            def __init__(self, description:str):
+
+                self.textEditWidget = GElements.Widgets.Basics.TextEdit(isEditable=False, 
+                                                                        isWrapText=True,
+                                                                        isHorizontalScrollBar=False)
+                self.textEditWidget.setText(description)    
+        
+                super().__init__(self.textEditWidget)
+
 class Constants:
 
     TabWidth = 350
@@ -193,6 +204,7 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 
 # ? Parse (video) metadata.
 
+description = None
 tags = None
 chapters = None
 highlights = None
@@ -203,6 +215,7 @@ try:
 
     if metadata is not None:
 
+        description = Shared.Utils.Metadata.parseDescription(metadata)
         tags = Shared.Utils.Metadata.parseTags(metadata)
         chapters = Shared.Utils.Metadata.parseChapters(metadata)
         highlights = Shared.Utils.Metadata.parseHighlights(metadata)
@@ -223,6 +236,11 @@ while int(videoPlayer.getRenderer().getDuration()) == 0:
 
 tabWidgets = []
 tabNames = []
+
+if description is not None:
+    descriptionWidget = Utils.CustomWidget.Description(description)
+    tabWidgets.append(descriptionWidget)
+    tabNames.append("Description")
 
 if chapters is not None:
     chaptersWidget = Utils.CustomWidget.Chapters(chapters, videoPlayer.getRenderer())

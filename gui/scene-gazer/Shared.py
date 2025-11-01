@@ -162,7 +162,7 @@ class Utils:
 
             if 'description' in metadata:
 
-                description = metadata['description']
+                description = '\n\n'.join(metadata['description'])
             
             return description
 
