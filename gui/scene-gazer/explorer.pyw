@@ -73,11 +73,14 @@ class Utils:
 
                     idx = 0
                     while idx < len(self.children):
+                        
                         child = self.children[idx]
+
+                        child.prune()
+                        
                         if child.f_root.isDirectory() and (len(child.children) == 0):
                             del self.children[idx]
                         else:
-                            child.prune()
                             idx += 1
 
 class Constants:
