@@ -128,6 +128,29 @@ class Utils:
                     tagCategoryWidget = Utils.CustomWidget.TagCategory(tagCategory, tags[tagCategory])
                     self.rootWidget.getLayout().insertWidget(tagCategoryWidget)
 
+        class TagsContainer(GElements.CustomWidget):
+
+            def __init__(self, tagsWidget:"Utils.CustomWidget.Tags"):
+
+                self.rootLayout = GElements.Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), 0)
+                self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
+
+                super().__init__(self.rootWidget)
+
+                # ? Create control bar.
+                self.controlLayout = GElements.Layouts.FlowLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                self.controlWidget = GElements.Widget.fromLayout(self.controlLayout)
+                # ? ? (...)
+                self.filterButton = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-filter.png'))))
+                self.controlLayout.insertWidget(self.filterButton)
+                # ? ? (...)
+                self.clearButton = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-remove.png'))))
+                self.controlLayout.insertWidget(self.clearButton)
+
+                self.rootLayout.setWidget(tagsWidget, 0, 0)
+                self.rootLayout.setWidget(self.controlWidget, 1, 0)
+                self.rootLayout.setRowMinimumSize(1, 0)
+
 class Constants:
 
     TreeColumnOffset = 20
@@ -181,7 +204,8 @@ tabNames = []
 unionizedTags = rootNode.getUnionizedTags()
 if unionizedTags is not None:
     tagsWidget = Utils.CustomWidget.Tags(unionizedTags)
-    tabWidgets.append(tagsWidget)
+    tagsContainerWidget = Utils.CustomWidget.TagsContainer(tagsWidget)
+    tabWidgets.append(tagsContainerWidget)
     tabNames.append("Tags")
 
 if len(tabWidgets) > 0:
