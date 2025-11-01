@@ -79,7 +79,12 @@ class Utils:
                     
                     return unionizedTags
                 
-                def filter(self, filterTags:OrderedDict) -> dict:
+                def filter(self, filterTags:OrderedDict) -> int:
+                    '''
+                    Returns number of node(s) selected.
+                    '''
+
+                    selectedNodeCount = 0
 
                     if self.tags is not None:
                         if len(filterTags.keys()) == 0:
@@ -105,9 +110,23 @@ class Utils:
                                         break
                             
                             self.attributes[Utils.CustomWidget.Tree.FilterColumnIdx] = (Constants.FilterInText if isSelected else Constants.FilterOutText)
+                            
+                            if isSelected:
+                                selectedNodeCount += 1
 
                     for subNode in self.children:
-                        subNode.filter(filterTags)
+                        selectedNodeCount += subNode.filter(filterTags)
+                    
+                    return selectedNodeCount
+
+                def getFileCount(self) -> int:
+
+                    count = 1 if (self.pseudoNode.f_root.isFile()) else 0
+
+                    for subNode in self.children:
+                        count += subNode.getFileCount()
+                    
+                    return count
 
             class PseudoNode:
 
@@ -288,8 +307,10 @@ tabNames = []
 
 def onFilter():
     selectedTags = tagsWidget.getSelectedTags()
-    rootNode.filter(selectedTags)
+    selectedNodeCount = rootNode.filter(selectedTags)
     treeWidget.refresh(rootNode, isRecursive=True)
+    print("XXX")
+    updateWindowStatus(selectedNodeCount)
 
 # ? ? ? Construct Tags Widget.
 unionizedTags = rootNode.getUnionizedTags()
@@ -322,7 +343,8 @@ windowTitleFormatter = Constants.WindowTitleTemplate.createFormatter()
 windowTitleFormatter.assertParameter('text', str(f_root))
 window = GElements.Window(title=str(windowTitleFormatter),
                           rootLayout=rootLayout,
-                          minimumSize=Constants.WindowSize)
+                          minimumSize=Constants.WindowSize,
+                          isEnableStatusBar=True)
 
 # ? ? Create Tree Context-Menu.
 
@@ -432,6 +454,13 @@ window.createToolbar(GUtils.Menu([
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-reload.png'))),
     ),
 ]))
+
+# ? ? Setup window status.
+
+fileNodeCount = rootNode.getFileCount()
+
+def updateWindowStatus(selectedNodeCount:int):
+    window.setStatus(f"{selectedNodeCount} / {fileNodeCount} selected")
 
 # ? Run GUI loop.
 window.show()
