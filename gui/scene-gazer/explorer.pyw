@@ -309,7 +309,6 @@ def onFilter():
     selectedTags = tagsWidget.getSelectedTags()
     selectedNodeCount = rootNode.filter(selectedTags)
     treeWidget.refresh(rootNode, isRecursive=True)
-    print("XXX")
     updateWindowStatus(selectedNodeCount)
 
 # ? ? ? Construct Tags Widget.
@@ -460,7 +459,9 @@ window.createToolbar(GUtils.Menu([
 fileNodeCount = rootNode.getFileCount()
 
 def updateWindowStatus(selectedNodeCount:int):
-    window.setStatus(f"{selectedNodeCount} / {fileNodeCount} selected")
+    window.setStatus(f"[ {selectedNodeCount} / {fileNodeCount} ]")
+
+updateWindowStatus(0)
 
 # ? Run GUI loop.
 window.show()
