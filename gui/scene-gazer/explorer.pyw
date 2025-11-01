@@ -352,39 +352,54 @@ def showDescription():
         descriptionDialogTextEdit.setText(node.description)
         descriptionDialog.run()
 
-fileContextMenu = GUtils.Menu([
-    GUtils.Menu.EndPoint(
-        text=f'Open with Default Handler',
-        fcn=lambda: openWith("default-handler"),
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
-    ),
-    GUtils.Menu.EndPoint(
-        text=f'Open with {constants['title']}',
-        fcn=lambda: openWith("this"),
-        icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app']))
-    )
+menuItem_OpenWithDefaultHandler = GUtils.Menu.EndPoint(
+    text=f'Open with Default Handler',
+    fcn=lambda: openWith("default-handler"),
+    icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
+)
+
+menuItem_OpenWithFileExplorer = GUtils.Menu.EndPoint(
+    text=f'Open with Default Handler',
+    fcn=lambda: openWith("file-explorer"),
+    icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
+)
+
+menuItem_OpenWithThis = GUtils.Menu.EndPoint(
+    text=f'Open with {constants['title']}',
+    fcn=lambda: openWith("this"),
+    icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app']))
+)
+
+menuItem_ReadDescription = GUtils.Menu.EndPoint(
+    text=f'Read Description',
+    fcn=showDescription,
+    icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-description.png'))),
+)
+
+contextMenu_File = GUtils.Menu([
+    menuItem_OpenWithDefaultHandler,
+    menuItem_OpenWithThis
 ])
 
-directoryContextMenu = GUtils.Menu([
-    GUtils.Menu.EndPoint(
-        text=f'Open with Default Handler',
-        fcn=lambda: openWith("file-explorer"),
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
-    ),
-    GUtils.Menu.EndPoint(
-        text=f'Read Description',
-        fcn=showDescription,
-        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-description.png'))),
-    )
+contextMenu_Directory = GUtils.Menu([
+    menuItem_OpenWithFileExplorer
+])
+
+contextMenu_DirectoryWithDescription = GUtils.Menu([
+    menuItem_OpenWithFileExplorer,
+    menuItem_ReadDescription
 ])
 
 def treeContextMenuCallout():
     node = treeWidget.getContextInfo()
     f_selected = node.pseudoNode.f_root
     if f_selected.isFile():
-        treeWidget.showContextMenu(fileContextMenu)
+        treeWidget.showContextMenu(contextMenu_File)
     else:
-        treeWidget.showContextMenu(directoryContextMenu)
+        if node.description is None:
+            treeWidget.showContextMenu(contextMenu_Directory)
+        else:
+            treeWidget.showContextMenu(contextMenu_DirectoryWithDescription)
 
 treeWidget.setContextMenuCallout(treeContextMenuCallout)
 
