@@ -16,6 +16,7 @@ import typing
 from pprint import pprint
 from collections import OrderedDict
 import subprocess
+import os
 
 import Shared
 
@@ -411,6 +412,9 @@ def collapseAll():
 def expandAll():
     treeWidget.expandAll()
 
+def reload():
+    os.execv(sys.executable, [sys.executable] + sys.argv)
+
 window.createToolbar(GUtils.Menu([
     GUtils.Menu.EndPoint(
         text='Collapse All',
@@ -421,7 +425,12 @@ window.createToolbar(GUtils.Menu([
         text='Expand All',
         fcn=expandAll,
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-plus.png'))),
-    )
+    ),
+    GUtils.Menu.EndPoint(
+        text='Reload',
+        fcn=reload,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-reload.png'))),
+    ),
 ]))
 
 # ? Run GUI loop.
