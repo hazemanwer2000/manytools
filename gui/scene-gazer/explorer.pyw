@@ -245,6 +245,10 @@ class Constants:
                 r"start",
                 r"{{{FILE-PATH}}}"
             ),
+            "file-explorer" : ProcessUtils.CommandTemplate(
+                r"explorer",
+                r"{{{FILE-PATH}}}"
+            ),
             "this" : ProcessUtils.CommandTemplate(
                 f"{constants["global-macros"]["python"]}",
                 str(f_appDir.traverseDirectory(constants["runners"]["viewer"])),
@@ -326,7 +330,8 @@ def openWith(commandKey):
     f_selected = node.pseudoNode.f_root
     commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
     commandFormatter.assertParameter("file-path", str(f_selected))
-    subprocess.Popen(str(commandFormatter), shell=True)
+    command = str(commandFormatter).replace('/', '\\')
+    subprocess.Popen(command, shell=True)
 
 # ? ? ? Create Description Dialog.
 
@@ -363,7 +368,7 @@ fileContextMenu = GUtils.Menu([
 directoryContextMenu = GUtils.Menu([
     GUtils.Menu.EndPoint(
         text=f'Open with Default Handler',
-        fcn=lambda: openWith("default-handler"),
+        fcn=lambda: openWith("file-explorer"),
         icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
     ),
     GUtils.Menu.EndPoint(
