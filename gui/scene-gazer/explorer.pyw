@@ -45,10 +45,11 @@ class Utils:
 
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
-                    if self.pseudoNode.f_root.isFile():
-                        metadata = Shared.Utils.Metadata.find(pseudoNode.f_root)
-                        if metadata is not None:
-                            self.tags = Shared.Utils.Metadata.parseTags(metadata)
+                    self.description = None
+                    self.metadata = Shared.Utils.Metadata.find(pseudoNode.f_root)
+                    if self.metadata is not None:
+                        self.tags = Shared.Utils.Metadata.parseTags(self.metadata)
+                        self.description = Shared.Utils.Metadata.parseDescription(self.metadata)
 
                     # ? Construct attribute(s).
                     attribute_name = pseudoNode.f_root.getNameWithoutExtension()
@@ -229,10 +230,13 @@ class Constants:
     TreeColumnOffset = 20
     TabWidth = 350
     WindowSize = (1100, 600)
+    DescriptionDialogSize = (350, 250)
 
     FilterInText = '■'
     FilterOutText = '⬚'
     FilterExcludedText = ''
+
+    WindowTitleTemplate = ProcessUtils.FileTemplate(constants['title'] + r'  |  {{{TEXT}}}')
 
     class Commands:
 
@@ -309,7 +313,9 @@ else:
 
 # ? ? Window.
 
-window = GElements.Window(title=constants['title'] + '  |  ' + str(f_root),
+windowTitleFormatter = Constants.WindowTitleTemplate.createFormatter()
+windowTitleFormatter.assertParameter('text', str(f_root))
+window = GElements.Window(title=str(windowTitleFormatter),
                           rootLayout=rootLayout,
                           minimumSize=Constants.WindowSize)
 
@@ -318,10 +324,28 @@ window = GElements.Window(title=constants['title'] + '  |  ' + str(f_root),
 def openWith(commandKey):
     node = treeWidget.getContextInfo()
     f_selected = node.pseudoNode.f_root
-    if f_selected.isFile():
-        commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
-        commandFormatter.assertParameter("file-path", str(f_selected))
-        subprocess.Popen(str(commandFormatter), shell=True)
+    commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
+    commandFormatter.assertParameter("file-path", str(f_selected))
+    subprocess.Popen(str(commandFormatter), shell=True)
+
+# ? ? ? Create Description Dialog.
+
+descriptionDialogTextEdit = GElements.Widgets.Basics.TextEdit(isEditable=False, 
+                                                            isWrapText=True,
+                                                            isHorizontalScrollBar=False)
+
+descriptionDialogLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+descriptionDialogLayout.setWidget(descriptionDialogTextEdit, 0, 0)
+
+windowTitleFormatter = Constants.WindowTitleTemplate.createFormatter()
+windowTitleFormatter.assertParameter('text', 'Description')
+descriptionDialog = GElements.Dialog(str(windowTitleFormatter), descriptionDialogLayout, minimumSize=Constants.DescriptionDialogSize, isSizeFixed=True)
+
+def showDescription():
+    node = treeWidget.getContextInfo()
+    if node.description is not None:
+        descriptionDialogTextEdit.setText(node.description)
+        descriptionDialog.run()
 
 fileContextMenu = GUtils.Menu([
     GUtils.Menu.EndPoint(
@@ -336,11 +360,26 @@ fileContextMenu = GUtils.Menu([
     )
 ])
 
+directoryContextMenu = GUtils.Menu([
+    GUtils.Menu.EndPoint(
+        text=f'Open with Default Handler',
+        fcn=lambda: openWith("default-handler"),
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-external-link.png'))),
+    ),
+    GUtils.Menu.EndPoint(
+        text=f'Read Description',
+        fcn=showDescription,
+        icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-description.png'))),
+    )
+])
+
 def treeContextMenuCallout():
     node = treeWidget.getContextInfo()
     f_selected = node.pseudoNode.f_root
     if f_selected.isFile():
         treeWidget.showContextMenu(fileContextMenu)
+    else:
+        treeWidget.showContextMenu(directoryContextMenu)
 
 treeWidget.setContextMenuCallout(treeContextMenuCallout)
 

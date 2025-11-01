@@ -152,7 +152,22 @@ class Utils:
             return highlights
 
         @staticmethod
-        def find(f_video:FileUtils.File) -> dict:
+        def parseDescription(metadata:dict) -> str:
+            '''
+            Parses description from metadata.
+
+            Returns `None` if not defined.
+            '''
+            description = None
+
+            if 'description' in metadata:
+
+                description = metadata['description']
+            
+            return description
+
+        @staticmethod
+        def find(f_target:FileUtils.File) -> dict:
             '''
             Returns `metadata` that corresponds to a specific video file.
 
@@ -161,7 +176,7 @@ class Utils:
 
             metadata = None
 
-            f_metadata = f_video.traverseDirectory('..', '.metadata', f_video.getNameWithoutExtension() + '.json')
+            f_metadata = f_target.traverseDirectory('..', '.metadata', f_target.getNameWithoutExtension() + '.json')
             if f_metadata.isExists():
                 metadata = JSON.fromFile(f_metadata)
             
