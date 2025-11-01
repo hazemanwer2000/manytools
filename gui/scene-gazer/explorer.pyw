@@ -103,9 +103,36 @@ class Utils:
                         else:
                             idx += 1
 
+        class TagCategory(GElements.CustomWidget):
+
+            def __init__(self, tagCategory:str, tagLabels:typing.List[str]):
+
+                self.rootLayout = GElements.Layouts.FlowLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                self.rootWidget = GElements.Widgets.Decorators.Titled(GElements.Widget.fromLayout(self.rootLayout), tagCategory, isInnerOutline=True)
+                
+                super().__init__(self.rootWidget)
+
+                for tagLabel in tagLabels:
+                    tagLabelWidget = GElements.Widgets.Basics.Button(tagLabel, isCheckable=True)
+                    self.rootLayout.insertWidget(tagLabelWidget)
+
+        class Tags(GElements.CustomWidget):
+                
+            def __init__(self, tags:typing.OrderedDict[str, list]):
+
+                self.rootWidget = GElements.Widgets.Containers.VerticalContainer(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+                super().__init__(GElements.Widgets.Decorators.ScrollArea(self.rootWidget, AbstractGraphics.SymmetricMargin(0), isVerticalScrollBar=True))
+
+                for tagCategory in tags:
+
+                    tagCategoryWidget = Utils.CustomWidget.TagCategory(tagCategory, tags[tagCategory])
+                    self.rootWidget.getLayout().insertWidget(tagCategoryWidget)
+
 class Constants:
 
     TreeColumnOffset = 20
+
+    TabWidth = 350
 
     class Commands:
 
@@ -137,9 +164,6 @@ pseudoRootNode=Utils.CustomWidget.Tree.PseudoNode(f_root)
 pseudoRootNode.prune()
 
 rootNode = Utils.CustomWidget.Tree.Node(pseudoRootNode)
-unionizedTags = rootNode.getUnionizedTags()
-
-print(unionizedTags)
 
 treeWidget = GElements.Widgets.Basics.Tree(
     rootNode=rootNode,
@@ -150,8 +174,32 @@ treeWidget.resizeColumnsToContents(Constants.TreeColumnOffset)
 
 # ? ? Construct Root Layout.
 
-rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
-rootLayout.setWidget(treeWidget, 0, 0)
+tabWidgets = []
+tabNames = []
+
+# ? ? ? Construct Tags Widget.
+unionizedTags = rootNode.getUnionizedTags()
+if unionizedTags is not None:
+    tagsWidget = Utils.CustomWidget.Tags(unionizedTags)
+    tabWidgets.append(tagsWidget)
+    tabNames.append("Tags")
+
+if len(tabWidgets) > 0:
+
+    tabWidget = GElements.Widgets.Containers.TabContainer(
+        tabNames=tabNames,
+        widgets=tabWidgets
+    )
+
+    rootLayout = GElements.Layouts.GridLayout(1, 2, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+    rootLayout.setWidget(treeWidget, 0, 0)
+    rootLayout.setWidget(tabWidget, 0, 1)
+    rootLayout.setColumnMinimumSize(1, Constants.TabWidth)
+
+else:
+
+    rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
+    rootLayout.setWidget(treeWidget, 0, 0)
 
 # ? ? Window.
 
