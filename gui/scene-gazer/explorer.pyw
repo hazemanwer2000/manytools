@@ -34,7 +34,7 @@ class Utils:
 
             Headers = ['Name', 'Extension', 'Size', '']
 
-            SelectionColumnIdx = 3
+            FilterColumnIdx = 3
 
             class Node(GElements.Widgets.Basics.Tree.Node):
 
@@ -48,7 +48,7 @@ class Utils:
                     attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
                     extension = pseudoNode.f_root.getExtension()
                     attribute_extension = extension.upper() if (extension is not None) else ''
-                    self.attributes = [attribute_name, attribute_extension, attribute_size, Constants.DeselectedText]
+                    self.attributes = [attribute_name, attribute_extension, attribute_size, Constants.FilterOutText]
 
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
@@ -76,16 +76,35 @@ class Utils:
                     
                     return unionizedTags
                 
-                def filter(self, selectedTags:OrderedDict):
+                def filter(self, filterTags:OrderedDict) -> dict:
 
                     if self.pseudoNode.f_root.isFile():
-                        if len(selectedTags.keys()) == 0:
-                            self.attributes[Utils.CustomWidget.Tree.SelectionColumnIdx] = Constants.DeselectedText
+                        if (len(filterTags.keys()) == 0) or (self.tags is None):
+                            self.attributes[Utils.CustomWidget.Tree.FilterColumnIdx] = Constants.FilterOutText
                         else:
-                            self.attributes[Utils.CustomWidget.Tree.SelectionColumnIdx] = Constants.SelectedText
+
+                            # ? Filter algorithm.
+                            isSelected = True
+                            for filterTagCategory in filterTags:
+                                
+                                if filterTagCategory not in self.tags:
+                                    isSelected = False
+                                    break
+                                else:
+                                    isAnyMatchingLabel = False
+                                    for filterTagLabel in filterTags[filterTagCategory]:
+                                        if filterTagLabel in self.tags[filterTagCategory]:
+                                            isAnyMatchingLabel = True
+                                            break
+                                        
+                                    if not isAnyMatchingLabel:
+                                        isSelected = False
+                                        break
+                            
+                            self.attributes[Utils.CustomWidget.Tree.FilterColumnIdx] = (Constants.FilterInText if isSelected else Constants.FilterOutText)
 
                     for subNode in self.children:
-                        subNode.filter(selectedTags)
+                        subNode.filter(filterTags)
 
             class PseudoNode:
 
@@ -210,8 +229,8 @@ class Constants:
     TabWidth = 350
     WindowSize = (1100, 600)
 
-    SelectedText = '■'
-    DeselectedText = ''
+    FilterInText = '■'
+    FilterOutText = ''
 
     class Commands:
 
