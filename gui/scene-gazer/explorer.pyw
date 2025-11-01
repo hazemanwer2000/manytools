@@ -43,19 +43,20 @@ class Utils:
                     self.pseudoNode = pseudoNode
                     self.children = [Utils.CustomWidget.Tree.Node(x) for x in pseudoNode.getChildren()]
 
-                    # ? Construct attribute(s).
-                    attribute_name = pseudoNode.f_root.getNameWithoutExtension()
-                    attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
-                    extension = pseudoNode.f_root.getExtension()
-                    attribute_extension = extension.upper() if (extension is not None) else ''
-                    self.attributes = [attribute_name, attribute_extension, attribute_size, Constants.FilterOutText]
-
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
                     if self.pseudoNode.f_root.isFile():
                         metadata = Shared.Utils.Metadata.find(pseudoNode.f_root)
                         if metadata is not None:
                             self.tags = Shared.Utils.Metadata.parseTags(metadata)
+
+                    # ? Construct attribute(s).
+                    attribute_name = pseudoNode.f_root.getNameWithoutExtension()
+                    attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
+                    extension = pseudoNode.f_root.getExtension()
+                    attribute_extension = extension.upper() if (extension is not None) else ''
+                    attribute_filter = Constants.FilterOutText if (self.tags is not None) else Constants.FilterExcludedText
+                    self.attributes = [attribute_name, attribute_extension, attribute_size, attribute_filter]
 
                 def getChildren(self):
                     return self.children
@@ -78,8 +79,8 @@ class Utils:
                 
                 def filter(self, filterTags:OrderedDict) -> dict:
 
-                    if self.pseudoNode.f_root.isFile():
-                        if (len(filterTags.keys()) == 0) or (self.tags is None):
+                    if self.tags is not None:
+                        if len(filterTags.keys()) == 0:
                             self.attributes[Utils.CustomWidget.Tree.FilterColumnIdx] = Constants.FilterOutText
                         else:
 
@@ -230,7 +231,8 @@ class Constants:
     WindowSize = (1100, 600)
 
     FilterInText = '■'
-    FilterOutText = ''
+    FilterOutText = '⬚'
+    FilterExcludedText = ''
 
     class Commands:
 
