@@ -78,20 +78,85 @@ class Utils:
 
     class CustomWidget:
 
-        class Tree:
+        class FileTree:
 
-            Headers = ['Name', 'Extension', 'Size', '']
+            AttributeDefinition = [
+                {
+                    'key' : 'name',
+                    'display-name' : 'Name'
+                },
+                {
+                    'key' : 'extension',
+                    'display-name' : 'Extension'
+                },
+                {
+                    'key' : 'size',
+                    'display-name' : 'Size'
+                },
+                {
+                    'key' : 'filter-state',
+                    'display-name' : ''
+                }
+            ]
 
-            FilterColumnIdx = 3
+            @staticmethod
+            def getHeaders() -> typing.List[str]:
+                return [element['display-name'] for element in Utils.CustomWidget.FileTree.AttributeDefinition]
 
+            @staticmethod
+            def constructHierarchy(dFileNode:"Utils.DataStructure.FileNode") -> "Utils.CustomWidget.FileTree.FileNode":
+                '''
+                Constructs hierarchy of `FileNode`(s), and returns root.
+                '''
+                return Utils.CustomWidget.FileTree.FileNode.INTERNAL_fromDFileNode(dFileNode)
+            
             class FileNode(GElements.Widgets.Basics.Tree.Node):
+
+                @staticmethod
+                def INTERNAL_fromDFileNode(dFileNode:"Utils.DataStructure.FileNode") -> "Utils.CustomWidget.FileTree.FileNode":
+                    return Utils.CustomWidget.FileTree.DirectoryNode(dFileNode) if dFileNode.asFile().isDirectory() else Utils.CustomWidget.FileTree.RegularFileNode(dFileNode)
 
                 def __init__(self, dFileNode:"Utils.DataStructure.FileNode"):
                     
                     self.dFileNode = dFileNode
-                    self.children = [Utils.CustomWidget.Tree.FileNode(x) for x in dFileNode.getChildren()]
+                    self.children = []
+                    for dChildFileNode in dFileNode.getChildren():
+                        self.children.append(Utils.CustomWidget.FileTree.FileNode.INTERNAL_fromDFileNode(dChildFileNode))
 
-                    # ? Fetch tag(s) (metadata).
+                    self.attributeMap:dict = None
+
+                def getChildren(self):
+                    return self.children
+            
+                def getAttributes(self):
+                    return [self.attributeMap[element['key']] for element in Utils.CustomWidget.FileTree.AttributeDefinition]
+
+            class DirectoryNode(FileNode):
+
+                def __init__(self, dFileNode):
+                    super().__init__(dFileNode)
+
+                    # ? Fetch metadata.
+                    self.description = None
+                    self.metadata = Metadata.find(dFileNode.asFile())
+                    if self.metadata is not None:
+                        self.description = Metadata.Description.parseDescription(self.metadata)
+
+                    # ? Construct attribute map.
+                    extension = dFileNode.asFile().getExtension()
+                    self.attributeMap = {
+                        'name' : dFileNode.asFile().getNameWithoutExtension(),
+                        'size' : StringUtils.MakePretty.Size(dFileNode.asFile().getSize()),
+                        'extension' : extension.upper() if (extension is not None) else '',
+                        'filter-state' : Constants.FilterExcludedText
+                    }
+
+            class RegularFileNode(FileNode):
+
+                def __init__(self, dFileNode):
+                    super().__init__(dFileNode)
+
+                    # ? Fetch metadata.
                     self.tags = None
                     self.description = None
                     self.metadata = Metadata.find(dFileNode.asFile())
@@ -99,81 +164,13 @@ class Utils:
                         self.tags = Metadata.Tags.parseTags(self.metadata)
                         self.description = Metadata.Description.parseDescription(self.metadata)
 
-                    # ? Construct attribute(s).
-                    attribute_name = dFileNode.asFile().getNameWithoutExtension()
-                    attribute_size = StringUtils.MakePretty.Size(dFileNode.asFile().getSize()) if dFileNode.asFile().isFile() else ''
-                    extension = dFileNode.asFile().getExtension()
-                    attribute_extension = extension.upper() if (extension is not None) else ''
-                    attribute_filter = Constants.FilterOutText if (self.tags is not None) else Constants.FilterExcludedText
-                    self.attributes = [attribute_name, attribute_extension, attribute_size, attribute_filter]
-
-                def getChildren(self):
-                    return self.children
-            
-                def getAttributes(self):
-                    return self.attributes
-                
-                def getUnionizedTags(self):
-
-                    unionizedTags = self.tags
-
-                    for child in self.getChildren():
-                        extraTags = child.getUnionizedTags()
-                        if unionizedTags is None:
-                            unionizedTags = extraTags
-                        elif extraTags is not None:
-                            unionizedTags = Metadata.Tags.unionizeTags(unionizedTags, extraTags)
-                    
-                    return unionizedTags
-                
-                def filter(self, filterTags:OrderedDict) -> int:
-                    '''
-                    Returns number of node(s) selected.
-                    '''
-
-                    selectedNodeCount = 0
-
-                    if self.tags is not None:
-                        if len(filterTags.keys()) == 0:
-                            self.attributes[Utils.CustomWidget.Tree.FilterColumnIdx] = Constants.FilterOutText
-                        else:
-
-                            # ? Filter algorithm.
-                            isSelected = True
-                            for filterTagCategory in filterTags:
-                                
-                                if filterTagCategory not in self.tags:
-                                    isSelected = False
-                                    break
-                                else:
-                                    isAnyMatchingLabel = False
-                                    for filterTagLabel in filterTags[filterTagCategory]:
-                                        if filterTagLabel in self.tags[filterTagCategory]:
-                                            isAnyMatchingLabel = True
-                                            break
-                                        
-                                    if not isAnyMatchingLabel:
-                                        isSelected = False
-                                        break
-                            
-                            self.attributes[Utils.CustomWidget.Tree.FilterColumnIdx] = (Constants.FilterInText if isSelected else Constants.FilterOutText)
-                            
-                            if isSelected:
-                                selectedNodeCount += 1
-
-                    for subNode in self.children:
-                        selectedNodeCount += subNode.filter(filterTags)
-                    
-                    return selectedNodeCount
-
-                def getFileCount(self) -> int:
-
-                    count = 1 if (self.dFileNode.asFile().isFile()) else 0
-
-                    for subNode in self.children:
-                        count += subNode.getFileCount()
-                    
-                    return count
+                    # ? Construct attribute map.
+                    self.attributeMap = {
+                        'name' : dFileNode.asFile().getNameWithoutExtension(),
+                        'size' : '',
+                        'extension' : '',
+                        'filter-state' : Constants.FilterExcludedText if (self.tags is None) else Constants.FilterOutText
+                    }
 
         class TagCategory(GElements.CustomWidget):
 
@@ -304,14 +301,14 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 
 # ? ? Construct Tree Widget.
 
-rootFileNode=Utils.DataStructure.FileNode(f_root, conditional=lambda f: VideoUtils.Video.Utils.isVideo(f))
-rootFileNode.prune()
+rootDFileNode=Utils.DataStructure.FileNode(f_root, conditional=lambda f: VideoUtils.Video.Utils.isVideo(f))
+rootDFileNode.prune()
 
-rootNode = Utils.CustomWidget.Tree.FileNode(rootFileNode)
+rootNode = Utils.CustomWidget.FileTree.constructHierarchy(rootDFileNode)
 
 treeWidget = GElements.Widgets.Basics.Tree(
     rootNode=rootNode,
-    header=Utils.CustomWidget.Tree.Headers
+    header=Utils.CustomWidget.FileTree.Headers
 )
 treeWidget.expandAll()
 treeWidget.resizeColumnsToContents(Constants.TreeColumnOffset)
