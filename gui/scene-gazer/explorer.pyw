@@ -9,6 +9,7 @@ import automatey.Media.VideoUtils as VideoUtils
 import automatey.Utils.StringUtils as StringUtils
 import automatey.OS.ProcessUtils as ProcessUtils
 import automatey.OS.Specific.Windows as Windows
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 import traceback
 import sys
@@ -131,6 +132,8 @@ class Utils:
                                 tags = Metadata.Tags.unionizeTags(tags, currentTags)
                         elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
                             queue.extend(currentFileNode.getChildren())
+                        else:
+                            raise ExceptionUtils.ImplementationError("Instance is of an unexpected type.")
                     
                     return tags
                 
@@ -159,7 +162,9 @@ class Utils:
                                         currentFileNode.updateFilterState(Constants.FilterOutText)
                         elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
                             queue.extend(currentFileNode.getChildren())
-                    
+                        else:
+                            raise ExceptionUtils.ImplementationError("Instance is of an unexpected type.")
+
                     return filteredInCount
 
                 @staticmethod
@@ -177,7 +182,9 @@ class Utils:
                             fileCount += 1
                         elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
                             queue.extend(currentFileNode.getChildren())
-                    
+                        else:
+                            raise ExceptionUtils.ImplementationError("Instance is of an unexpected type.")
+
                     return fileCount
 
             class FileNode(GElements.Widgets.Basics.Tree.Node):
@@ -194,6 +201,9 @@ class Utils:
                         self.children.append(Utils.CustomWidget.FileTree.FileNode.INTERNAL_fromDFileNode(dChildFileNode))
 
                     self.attributeMap:dict = None
+
+                def asFile(self) -> FileUtils.File:
+                    return self.dFileNode.asFile()
 
                 def getChildren(self):
                     return self.children
@@ -459,8 +469,8 @@ window = GElements.Window(title=str(windowTitleFormatter),
 # ? ? Create Tree Context-Menu.
 
 def openWith(commandKey):
-    node = treeWidget.getContextInfo()
-    f_selected = node.fileNode.asFile()
+    fileNode = treeWidget.getContextInfo()
+    f_selected = fileNode.asFile()
     commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
     commandFormatter.assertParameter("file-path", str(f_selected))
     command = str(commandFormatter).replace('/', '\\')
@@ -480,10 +490,13 @@ windowTitleFormatter.assertParameter('text', 'Description')
 descriptionDialog = GElements.Dialog(str(windowTitleFormatter), descriptionDialogLayout, minimumSize=Constants.DescriptionDialogSize, isSizeFixed=True)
 
 def showDescription():
-    node = treeWidget.getContextInfo()
-    if node.description is not None:
-        descriptionDialogTextEdit.setText(node.description)
+    fileNode = treeWidget.getContextInfo()
+    description = fileNode.getDescription()
+    if description is not None:
+        descriptionDialogTextEdit.setText(description)
         descriptionDialog.run()
+
+# ? ? ? (...)
 
 menuItem_OpenWithDefaultHandler = GUtils.Menu.EndPoint(
     text=f'Open with Default Handler',
@@ -509,30 +522,28 @@ menuItem_ReadDescription = GUtils.Menu.EndPoint(
     icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-description.png'))),
 )
 
-contextMenu_File = GUtils.Menu([
-    menuItem_OpenWithDefaultHandler,
-    menuItem_OpenWithThis
-])
-
-contextMenu_Directory = GUtils.Menu([
-    menuItem_OpenWithFileExplorer
-])
-
-contextMenu_DirectoryWithDescription = GUtils.Menu([
-    menuItem_OpenWithFileExplorer,
-    menuItem_ReadDescription
-])
-
 def treeContextMenuCallout():
-    node = treeWidget.getContextInfo()
-    f_selected = node.fileNode.asFile()
-    if f_selected.isFile():
-        treeWidget.showContextMenu(contextMenu_File)
-    else:
-        if node.description is None:
-            treeWidget.showContextMenu(contextMenu_Directory)
-        else:
-            treeWidget.showContextMenu(contextMenu_DirectoryWithDescription)
+
+    fileNode = treeWidget.getContextInfo()
+    contextMenuItemList = []
+    
+    if isinstance(fileNode, Utils.CustomWidget.FileTree.RegularFileNode):
+        contextMenuItemList.extend([
+            menuItem_OpenWithDefaultHandler,
+            menuItem_OpenWithThis
+        ])
+    elif isinstance(fileNode, Utils.CustomWidget.FileTree.DirectoryNode):
+        contextMenuItemList.extend([
+            menuItem_OpenWithFileExplorer
+        ])
+    
+    if fileNode.getDescription() is not None:
+        contextMenuItemList.extend([
+            GUtils.Menu.Separator(),
+            menuItem_ReadDescription
+        ])
+    
+    treeWidget.showContextMenu(GUtils.Menu(contextMenuItemList))
 
 treeWidget.setContextMenuCallout(treeContextMenuCallout)
 
