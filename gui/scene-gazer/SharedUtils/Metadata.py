@@ -92,6 +92,35 @@ class Tags:
 
         return resultTags
 
+    @staticmethod
+    def isSubsetTags(tags, subsetTags) -> bool:
+        '''
+        Returns `True` if `subsetTags` is a subset of `tags`.
+        '''
+        isIncluded = True
+
+        for subsetTagCategory in subsetTags:
+            
+            # ? If any category not included, then 'False'.
+
+            if subsetTagCategory not in tags:
+                isIncluded = False
+                break
+            
+            # ? If not at least one label in a category is included, then 'False'.
+
+            isAnyLabelIncluded = False
+            for subsetLabel in subsetTags[subsetTagCategory]:
+                if subsetLabel in tags[subsetTagCategory]:
+                    isAnyLabelIncluded = True
+                    break
+            
+            if not isAnyLabelIncluded:
+                isIncluded = False
+                break
+        
+        return isIncluded
+
 class Chapters:
 
     @staticmethod

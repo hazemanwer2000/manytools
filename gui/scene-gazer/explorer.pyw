@@ -133,6 +133,34 @@ class Utils:
                             queue.extend(currentFileNode.getChildren())
                     
                     return tags
+                
+                @staticmethod
+                def updateFilterState(rootFileNode:"Utils.CustomWidget.FileTree.FileNode", referenceTags):
+                    '''
+                    Update filter state of each in the file hierarchy, based on the input `referenceTags`.
+                    '''
+                    filteredInCount = 0
+
+                    queue = [rootFileNode]
+                    
+                    while (len(queue) > 0):
+                        currentFileNode = queue.pop(0)
+                        if isinstance(currentFileNode, Utils.CustomWidget.FileTree.RegularFileNode):
+                            currentTags = currentFileNode.getTags()
+                            if currentTags is not None:
+                                if len(referenceTags) == 0:
+                                    currentFileNode.updateFilterState(Constants.FilterOutText)
+                                else:
+                                    isSubsetOf = Metadata.Tags.isSubsetTags(currentTags, referenceTags)
+                                    if isSubsetOf:
+                                        currentFileNode.updateFilterState(Constants.FilterInText)
+                                        filteredInCount += 1
+                                    else:
+                                        currentFileNode.updateFilterState(Constants.FilterOutText)
+                        elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
+                            queue.extend(currentFileNode.getChildren())
+                    
+                    return filteredInCount
 
                 @staticmethod
                 def getRegularFileCount(rootFileNode:"Utils.CustomWidget.FileTree.FileNode"):
@@ -223,6 +251,9 @@ class Utils:
                 def getTags(self):
                     return self.tags
 
+                def updateFilterState(self, filterState:str):
+                    self.attributeMap['filter-state'] = filterState
+
         class TagCategory(GElements.CustomWidget):
 
             def __init__(self, tagCategory:str, tagLabels:typing.List[str]):
@@ -250,6 +281,9 @@ class Utils:
                     tagLabelWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(fcn))
 
             def getSelectedTags(self) -> OrderedDict:
+                '''
+                Note: This API must be compatible with `Metadata.Tags` implementation.
+                '''
                 
                 result = OrderedDict()
 
@@ -383,12 +417,10 @@ tabWidgets = []
 tabNames = []
 
 def onSelectedTagsChange():
-    print("Ayeee!")
-    return
     selectedTags = tagsWidget.getSelectedTags()
-    selectedNodeCount = rootNode.filter(selectedTags)
-    treeWidget.refresh(rootNode, isRecursive=True)
-    updateWindowStatus(selectedNodeCount)
+    filteredInCount = Utils.CustomWidget.FileTree.Utils.updateFilterState(rootFileNode, selectedTags)
+    treeWidget.refresh(rootFileNode, isRecursive=True)
+    updateWindowStatus(filteredInCount)
 
 # ? ? ? Construct Tags Widget.
 allTags = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode)
