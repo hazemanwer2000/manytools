@@ -110,6 +110,48 @@ class Utils:
                 '''
                 return Utils.CustomWidget.FileTree.FileNode.INTERNAL_fromDFileNode(dFileNode)
             
+            class Utils:
+
+                @staticmethod
+                def getAllTags(rootFileNode:"Utils.CustomWidget.FileTree.FileNode"):
+                    '''
+                    Fetches all tag(s) in the file hierarchy.
+                    '''
+                    tags = None
+
+                    queue = [rootFileNode]
+                    
+                    while (len(queue) > 0):
+                        currentFileNode = queue.pop(0)
+                        if isinstance(currentFileNode, Utils.CustomWidget.FileTree.RegularFileNode):
+                            currentTags = currentFileNode.getTags()
+                            if tags is None:
+                                tags = currentTags
+                            elif currentTags is not None:
+                                tags = Metadata.Tags.unionizeTags(tags, currentTags)
+                        elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
+                            queue.extend(currentFileNode.getChildren())
+                    
+                    return tags
+
+                @staticmethod
+                def getRegularFileCount(rootFileNode:"Utils.CustomWidget.FileTree.FileNode"):
+                    '''
+                    Counts number of regular file(s) in the file hierarchy.
+                    '''
+                    fileCount = 0
+
+                    queue = [rootFileNode]
+                    
+                    while (len(queue) > 0):
+                        currentFileNode = queue.pop(0)
+                        if isinstance(currentFileNode, Utils.CustomWidget.FileTree.RegularFileNode):
+                            fileCount += 1
+                        elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
+                            queue.extend(currentFileNode.getChildren())
+                    
+                    return fileCount
+
             class FileNode(GElements.Widgets.Basics.Tree.Node):
 
                 @staticmethod
@@ -143,13 +185,15 @@ class Utils:
                         self.description = Metadata.Description.parseDescription(self.metadata)
 
                     # ? Construct attribute map.
-                    extension = dFileNode.asFile().getExtension()
                     self.attributeMap = {
                         'name' : dFileNode.asFile().getNameWithoutExtension(),
-                        'size' : StringUtils.MakePretty.Size(dFileNode.asFile().getSize()),
-                        'extension' : extension.upper() if (extension is not None) else '',
+                        'size' : '',
+                        'extension' : '',
                         'filter-state' : Constants.FilterExcludedText
                     }
+
+                def getDescription(self):
+                    return self.description
 
             class RegularFileNode(FileNode):
 
@@ -165,12 +209,19 @@ class Utils:
                         self.description = Metadata.Description.parseDescription(self.metadata)
 
                     # ? Construct attribute map.
+                    extension = dFileNode.asFile().getExtension()
                     self.attributeMap = {
                         'name' : dFileNode.asFile().getNameWithoutExtension(),
-                        'size' : '',
-                        'extension' : '',
+                        'size' : StringUtils.MakePretty.Size(dFileNode.asFile().getSize()),
+                        'extension' : extension.upper() if (extension is not None) else '',
                         'filter-state' : Constants.FilterExcludedText if (self.tags is None) else Constants.FilterOutText
                     }
+
+                def getDescription(self) -> str:
+                    return self.description
+                
+                def getTags(self):
+                    return self.tags
 
         class TagCategory(GElements.CustomWidget):
 
@@ -304,11 +355,11 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 rootDFileNode=Utils.DataStructure.FileNode(f_root, conditional=lambda f: VideoUtils.Video.Utils.isVideo(f))
 rootDFileNode.prune()
 
-rootNode = Utils.CustomWidget.FileTree.constructHierarchy(rootDFileNode)
+rootFileNode = Utils.CustomWidget.FileTree.constructHierarchy(rootDFileNode)
 
 treeWidget = GElements.Widgets.Basics.Tree(
-    rootNode=rootNode,
-    header=Utils.CustomWidget.FileTree.Headers
+    rootNode=rootFileNode,
+    header=Utils.CustomWidget.FileTree.getHeaders()
 )
 treeWidget.expandAll()
 treeWidget.resizeColumnsToContents(Constants.TreeColumnOffset)
@@ -319,15 +370,16 @@ tabWidgets = []
 tabNames = []
 
 def onFilter():
+    return
     selectedTags = tagsWidget.getSelectedTags()
     selectedNodeCount = rootNode.filter(selectedTags)
     treeWidget.refresh(rootNode, isRecursive=True)
     updateWindowStatus(selectedNodeCount)
 
 # ? ? ? Construct Tags Widget.
-unionizedTags = rootNode.getUnionizedTags()
-if unionizedTags is not None:
-    tagsWidget = Utils.CustomWidget.Tags(unionizedTags)
+allTags = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode)
+if allTags is not None:
+    tagsWidget = Utils.CustomWidget.Tags(allTags)
     tagsContainerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onFilter)
     tabWidgets.append(tagsContainerWidget)
     tabNames.append("Tags")
@@ -469,7 +521,7 @@ window.createToolbar(GUtils.Menu([
 
 # ? ? Setup window status.
 
-fileNodeCount = rootNode.getFileCount()
+fileNodeCount = Utils.CustomWidget.FileTree.Utils.getRegularFileCount(rootFileNode)
 
 def updateWindowStatus(selectedNodeCount:int):
     window.setStatus(f"[ {selectedNodeCount} / {fileNodeCount} ]")
