@@ -86,23 +86,23 @@ class Utils:
 
             class FileNode(GElements.Widgets.Basics.Tree.Node):
 
-                def __init__(self, fileNode:"Utils.DataStructure.FileNode"):
+                def __init__(self, dFileNode:"Utils.DataStructure.FileNode"):
                     
-                    self.fileNode = fileNode
-                    self.children = [Utils.CustomWidget.Tree.FileNode(x) for x in fileNode.getChildren()]
+                    self.dFileNode = dFileNode
+                    self.children = [Utils.CustomWidget.Tree.FileNode(x) for x in dFileNode.getChildren()]
 
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
                     self.description = None
-                    self.metadata = Metadata.find(fileNode.asFile())
+                    self.metadata = Metadata.find(dFileNode.asFile())
                     if self.metadata is not None:
                         self.tags = Metadata.Tags.parseTags(self.metadata)
                         self.description = Metadata.Description.parseDescription(self.metadata)
 
                     # ? Construct attribute(s).
-                    attribute_name = fileNode.asFile().getNameWithoutExtension()
-                    attribute_size = StringUtils.MakePretty.Size(fileNode.asFile().getSize()) if fileNode.asFile().isFile() else ''
-                    extension = fileNode.asFile().getExtension()
+                    attribute_name = dFileNode.asFile().getNameWithoutExtension()
+                    attribute_size = StringUtils.MakePretty.Size(dFileNode.asFile().getSize()) if dFileNode.asFile().isFile() else ''
+                    extension = dFileNode.asFile().getExtension()
                     attribute_extension = extension.upper() if (extension is not None) else ''
                     attribute_filter = Constants.FilterOutText if (self.tags is not None) else Constants.FilterExcludedText
                     self.attributes = [attribute_name, attribute_extension, attribute_size, attribute_filter]
@@ -168,7 +168,7 @@ class Utils:
 
                 def getFileCount(self) -> int:
 
-                    count = 1 if (self.fileNode.asFile().isFile()) else 0
+                    count = 1 if (self.dFileNode.asFile().isFile()) else 0
 
                     for subNode in self.children:
                         count += subNode.getFileCount()
