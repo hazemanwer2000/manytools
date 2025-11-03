@@ -18,7 +18,7 @@ from collections import OrderedDict
 import subprocess
 import os
 
-import Shared
+import SharedUtils.Metadata as Metadata
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
@@ -47,10 +47,10 @@ class Utils:
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
                     self.description = None
-                    self.metadata = Shared.Utils.Metadata.find(pseudoNode.f_root)
+                    self.metadata = Metadata.find(pseudoNode.f_root)
                     if self.metadata is not None:
-                        self.tags = Shared.Utils.Metadata.parseTags(self.metadata)
-                        self.description = Shared.Utils.Metadata.parseDescription(self.metadata)
+                        self.tags = Metadata.Tags.parseTags(self.metadata)
+                        self.description = Metadata.Description.parseDescription(self.metadata)
 
                     # ? Construct attribute(s).
                     attribute_name = pseudoNode.f_root.getNameWithoutExtension()
@@ -75,7 +75,7 @@ class Utils:
                         if unionizedTags is None:
                             unionizedTags = extraTags
                         elif extraTags is not None:
-                            unionizedTags = Shared.Utils.Metadata.unionizeTags(unionizedTags, extraTags)
+                            unionizedTags = Metadata.Tags.unionizeTags(unionizedTags, extraTags)
                     
                     return unionizedTags
                 
@@ -218,7 +218,7 @@ class Utils:
                     result.update(tagCategoryWidget.getSelectedTags())
                 return result
 
-        class TagsContainer(GElements.CustomWidget):
+        class TagsManager(GElements.CustomWidget):
 
             def __init__(self, tagsWidget:"Utils.CustomWidget.Tags", onFilter):
 
@@ -315,7 +315,7 @@ def onFilter():
 unionizedTags = rootNode.getUnionizedTags()
 if unionizedTags is not None:
     tagsWidget = Utils.CustomWidget.Tags(unionizedTags)
-    tagsContainerWidget = Utils.CustomWidget.TagsContainer(tagsWidget, onFilter)
+    tagsContainerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onFilter)
     tabWidgets.append(tagsContainerWidget)
     tabNames.append("Tags")
 

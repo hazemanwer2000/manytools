@@ -279,9 +279,7 @@ window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
                           minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)
 
-# ? Setup event handler(s).
-
-# ? ? Setup timer (i.e., for recurrent activities).
+# ? Setup timer (i.e., for recurrent activities).
 
 previousChapterWidget:Utils.CustomWidget.Chapter = None
 
