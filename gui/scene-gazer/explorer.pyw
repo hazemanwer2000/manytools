@@ -245,6 +245,10 @@ class Utils:
                 for tagLabelWidget in self.tagLabelWidgets:
                     tagLabelWidget.setChecked(False)
 
+            def registerOnTagToggle(self, fcn):
+                for tagLabelWidget in self.tagLabelWidgets:
+                    tagLabelWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(fcn))
+
             def getSelectedTags(self) -> OrderedDict:
                 
                 result = OrderedDict()
@@ -275,6 +279,10 @@ class Utils:
             def deselectAll(self):
                 for tagCategoryWidget in self.tagCategoryWidgets:
                     tagCategoryWidget.deselectAll()
+            
+            def registerOnTagToggle(self, fcn):
+                for tagCategoryWidget in self.tagCategoryWidgets:
+                    tagCategoryWidget.registerOnTagToggle(fcn)
 
             def getSelectedTags(self) -> OrderedDict:
                 result = OrderedDict()
@@ -284,7 +292,7 @@ class Utils:
 
         class TagsManager(GElements.CustomWidget):
 
-            def __init__(self, tagsWidget:"Utils.CustomWidget.Tags", onFilter):
+            def __init__(self, tagsWidget:"Utils.CustomWidget.Tags", onSelectedTagsChange):
 
                 self.rootLayout = GElements.Layouts.GridLayout(2, 1, AbstractGraphics.SymmetricMargin(0), 0)
                 self.rootWidget = GElements.Widget.fromLayout(self.rootLayout)
@@ -295,9 +303,6 @@ class Utils:
                 self.controlLayout = GElements.Layouts.FlowLayout(elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
                 self.controlWidget = GElements.Widget.fromLayout(self.controlLayout)
                 # ? ? (...)
-                self.filterButton = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-filter.png'))))
-                self.controlLayout.insertWidget(self.filterButton)
-                # ? ? (...)
                 self.clearButton = GElements.Widgets.Basics.Button(icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-remove.png'))))
                 self.controlLayout.insertWidget(self.clearButton)
 
@@ -306,8 +311,16 @@ class Utils:
                 self.rootLayout.setRowMinimumSize(1, 0)
 
                 # ? Set event handler(s).
-                self.clearButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(tagsWidget.deselectAll))
-                self.filterButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(onFilter))
+                self.clearButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.onClear))
+                tagsWidget.registerOnTagToggle(onSelectedTagsChange)
+
+                # ? (...)
+                self.tagsWidget = tagsWidget
+                self.onSelectedTagsChange = onSelectedTagsChange
+
+            def onClear(self):
+                self.tagsWidget.deselectAll()
+                self.onSelectedTagsChange()
 
 class Constants:
 
@@ -369,7 +382,8 @@ treeWidget.resizeColumnsToContents(Constants.TreeColumnOffset)
 tabWidgets = []
 tabNames = []
 
-def onFilter():
+def onSelectedTagsChange():
+    print("Ayeee!")
     return
     selectedTags = tagsWidget.getSelectedTags()
     selectedNodeCount = rootNode.filter(selectedTags)
@@ -380,7 +394,7 @@ def onFilter():
 allTags = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode)
 if allTags is not None:
     tagsWidget = Utils.CustomWidget.Tags(allTags)
-    tagsContainerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onFilter)
+    tagsContainerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onSelectedTagsChange)
     tabWidgets.append(tagsContainerWidget)
     tabNames.append("Tags")
 
