@@ -22,7 +22,15 @@ The metadata file must reside under `../FILE-NAME.json` relative to the video fi
     "tags": [
         "Category / Label"
     ],
-    "descr
+    "description" : [
+        "Paragraph-1, Line-1.",
+        "Paragraph-1, Line-2.",
+        "Paragraph-1, Line-3.",
+        "",
+        "Paragraph-2, Line-1.",
+        "Paragraph-2, Line-2.",
+        "Paragraph-2, Line-3."
+    ],
     "chapters": [
         {
             "description": "La-bla!",
@@ -38,4 +46,4 @@ The metadata file must reside under `../FILE-NAME.json` relative to the video fi
 }
 ```
 
-Note: Only `tags` metadata information is supported for directories.
+Note: Only `description` metadata information is supported for directories.
