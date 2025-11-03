@@ -30,6 +30,12 @@ constants = JSON.fromFile(f_constants)
 
 class Utils:
 
+    class Dialog:
+
+        @staticmethod
+        def reportError(msg:str):
+            GElements.StandardDialog.showInformation('Error', msg, Constants.ErrorDialogSize, isSizeFixed=True)
+
     class DataStructure:
 
         class FileNode:
@@ -217,10 +223,13 @@ class Utils:
                     super().__init__(dFileNode)
 
                     # ? Fetch metadata.
-                    self.description = None
-                    self.metadata = Metadata.find(dFileNode.asFile())
-                    if self.metadata is not None:
-                        self.description = Metadata.Description.parseDescription(self.metadata)
+                    try:
+                        self.description = None
+                        self.metadata = Metadata.find(dFileNode.asFile())
+                        if self.metadata is not None:
+                            self.description = Metadata.Description.parseDescription(self.metadata)
+                    except:
+                        raise ExceptionUtils.ValidationError(f"Error occurred while parsing metadata: '{str(dFileNode.asFile())}'")
 
                     # ? Construct attribute map.
                     self.attributeMap = {
@@ -239,12 +248,15 @@ class Utils:
                     super().__init__(dFileNode)
 
                     # ? Fetch metadata.
-                    self.tags = None
-                    self.description = None
-                    self.metadata = Metadata.find(dFileNode.asFile())
-                    if self.metadata is not None:
-                        self.tags = Metadata.Tags.parseTags(self.metadata)
-                        self.description = Metadata.Description.parseDescription(self.metadata)
+                    try:
+                        self.tags = None
+                        self.description = None
+                        self.metadata = Metadata.find(dFileNode.asFile())
+                        if self.metadata is not None:
+                            self.tags = Metadata.Tags.parseTags(self.metadata)
+                            self.description = Metadata.Description.parseDescription(self.metadata)
+                    except:
+                        raise ExceptionUtils.ValidationError(f"Error occurred while parsing metadata: '{str(dFileNode.asFile())}'")
 
                     # ? Construct attribute map.
                     extension = dFileNode.asFile().getExtension()
@@ -373,6 +385,8 @@ class Constants:
     WindowSize = (1100, 600)
     DescriptionDialogSize = (350, 250)
 
+    ErrorDialogSize = (1000, 400)
+
     FilterInText = '■'
     FilterOutText = '⬚'
     FilterExcludedText = ''
@@ -412,7 +426,14 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 rootDFileNode=Utils.DataStructure.FileNode(f_root, conditional=lambda f: VideoUtils.Video.Utils.isVideo(f))
 rootDFileNode.prune()
 
-rootFileNode = Utils.CustomWidget.FileTree.constructHierarchy(rootDFileNode)
+try:
+
+    rootFileNode = Utils.CustomWidget.FileTree.constructHierarchy(rootDFileNode)
+
+except Exception as e:
+
+    Utils.Dialog.reportError(traceback.format_exc())
+    exit(1)
 
 treeWidget = GElements.Widgets.Basics.Tree(
     rootNode=rootFileNode,
