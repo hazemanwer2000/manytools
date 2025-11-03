@@ -17,26 +17,64 @@ The metadata file must reside under `../FILE-NAME.json` relative to the video fi
 
 ## Metadata
 
+*Note:* Only `description` metadata information is supported for directories.
+
+### `tags` 
+
 ```
 {
     "tags": [
         "Category / Label"
-    ],
+    ]
+}
+```
+
+### `description` 
+
+```
+{
     "description" : [
-        "Paragraph-1, Line-1.",
-        "Paragraph-1, Line-2.",
-        "Paragraph-1, Line-3.",
-        "",
-        "Paragraph-2, Line-1.",
-        "Paragraph-2, Line-2.",
-        "Paragraph-2, Line-3."
-    ],
+        [
+            "Paragraph-1, Line-1.",
+            "Paragraph-1, Line-2.",
+            "Paragraph-1, Line-3."
+        ],
+        [
+            "Paragraph-2, Line-1."
+            "Paragraph-2, Line-2.",
+            "Paragraph-2, Line-3."
+        ]
+    ]
+}
+```
+
+```
+{
+    "description" : [
+        "Line-1",
+        "Line-2",
+        "Line-3"
+    ]
+}
+```
+
+### `chapters` 
+
+```
+{
     "chapters": [
         {
             "description": "La-bla!",
             "timestamp": "00:00:00.000"
         }
-    ],
+    ]
+}
+```
+
+### `highlights` 
+
+```
+{
     "highlights": [
         {
             "description": "La-bla!",
@@ -46,4 +84,3 @@ The metadata file must reside under `../FILE-NAME.json` relative to the video fi
 }
 ```
 
-Note: Only `description` metadata information is supported for directories.

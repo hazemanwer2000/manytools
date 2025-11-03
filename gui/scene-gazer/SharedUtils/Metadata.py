@@ -193,7 +193,13 @@ class Description:
 
         if 'description' in metadata:
 
-            description = '\n\n'.join(metadata['description'])
+            if isinstance(metadata['description'][0], list):
+                paragraphs = []
+                for sentenceList in metadata['description']:
+                    paragraphs.append(' '.join(sentenceList))
+                description = '\n\n'.join(paragraphs)
+            else:
+                description = ' '.join(metadata['description'])
         
         return description
 
