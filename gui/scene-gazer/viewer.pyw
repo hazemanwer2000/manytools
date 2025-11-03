@@ -19,7 +19,7 @@ from pprint import pprint
 import os
 from collections import OrderedDict
 
-import Shared
+import SharedUtils.Metadata as Metadata
 
 class Utils:
 
@@ -211,14 +211,14 @@ highlights = None
 
 try:
 
-    metadata = Shared.Utils.Metadata.find(f_video)
+    metadata = Metadata.find(f_video)
 
     if metadata is not None:
 
-        description = Shared.Utils.Metadata.parseDescription(metadata)
-        tags = Shared.Utils.Metadata.parseTags(metadata)
-        chapters = Shared.Utils.Metadata.parseChapters(metadata)
-        highlights = Shared.Utils.Metadata.parseHighlights(metadata)
+        description = Metadata.Description.parseDescription(metadata)
+        tags = Metadata.Tags.parseTags(metadata)
+        chapters = Metadata.Chapters.parseChapters(metadata)
+        highlights = Metadata.Highlights.parseHighlights(metadata)
 
 except Exception as e:
 
