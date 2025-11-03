@@ -29,6 +29,53 @@ constants = JSON.fromFile(f_constants)
 
 class Utils:
 
+    class DataStructure:
+
+        class FileNode:
+            '''
+            Represents a file, and self-grows to represent the file hierarchy beneathe it.
+
+            Notes:
+            - `conditional` determines if a non-directory file is included in the hierarchy or not.
+            '''
+
+            def __init__(self, f_root:FileUtils.File, conditional:lambda f:True):
+                
+                self.f_root = f_root
+                self.children = []
+
+                if f_root.isDirectory():
+
+                    f_list = f_root.listDirectory(conditional=lambda x: (x.isDirectory() or (x.isFile() and conditional(x))))
+                    Windows.Utils.sort(f_list, lambda x: x.getName())
+                    for f in f_list:
+                        self.children.append(Utils.DataStructure.FileNode(f, conditional))
+
+            def getChildren(self):
+                '''
+                Returns the list of child `FileNode`(s).
+                '''
+                return self.children
+            
+            def asFile(self) -> FileUtils.File:
+                return self.f_root
+
+            def prune(self):
+                '''
+                Removes all child `FileNode`(s) that represent directories that do not contain non-directory file(s).
+                '''
+                idx = 0
+                while idx < len(self.children):
+                    
+                    child = self.children[idx]
+
+                    child.prune()
+                    
+                    if child.f_root.isDirectory() and (len(child.children) == 0):
+                        del self.children[idx]
+                    else:
+                        idx += 1
+
     class CustomWidget:
 
         class Tree:
@@ -39,7 +86,7 @@ class Utils:
 
             class Node(GElements.Widgets.Basics.Tree.Node):
 
-                def __init__(self, pseudoNode:"Utils.CustomWidget.Tree.PseudoNode"):
+                def __init__(self, pseudoNode:"Utils.DataStructure.FileNode"):
                     
                     self.pseudoNode = pseudoNode
                     self.children = [Utils.CustomWidget.Tree.Node(x) for x in pseudoNode.getChildren()]
@@ -47,15 +94,15 @@ class Utils:
                     # ? Fetch tag(s) (metadata).
                     self.tags = None
                     self.description = None
-                    self.metadata = Metadata.find(pseudoNode.f_root)
+                    self.metadata = Metadata.find(pseudoNode.asFile())
                     if self.metadata is not None:
                         self.tags = Metadata.Tags.parseTags(self.metadata)
                         self.description = Metadata.Description.parseDescription(self.metadata)
 
                     # ? Construct attribute(s).
-                    attribute_name = pseudoNode.f_root.getNameWithoutExtension()
-                    attribute_size = StringUtils.MakePretty.Size(pseudoNode.f_root.getSize()) if pseudoNode.f_root.isFile() else ''
-                    extension = pseudoNode.f_root.getExtension()
+                    attribute_name = pseudoNode.asFile().getNameWithoutExtension()
+                    attribute_size = StringUtils.MakePretty.Size(pseudoNode.asFile().getSize()) if pseudoNode.asFile().isFile() else ''
+                    extension = pseudoNode.asFile().getExtension()
                     attribute_extension = extension.upper() if (extension is not None) else ''
                     attribute_filter = Constants.FilterOutText if (self.tags is not None) else Constants.FilterExcludedText
                     self.attributes = [attribute_name, attribute_extension, attribute_size, attribute_filter]
@@ -121,43 +168,12 @@ class Utils:
 
                 def getFileCount(self) -> int:
 
-                    count = 1 if (self.pseudoNode.f_root.isFile()) else 0
+                    count = 1 if (self.pseudoNode.asFile().isFile()) else 0
 
                     for subNode in self.children:
                         count += subNode.getFileCount()
                     
                     return count
-
-            class PseudoNode:
-
-                def __init__(self, f_root:FileUtils.File):
-                    
-                    self.f_root = f_root
-                    self.children = []
-
-                    if f_root.isDirectory():
-
-                        f_list = f_root.listDirectory(conditional=lambda x: x.isDirectory() or VideoUtils.Video.Utils.isVideo(x))
-                        Windows.Utils.sort(f_list, lambda x: x.getName())
-                        for f in f_list:
-                            self.children.append(Utils.CustomWidget.Tree.PseudoNode(f))
-
-                def getChildren(self):
-                    return self.children
-                
-                def prune(self):
-
-                    idx = 0
-                    while idx < len(self.children):
-                        
-                        child = self.children[idx]
-
-                        child.prune()
-                        
-                        if child.f_root.isDirectory() and (len(child.children) == 0):
-                            del self.children[idx]
-                        else:
-                            idx += 1
 
         class TagCategory(GElements.CustomWidget):
 
@@ -288,10 +304,10 @@ application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path'][
 
 # ? ? Construct Tree Widget.
 
-pseudoRootNode=Utils.CustomWidget.Tree.PseudoNode(f_root)
-pseudoRootNode.prune()
+rootFileNode=Utils.DataStructure.FileNode(f_root, conditional=lambda f: VideoUtils.Video.Utils.isVideo(f))
+rootFileNode.prune()
 
-rootNode = Utils.CustomWidget.Tree.Node(pseudoRootNode)
+rootNode = Utils.CustomWidget.Tree.Node(rootFileNode)
 
 treeWidget = GElements.Widgets.Basics.Tree(
     rootNode=rootNode,
@@ -349,7 +365,7 @@ window = GElements.Window(title=str(windowTitleFormatter),
 
 def openWith(commandKey):
     node = treeWidget.getContextInfo()
-    f_selected = node.pseudoNode.f_root
+    f_selected = node.pseudoNode.asFile()
     commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
     commandFormatter.assertParameter("file-path", str(f_selected))
     command = str(commandFormatter).replace('/', '\\')
@@ -414,7 +430,7 @@ contextMenu_DirectoryWithDescription = GUtils.Menu([
 
 def treeContextMenuCallout():
     node = treeWidget.getContextInfo()
-    f_selected = node.pseudoNode.f_root
+    f_selected = node.pseudoNode.asFile()
     if f_selected.isFile():
         treeWidget.showContextMenu(contextMenu_File)
     else:
