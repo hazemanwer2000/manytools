@@ -311,7 +311,7 @@ class Utils:
 
             def getSelectedTags(self) -> OrderedDict:
                 '''
-                Note: This API must be compatible with `Metadata.Tags` implementation.
+                Warning: This part of the implementation must be compatible with `Metadata` implementation.
                 '''
                 
                 result = OrderedDict()
@@ -483,6 +483,7 @@ def onSelectedTagsChange():
     treeWidget.refresh(rootFileNode, isRecursive=True)
 
     # ? Fetch all tags of all selected in the file hierarchy, and update the state of the tags accordingly.
+    # ? ? Warning: This part of the implementation must be compatible with `Metadata` implementation.
     allTagsOfSelected = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode, conditional=lambda n: n.isSelected())
     if allTagsOfSelected is None:
         allTagsOfSelected = OrderedDict()
