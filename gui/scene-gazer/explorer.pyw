@@ -367,14 +367,14 @@ class Utils:
                 self.rootLayout.setRowMinimumSize(1, 0)
 
                 # ? Set event handler(s).
-                self.clearButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.onClear))
+                self.clearButton.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onClear))
                 tagsWidget.registerOnTagToggle(onSelectedTagsChange)
 
                 # ? (...)
                 self.tagsWidget = tagsWidget
                 self.onSelectedTagsChange = onSelectedTagsChange
 
-            def onClear(self):
+            def INTERNAL_onClear(self):
                 self.tagsWidget.deselectAll()
                 self.onSelectedTagsChange()
 
@@ -448,9 +448,16 @@ tabWidgets = []
 tabNames = []
 
 def onSelectedTagsChange():
+
+    # ? Query current selected tags, and update attributes of file hierarchy accordingly.
     selectedTags = tagsWidget.getSelectedTags()
     filteredInCount = Utils.CustomWidget.FileTree.Utils.updateFilterState(rootFileNode, selectedTags)
     treeWidget.refresh(rootFileNode, isRecursive=True)
+
+    # ? Fetch all tags of all "filtered-in" in the file hierarchy, and update the state of the tags accordingly.
+    
+
+    # ? Update window status.
     updateWindowStatus(filteredInCount)
 
 # ? ? ? Construct Tags Widget.
