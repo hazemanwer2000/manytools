@@ -28,10 +28,14 @@ class Utils:
     class Metadata:
 
         @staticmethod
-        def create(f_video:FileUtils.File):
+        def create(f_video:FileUtils.File) -> bool:
             '''
             Creates metadata file that corresponds to a specific video file, if non-existent.
+
+            Returns `False` if already existent, otherwise `True`. 
             '''
+            isNewlyCreated = False
+
             # ? Create metadata directory, if non-existent.
             f_metadataDir = f_video.traverseDirectory('..', '.metadata')
             if not f_metadataDir.isExists():
@@ -43,7 +47,9 @@ class Utils:
             f_metadata = f_metadataDir.traverseDirectory(f_video.getNameWithoutExtension() + '.json')
             if not f_metadata.isExists():
                 JSON.saveAs(dict(), f_metadata)
-                print(f_metadata)
+                isNewlyCreated = True
+            
+            return isNewlyCreated
 
 @click.group()
 def cli():
@@ -74,8 +80,12 @@ def init(input):
         f_list.extend(f_root.listDirectory(isRecursive=True, conditional=Utils.isVideoFile))
 
     # ? Create metadata file, for each video file.
+    newlyCreatedCount = 0
     for f_video in f_list:
-        Utils.Metadata.create(f_video)
+        if Utils.Metadata.create(f_video):
+            newlyCreatedCount += 1
+
+    print(f"{newlyCreatedCount} newly created out of {len(f_list)}")
 
 if __name__ == '__main__':
     cli()
