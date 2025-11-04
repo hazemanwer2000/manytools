@@ -120,9 +120,12 @@ class Utils:
             class Utils:
 
                 @staticmethod
-                def getAllTags(rootFileNode:"Utils.CustomWidget.FileTree.FileNode"):
+                def getAllTags(rootFileNode:"Utils.CustomWidget.FileTree.FileNode", conditional=lambda n:True):
                     '''
                     Fetches all tag(s) in the file hierarchy.
+
+                    Note(s):
+                    - `conditional` determines if the tags of `RegularFileNode` are included or not. 
                     '''
                     tags = None
 
@@ -131,11 +134,12 @@ class Utils:
                     while (len(queue) > 0):
                         currentFileNode = queue.pop(0)
                         if isinstance(currentFileNode, Utils.CustomWidget.FileTree.RegularFileNode):
-                            currentTags = currentFileNode.getTags()
-                            if tags is None:
-                                tags = currentTags
-                            elif currentTags is not None:
-                                tags = Metadata.Tags.unionizeTags(tags, currentTags)
+                            if conditional(currentFileNode):
+                                currentTags = currentFileNode.getTags()
+                                if tags is None:
+                                    tags = currentTags
+                                elif currentTags is not None:
+                                    tags = Metadata.Tags.unionizeTags(tags, currentTags)
                         elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
                             queue.extend(currentFileNode.getChildren())
                         else:
@@ -276,6 +280,9 @@ class Utils:
                 def updateFilterState(self, filterState:str):
                     self.attributeMap['filter-state'] = filterState
 
+                def isSelected(self) -> bool:
+                    return self.attributeMap['filter-state'] == Constants.FilterInText
+
         class TagCategory(GElements.CustomWidget):
 
             def __init__(self, tagCategory:str, tagLabels:typing.List[str]):
@@ -319,6 +326,20 @@ class Utils:
 
                 return result
 
+            def updateTagEnabledState(self, enabledTags):
+
+                for idx, tagLabelWidget in enumerate(self.tagLabelWidgets):
+
+                    enabledState = True
+                    
+                    if len(enabledTags.keys()) > 0:
+                        if self.tagCategory not in enabledTags:
+                            enabledState = False
+                        elif self.tagLabels[idx] not in enabledTags[self.tagCategory]:
+                            enabledState = False
+
+                    tagLabelWidget.setEnabled(enabledState)
+
         class Tags(GElements.CustomWidget):
                 
             def __init__(self, tags:typing.OrderedDict[str, list]):
@@ -345,6 +366,10 @@ class Utils:
                 for tagCategoryWidget in self.tagCategoryWidgets:
                     result.update(tagCategoryWidget.getSelectedTags())
                 return result
+            
+            def updateTagEnabledState(self, enabledTags):
+                for tagCategoryWidget in self.tagCategoryWidgets:
+                    tagCategoryWidget.updateTagEnabledState(enabledTags)
 
         class TagsManager(GElements.CustomWidget):
 
@@ -377,6 +402,9 @@ class Utils:
             def INTERNAL_onClear(self):
                 self.tagsWidget.deselectAll()
                 self.onSelectedTagsChange()
+
+            def updateTagEnabledState(self, enabledTags):
+                self.tagsWidget.updateTagEnabledState(enabledTags)
 
 class Constants:
 
@@ -454,8 +482,11 @@ def onSelectedTagsChange():
     filteredInCount = Utils.CustomWidget.FileTree.Utils.updateFilterState(rootFileNode, selectedTags)
     treeWidget.refresh(rootFileNode, isRecursive=True)
 
-    # ? Fetch all tags of all "filtered-in" in the file hierarchy, and update the state of the tags accordingly.
-    
+    # ? Fetch all tags of all selected in the file hierarchy, and update the state of the tags accordingly.
+    allTagsOfSelected = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode, conditional=lambda n: n.isSelected())
+    if allTagsOfSelected is None:
+        allTagsOfSelected = OrderedDict()
+    tagsManagerWidget.updateTagEnabledState(allTagsOfSelected)
 
     # ? Update window status.
     updateWindowStatus(filteredInCount)
@@ -464,8 +495,8 @@ def onSelectedTagsChange():
 allTags = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode)
 if allTags is not None:
     tagsWidget = Utils.CustomWidget.Tags(allTags)
-    tagsContainerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onSelectedTagsChange)
-    tabWidgets.append(tagsContainerWidget)
+    tagsManagerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onSelectedTagsChange)
+    tabWidgets.append(tagsManagerWidget)
     tabNames.append("Tags")
 
 if len(tabWidgets) > 0:

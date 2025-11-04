@@ -107,15 +107,15 @@ class Tags:
                 isIncluded = False
                 break
             
-            # ? If not at least one label in a category is included, then 'False'.
+            # ? If not all label(s) in a category included, then 'False'.
 
-            isAnyLabelIncluded = False
+            isAllLabelsIncluded = True
             for subsetLabel in subsetTags[subsetTagCategory]:
-                if subsetLabel in tags[subsetTagCategory]:
-                    isAnyLabelIncluded = True
+                if subsetLabel not in tags[subsetTagCategory]:
+                    isAllLabelsIncluded = False
                     break
             
-            if not isAnyLabelIncluded:
+            if not isAllLabelsIncluded:
                 isIncluded = False
                 break
         
