@@ -143,7 +143,8 @@ class FFMPEG:
             r'-hide_banner',
             r'-i {{{INPUT-VIDEO-FILE}}}',   
             r'-i {{{INPUT-AUDIO-FILE}}}',   
-            r'-c:v copy', 
+            r'-c:v copy',
+            r'-c:a copy',
             r'-map 0:v:0', 
             r'-map 1:a:0', 
             r'-shortest', 
@@ -466,7 +467,7 @@ class CommandHandler:
                 # ? (...)
                 f_output = FileUtils.File(
                     FileUtils.File.Utils.Path.iterateName(
-                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
+                        FileUtils.File.Utils.Path.modifyName(str(f_input))
                     )
                 )
 
@@ -492,6 +493,25 @@ class CommandHandler:
                 commandFormatter = FFMPEG.CommandTemplates['AudioExtract'].createFormatter()
                 commandFormatter.assertParameter('input-video-file', str(f_input))
                 commandFormatter.assertParameter('output-audio-file', str(f_output))
+                Utils.executeCommand(str(commandFormatter))
+
+        class Replace:
+
+            @staticmethod
+            def run(f_input:FileUtils.File, f_audio:FileUtils.File):
+
+                # ? (...)
+                f_output = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input))
+                    )
+                )
+
+                # ? Generate.
+                commandFormatter = FFMPEG.CommandTemplates['AudioReplace'].createFormatter()
+                commandFormatter.assertParameter('input-video-file', str(f_input))
+                commandFormatter.assertParameter('input-audio-file', str(f_audio))
+                commandFormatter.assertParameter('output-video-file', str(f_output))
                 Utils.executeCommand(str(commandFormatter))
 
 class CustomGroup(click.Group):
@@ -618,6 +638,12 @@ def mute(input):
 @click.option('--ext', required=True, help='Extension of output file.')
 def extract(input, ext):
     CommandHandler.Audio.Extract.run(FileUtils.File(input), ext)
+
+@audio.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--audio', required=True, help='Input (audio) file.')
+def replace(input, audio):
+    CommandHandler.Audio.Replace.run(FileUtils.File(input), FileUtils.File(audio))
 
 if __name__ == '__main__':
     cli()
