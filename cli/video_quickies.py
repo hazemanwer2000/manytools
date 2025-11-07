@@ -661,9 +661,9 @@ def mute(input):
 
 @audio.command()
 @click.option('--input', required=True, help='Input (video) file.')
-@click.option('--ext', required=True, help='Extension of output file.')
-def extract(input, ext):
-    CommandHandler.Audio.Extract.run(FileUtils.File(input), ext)
+@click.option('--extension', required=False, default='m4a', help='Extension of output file.')
+def extract(input, extension):
+    CommandHandler.Audio.Extract.run(FileUtils.File(input), extension)
 
 @audio.command()
 @click.option('--input', required=True, help='Input (video) file.')
