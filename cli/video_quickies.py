@@ -149,6 +149,14 @@ class FFMPEG:
             r'-shortest', 
             r'{{{OUTPUT-VIDEO-FILE}}}', 
         ),
+        'AudioExtract' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-VIDEO-FILE}}}',
+            r'-vn',
+            r'-acodec copy',
+            r'{{{OUTPUT-AUDIO-FILE}}}', 
+        ),
     }
 
     @staticmethod
@@ -468,6 +476,24 @@ class CommandHandler:
                 commandFormatter.assertParameter('output-file', str(f_output))
                 Utils.executeCommand(str(commandFormatter))
 
+        class Extract:
+
+            @staticmethod
+            def run(f_input:FileUtils.File, outputExtension:str):
+
+                # ? (...)
+                f_output = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension=outputExtension)
+                    )
+                )
+
+                # ? Generate.
+                commandFormatter = FFMPEG.CommandTemplates['AudioExtract'].createFormatter()
+                commandFormatter.assertParameter('input-video-file', str(f_input))
+                commandFormatter.assertParameter('output-audio-file', str(f_output))
+                Utils.executeCommand(str(commandFormatter))
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -586,6 +612,12 @@ def audio():
 @click.option('--input', required=True, help='Input (video) file.')
 def mute(input):
     CommandHandler.Audio.Mute.run(FileUtils.File(input))
+
+@audio.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--ext', required=True, help='Extension of output file.')
+def extract(input, ext):
+    CommandHandler.Audio.Extract.run(FileUtils.File(input), ext)
 
 if __name__ == '__main__':
     cli()
