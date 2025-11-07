@@ -150,6 +150,14 @@ class FFMPEG:
             r'-shortest', 
             r'{{{OUTPUT-VIDEO-FILE}}}', 
         ),
+        'AudioConvert' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-FILE}}}',
+            r'-c:a aac',
+            r'-b:a 256k',
+            r'{{{OUTPUT-FILE}}}', 
+        ),
         'AudioExtract' : ProcessUtils.CommandTemplate(
             r'ffmpeg',
             r'-hide_banner',
@@ -514,6 +522,24 @@ class CommandHandler:
                 commandFormatter.assertParameter('output-video-file', str(f_output))
                 Utils.executeCommand(str(commandFormatter))
 
+        class Convert:
+
+            @staticmethod
+            def run(f_input:FileUtils.File):
+
+                # ? (...)
+                f_output = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension='m4a')
+                    )
+                )
+
+                # ? Generate.
+                commandFormatter = FFMPEG.CommandTemplates['AudioConvert'].createFormatter()
+                commandFormatter.assertParameter('input-file', str(f_input))
+                commandFormatter.assertParameter('output-file', str(f_output))
+                Utils.executeCommand(str(commandFormatter))
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -644,6 +670,11 @@ def extract(input, ext):
 @click.option('--audio', required=True, help='Input (audio) file.')
 def replace(input, audio):
     CommandHandler.Audio.Replace.run(FileUtils.File(input), FileUtils.File(audio))
+
+@audio.command()
+@click.option('--input', required=True, help='Input (audio) file.')
+def convert(input):
+    CommandHandler.Audio.Convert.run(FileUtils.File(input))
 
 if __name__ == '__main__':
     cli()
