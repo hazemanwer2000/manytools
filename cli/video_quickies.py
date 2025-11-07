@@ -130,6 +130,25 @@ class FFMPEG:
             r'-c:a aac',
             r'{{{OUTPUT-FILE}}}',
         ),
+        'AudioMute' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-FILE}}}',
+            r'-an',
+            r'-c:v copy',
+            r'{{{OUTPUT-FILE}}}',
+        ),
+        'AudioReplace' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-VIDEO-FILE}}}',   
+            r'-i {{{INPUT-AUDIO-FILE}}}',   
+            r'-c:v copy', 
+            r'-map 0:v:0', 
+            r'-map 1:a:0', 
+            r'-shortest', 
+            r'{{{OUTPUT-VIDEO-FILE}}}', 
+        ),
     }
 
     @staticmethod
@@ -429,6 +448,26 @@ class CommandHandler:
             commandFormatter.assertParameter('output-file', str(f_output))
             Utils.executeCommand(str(commandFormatter))
 
+    class Audio:
+
+        class Mute:
+
+            @staticmethod
+            def run(f_input:FileUtils.File):
+
+                # ? (...)
+                f_output = FileUtils.File(
+                    FileUtils.File.Utils.Path.iterateName(
+                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
+                    )
+                )
+
+                # ? Generate.
+                commandFormatter = FFMPEG.CommandTemplates['AudioMute'].createFormatter()
+                commandFormatter.assertParameter('input-file', str(f_input))
+                commandFormatter.assertParameter('output-file', str(f_output))
+                Utils.executeCommand(str(commandFormatter))
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -535,6 +574,18 @@ def no_metadata(input):
     Remove all metadata from video.
     '''
     CommandHandler.NoMetadata.run(FileUtils.File(input))
+
+@cli.group()
+def audio():
+    '''
+    Manipulate audio.
+    '''
+    pass
+
+@audio.command()
+@click.option('--input', required=True, help='Input (video) file.')
+def mute(input):
+    CommandHandler.Audio.Mute.run(FileUtils.File(input))
 
 if __name__ == '__main__':
     cli()
