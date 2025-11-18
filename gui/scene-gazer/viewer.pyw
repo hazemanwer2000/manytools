@@ -219,6 +219,9 @@ try:
         tags = Metadata.Tags.parseTags(metadata)
         chapters = Metadata.Chapters.parseChapters(metadata)
         highlights = Metadata.Highlights.parseHighlights(metadata)
+        
+        if (chapters is not None) and (highlights is not None):
+            Metadata.Highlights.ammendHighlights(highlights, chapters)
 
 except Exception as e:
 
@@ -303,11 +306,7 @@ def performRecurrentActivities():
         global previousChapterWidget
         
         # ? ? Determine current chapter.
-        currentChapterIdx = None
-        for idx in range(len(chapters)-1, -1, -1):
-            if videoPosition >= chapters[idx]['timestamp']:
-                currentChapterIdx = idx
-                break
+        currentChapterIdx = Metadata.Chapters.findChapter(chapters, videoPosition)['index'] - 1
 
         # ? ? Get corresponding chapter widget.
         currentChapterWidget:Utils.CustomWidget.Chapter = None

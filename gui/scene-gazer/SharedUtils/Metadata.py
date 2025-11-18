@@ -155,6 +155,19 @@ class Chapters:
         
         return chapters
 
+    @staticmethod
+    def findChapter(chapters:list, timestamp:TimeUtils.Time):
+        '''
+        Returns the chapter within which a timestamp lies.
+        '''
+        # ? ? Determine current chapter.
+        chapter = None
+        for idx in range(len(chapters)-1, -1, -1):
+            if timestamp >= chapters[idx]['timestamp']:
+                chapter = chapters[idx]
+                break
+        return chapter
+
 class Highlights:
 
     @staticmethod
@@ -179,6 +192,16 @@ class Highlights:
                 highlights.append(highlight)
         
         return highlights
+
+    @staticmethod
+    def ammendHighlights(hightlights:list, chapters:list):
+        '''
+        Ammends highlights, using chapters (information).
+        '''
+        for highlight in hightlights:
+            selectedChapter = Chapters.findChapter(chapters, highlight['timestamp'])
+            if selectedChapter is not None:
+                highlight['description'] += f" [{selectedChapter['index']}]"
 
 class Description:
 
