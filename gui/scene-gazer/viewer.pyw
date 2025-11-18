@@ -184,8 +184,8 @@ class Constants:
 
     TextEditHeight = 50
 
-    Color_Highlight = ColorUtils.Color.fromHEX("#FFFFFF")
-    Color_NoHighlight = ColorUtils.Color.fromHEX("#1E1E1E")
+    Color_Highlight = ColorUtils.Color.fromHEX("#1E1E1E")
+    Color_NoHighlight = ColorUtils.Color.fromHEX("#FFFFFF")
 
 # ? Get app's root directory.
 f_appDir = FileUtils.File(__file__).traverseDirectory('..')
