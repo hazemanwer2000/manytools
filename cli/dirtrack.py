@@ -64,12 +64,20 @@ class Utils:
                         CLI.echo('  ' + filePath + '\n', textColor=Utils.Constants['cli']['text-color']['delta-file-path'])
 
     @staticmethod
+    def isTrackable(f:FileUtils.File):
+        return f.isFile() and all([not (chunk in str(f)) for chunk in [
+            Utils.Constants['tracker-directory-name'] + '/',
+            '.git/',
+            '.gitignore'
+        ]])
+
+    @staticmethod
     def constructDirectoryState():
         
         f_cwd = FileUtils.File.Utils.getWorkingDirectory()
         
         # ? Get a list of all file(s).
-        allFilePaths = f_cwd.listDirectoryRelatively(isRecursive=True, conditional=lambda x: x.isFile() and not ((Utils.Constants['tracker-directory-name'] + '/') in str(x)))
+        allFilePaths = f_cwd.listDirectoryRelatively(isRecursive=True, conditional=Utils.isTrackable)
         allFiles = [FileUtils.File(x) for x in allFilePaths]
         
         # ? Construct state.
