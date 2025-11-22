@@ -44,7 +44,7 @@ class Utils:
                 self.rootLayout.setColumnMinimumSize(0, 0)
                 self.rootLayout.setRowMinimumSize(0, 0)
                 
-                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False, height=Constants.TextEditHeight)
+                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isTextSelectable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False, height=Constants.TextEditHeight)
                 self.textEdit.setText(entry['description'])
                 self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
 
@@ -103,7 +103,7 @@ class Utils:
                 self.rootLayout.setRowMinimumSize(0, 0)
                 self.rootLayout.setRowMinimumSize(1, 0)
                 
-                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False, height=Constants.TextEditHeight)
+                self.textEdit = GElements.Widgets.Basics.TextEdit(isWrapText=True, isEditable=False, isTextSelectable=False, isVerticalScrollBar=False, isHorizontalScrollBar=False, height=Constants.TextEditHeight)
                 self.textEdit.setText(entry['description'])
                 self.textEdit.setEventHandler(GUtils.EventHandlers.ClickEventHandler(self.INTERNAL_onSelect))
 
@@ -167,7 +167,8 @@ class Utils:
 
             def __init__(self, description:str):
 
-                self.textEditWidget = GElements.Widgets.Basics.TextEdit(isEditable=False, 
+                self.textEditWidget = GElements.Widgets.Basics.TextEdit(isEditable=False,
+                                                                        isTextSelectable=False,
                                                                         isWrapText=True,
                                                                         isHorizontalScrollBar=False)
                 self.textEditWidget.setText(description)    
