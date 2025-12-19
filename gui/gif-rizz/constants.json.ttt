@@ -2,7 +2,7 @@
     "title" : "GIF'Rizz",
     "path" : {
         "icon" : {
-            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/melon.png"
+            "app" : "{{ current_directory }}/resources/icon/melon.png"
         }
     },
     "gui" : {
@@ -11,7 +11,7 @@
         } 
     },
     "start-menu" : {
-        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/melon-48.ico",
+        "icon-path" : "{{ current_directory }}/resources/icon/melon-48.ico",
         "name" : "GIF Rizz"
     }
 }

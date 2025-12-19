@@ -2,12 +2,12 @@
     "title" : "Scene' Gazer",
     "path" : {
         "icon" : {
-            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/video.png"
+            "app" : "{{ current_directory }}/resources/icon/video.png"
         }
     },
 
     "context-menu" : {
-        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/video-16.ico",
+        "icon-path" : "{{ current_directory }}/resources/icon/video-16.ico",
         "name" : {
             "viewer" : "View with SceneGazer",
             "explorer" : "Explore with SceneGazer"
@@ -15,8 +15,8 @@
     },
     
     "global-macros" : {
-        "pythonw" : "{{{BIN-PYTHONW}}}",
-        "python" : "{{{BIN-PYTHON}}}"
+        "pythonw" : "{{ bin_pythonw }}",
+        "python" : "{{ bin_python }}"
     },
 
     "runners" : {

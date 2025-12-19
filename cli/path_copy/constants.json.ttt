@@ -1,11 +1,11 @@
 {
     "context-menu" : {
-        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/path-16.ico",
+        "icon-path" : "{{ current_directory }}/resources/icon/path-16.ico",
         "name" : "Copy Path (Unix-Style)"
     },
     
     "global-macros" : {
-        "pythonw" : "{{{BIN-PYTHONW}}}",
-        "python" : "{{{BIN-PYTHON}}}"
+        "pythonw" : "{{ bin_pythonw }}",
+        "python" : "{{ bin_python }}"
     }
 }

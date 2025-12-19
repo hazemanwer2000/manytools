@@ -4,8 +4,8 @@
 
     "path" : {
         "icon" : {
-            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/doc.png",
-            "xml" : "{{{CURRENT-DIRECTORY}}}/resources/icon/xml.png"
+            "app" : "{{ current_directory }}/resources/icon/doc.png",
+            "xml" : "{{ current_directory }}/resources/icon/xml.png"
         }
     },
     
@@ -23,7 +23,7 @@
         "element-history-capacity" : 100,
         "indent-spaces-count" : 2,
 
-        "xml-viewer" : "{{{BIN-NOTEPAD-PLUS-PLUS}}}",
-        "default-viewer" : "{{{BIN-VSCODE}}}"
+        "xml-viewer" : "{{ bin_notepad_plus_plus }}",
+        "default-viewer" : "{{ bin_vscode }}"
     }
 }

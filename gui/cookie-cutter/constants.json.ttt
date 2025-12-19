@@ -2,10 +2,10 @@
     "title" : "Cookie'Cutter",
     "path" : {
         "icon" : {
-            "app" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie.png"
+            "app" : "{{ current_directory }}/resources/icon/cookie.png"
         },
         "template" : {
-            "video-info" : "{{{CURRENT-DIRECTORY}}}/resources/template/video-info.template"
+            "video-info" : "{{ current_directory }}/resources/template/video-info.template"
         }
     },
     "gui" : {
@@ -15,11 +15,11 @@
     },
 
     "context-menu" : {
-        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/cookie-16.ico",
+        "icon-path" : "{{ current_directory }}/resources/icon/cookie-16.ico",
         "name" : "Edit with CookieCutter"
     },
     
     "global-macros" : {
-        "pythonw" : "{{{BIN-PYTHONW}}}"
+        "pythonw" : "{{ bin_pythonw }}"
     }
 }

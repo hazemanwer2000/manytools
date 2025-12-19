@@ -1,11 +1,11 @@
 {
     "context-menu" : {
-        "icon-path" : "{{{CURRENT-DIRECTORY}}}/resources/icon/renamer-16.ico",
+        "icon-path" : "{{ current_directory }}/resources/icon/renamer-16.ico",
         "name" : "Rename Files"
     },
     
     "global-macros" : {
-        "pythonw" : "{{{BIN-PYTHONW}}}",
-        "python" : "{{{BIN-PYTHON}}}"
+        "pythonw" : "{{ bin_pythonw }}",
+        "python" : "{{ bin_python }}"
     }
 }
