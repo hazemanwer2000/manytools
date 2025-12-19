@@ -13,6 +13,8 @@ import automatey.Utils.StringUtils as StringUtils
 import time
 import traceback
 
+import jinja2
+
 # ? Video Informaiton, has to be initialized by thread.
 class VideoInformation:
 
@@ -404,10 +406,11 @@ class INTERNAL:
         VideoInformation.dimensions = INTERNAL.video.getDimensions()
         VideoInformation.duration = INTERNAL.video.getDuration()
         # ? ? 
-        summaryFormatter = ProcessUtils.FileTemplate.fromFile(INTERNAL.Parameters.f_videoInfoTemplate).createFormatter()
-        summaryFormatter.assertParameter('fps', f"{VideoInformation.fps:.3f}")
-        summaryFormatter.assertParameter('size', str(VideoInformation.dimensions))
-        VideoInformation.summary = str(summaryFormatter)
+        templateDict = dict()
+        template = jinja2.Template(INTERNAL.Parameters.f_videoInfoTemplate.quickRead('t'))
+        templateDict['fps'] = f"{VideoInformation.fps:.3f}"
+        templateDict['size'] = str(VideoInformation.dimensions)
+        VideoInformation.summary = template.render(**templateDict)
         # ? ? (...)
         VideoInformation.isInitialized = True
 

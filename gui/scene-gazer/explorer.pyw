@@ -18,6 +18,7 @@ from pprint import pprint
 from collections import OrderedDict
 import subprocess
 import os
+import jinja2
 
 import SharedUtils.Metadata as Metadata
 
@@ -419,7 +420,7 @@ class Constants:
     FilterOutText = '⬚'
     FilterExcludedText = ''
 
-    WindowTitleTemplate = ProcessUtils.FileTemplate(constants['title'] + r'  |  {{{TEXT}}}')
+    WindowTitleTemplate = jinja2.Template(constants['title'] + r'  |  {{ TEXT }}')
 
     class Commands:
 
@@ -518,10 +519,7 @@ else:
     rootLayout.setWidget(treeWidget, 0, 0)
 
 # ? ? Window.
-
-windowTitleFormatter = Constants.WindowTitleTemplate.createFormatter()
-windowTitleFormatter.assertParameter('text', str(f_root))
-window = GElements.Window(title=str(windowTitleFormatter),
+window = GElements.Window(title=Constants.WindowTitleTemplate.render(text=str(f_root)),
                           rootLayout=rootLayout,
                           minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)
@@ -545,9 +543,7 @@ descriptionDialogTextEdit = GElements.Widgets.Basics.TextEdit(isEditable=False,
 descriptionDialogLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
 descriptionDialogLayout.setWidget(descriptionDialogTextEdit, 0, 0)
 
-windowTitleFormatter = Constants.WindowTitleTemplate.createFormatter()
-windowTitleFormatter.assertParameter('text', 'Description')
-descriptionDialog = GElements.Dialog(str(windowTitleFormatter), descriptionDialogLayout, minimumSize=Constants.DescriptionDialogSize, isSizeFixed=True)
+descriptionDialog = GElements.Dialog(Constants.WindowTitleTemplate.render(text='Description'), descriptionDialogLayout, minimumSize=Constants.DescriptionDialogSize, isSizeFixed=True)
 
 def showDescription():
     fileNode = treeWidget.getContextInfo()

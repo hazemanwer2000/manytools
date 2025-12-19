@@ -1,3 +1,3 @@
 
-FPS = {{{FPS}}}
-Size = {{{SIZE}}}
+FPS = {{ fps }}
+Size = {{ size }}

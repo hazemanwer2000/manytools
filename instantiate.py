@@ -23,8 +23,6 @@ for f_template in f_templates:
     # ? Read template.
     template = jinja2.Template(f_template.quickRead('t'))
     
-    # ? Format (...)
-    
     # ? ? Parameter: CURRENT-DIRECTORY
     f_templateDir = f_template.traverseDirectory('..')
     f_templateDirAbs = f_cwd.traverseDirectory(str(f_templateDir))
@@ -33,7 +31,7 @@ for f_template in f_templates:
     # ? ? Parameter: BASE-DIRECTORY
     templateDict['base_directory'] = str(f_cwd)
 
-    # ? ? Replace 'global-macros'.
+    # ? ? Parameter(s): GLOBAL-MACROS
     global_macros = settings['global-macros']
     for macro_name in global_macros:
         templateDict[macro_name] = global_macros[macro_name]
