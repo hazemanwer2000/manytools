@@ -5,7 +5,7 @@
             "app" : "{{ current_directory }}/resources/icon/cookie.png"
         },
         "template" : {
-            "video-info" : "{{ current_directory }}/resources/template/video-info.template"
+            "video-info" : "{{ current_directory }}/resources/template/video-info.jinja2"
         }
     },
     "gui" : {
