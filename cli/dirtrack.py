@@ -70,6 +70,10 @@ class Utils:
             '.git/',
             '.gitignore'
         ]])
+    
+    @staticmethod
+    def generateHashFromFile(f:FileUtils.File):
+        return Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
 
     @staticmethod
     def constructDirectoryState():
@@ -93,7 +97,7 @@ class Utils:
         totalSize = 0
         with CLI.ProgressBar.create(allFiles, label='Hashing files') as iteratorWrapper:
             for f in iteratorWrapper:
-                hashAsBytes = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
+                hashAsBytes = Utils.generateHashFromFile(f)
                 fileSize = f.getSize()
                 totalSize += fileSize
                 fileState = {
