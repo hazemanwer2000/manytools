@@ -153,11 +153,17 @@ class Utils:
 
     @staticmethod
     def getReferenceState():
+        
         trackerFileNamePrefix = FileUtils.File(Utils.Constants['tracker-file-name']).getNameWithoutExtension()
         f_trackList = SharedObjects.F_DirTrack.listDirectory(conditional=lambda x: x.getNameWithoutExtension().startswith(trackerFileNamePrefix))
         f_trackList.sort(key=lambda x: str(x))
-        f_trackLast = f_trackList[-1]
-        return JSON.fromFile(f_trackLast)
+        
+        state = None
+        if len(f_trackList) != 0:
+            f_trackLast = f_trackList[-1]
+            state = JSON.fromFile(f_trackLast)
+            
+        return state
 
 class SharedObjects:
     
@@ -186,50 +192,62 @@ class CommandHandler:
         @staticmethod
         def run():
             
-            # ? Determine if must commit, or not (...)
-            isCommit = None
             if not SharedObjects.F_DirTrack.isExists():
-                SharedObjects.F_DirTrack.makeDirectory()
-
-                # Create settings file with default settings.
-                SharedObjects.Settings = Utils.Constants['default-settings'].copy()
-                JSON.saveAs(SharedObjects.Settings, SharedObjects.F_Settings)
-
-                currentState = Utils.constructDirectoryState()
-                isCommit = True
-                Utils.Report.Info('First commit in current directory.')
+                Utils.Report.Error("Directory is not initialized.")
             else:
                 referenceState = Utils.getReferenceState()
                 currentState = Utils.constructDirectoryState()
-                delta = Utils.constructDelta(referenceState, currentState)
-                isCommit = delta['metadata']['is-directory-modified']
-                if isCommit:
-                    Utils.Report.Delta(delta)
+                
+                isSaveRequired = False
+
+                if referenceState is None:
+                    isSaveRequired = True
+                    Utils.Report.Info('First commit in directory.')
                 else:
-                    Utils.Report.Error('Nothing to commit, directory un-changed.')
+                    delta = Utils.constructDelta(referenceState, currentState)
+                    if delta['metadata']['is-directory-modified']:
+                        isSaveRequired = True
+                        Utils.Report.Delta(delta)
+                    else:
+                        Utils.Report.Info('There is no delta, directory un-changed.')
+
+                if isSaveRequired:
+                    f_trackBase = SharedObjects.F_DirTrack.traverseDirectory(Utils.Constants['tracker-file-name'])
+                    f_trackNew = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_trackBase)))
+                    JSON.saveAs(currentState, f_trackNew)
                 
-            # ? Commit, if (...)
-            if isCommit:
-                f_trackBase = SharedObjects.F_DirTrack.traverseDirectory(Utils.Constants['tracker-file-name'])
-                f_trackNew = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_trackBase)))
-                JSON.saveAs(currentState, f_trackNew)
-                
+    class Init:
+
+        def run():
+
+            if SharedObjects.F_DirTrack.isExists():
+                Utils.Report.Error("Directory already initialized.")
+            else:
+                SharedObjects.F_DirTrack.makeDirectory()
+
+                SharedObjects.Settings = Utils.Constants['default-settings'].copy()
+                JSON.saveAs(SharedObjects.Settings, SharedObjects.F_Settings)
+
+                Utils.Report.Info('Directory initialized successfully.')
+
     class Delta:
         
         @staticmethod
         def run():
 
             if not SharedObjects.F_DirTrack.isExists():
-                Utils.Report.Error("Current directory has no commit(s).")
+                Utils.Report.Error("Directory is not initialized.")
             else:
                 referenceState = Utils.getReferenceState()
-                currentState = Utils.constructDirectoryState()
-                delta = Utils.constructDelta(referenceState, currentState)
-                isCommit = delta['metadata']['is-directory-modified']
-                if isCommit:
-                    Utils.Report.Delta(delta)
+                if referenceState is None:
+                    Utils.Report.Error("No commit(s) found in the directory.")
                 else:
-                    Utils.Report.Info('There is no delta, directory un-changed.')
+                    currentState = Utils.constructDirectoryState()
+                    delta = Utils.constructDelta(referenceState, currentState)
+                    if delta['metadata']['is-directory-modified']:
+                        Utils.Report.Delta(delta)
+                    else:
+                        Utils.Report.Info('There is no delta, directory un-changed.')
 
     class Settings:
 
@@ -237,7 +255,7 @@ class CommandHandler:
         def run(mode:str=None):
 
             if not SharedObjects.F_DirTrack.isExists():
-                Utils.Report.Error("Current directory has no commit(s).")
+                Utils.Report.Error("Directory is not initialized.")
             else:
 
                 if mode is not None:
@@ -245,6 +263,8 @@ class CommandHandler:
                 
                 FileUtils.File.Utils.recycle(SharedObjects.F_Settings)
                 JSON.saveAs(SharedObjects.Settings, SharedObjects.F_Settings)
+
+                Utils.Report.Info('Settings updated successfully.')
 
 @click.group()
 def cli():
@@ -269,6 +289,15 @@ def delta():
     '''
     SharedObjects.initialize()
     CommandHandler.Delta.run()
+    SharedObjects.cleanUp()
+
+@cli.command()
+def init():
+    '''
+    Initialize a directory for tracking.
+    '''
+    SharedObjects.initialize()
+    CommandHandler.Init.run()
     SharedObjects.cleanUp()
 
 @cli.command()
