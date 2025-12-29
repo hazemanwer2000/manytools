@@ -42,6 +42,9 @@ class Utils:
                 ),
             }
         },
+        'default-settings' : {
+            'mode' : 'slow',
+        },
     }
     
     class Report:
@@ -73,7 +76,12 @@ class Utils:
     
     @staticmethod
     def generateHashFromFile(f:FileUtils.File):
-        return Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
+        if SharedObjects.Settings['mode'] == 'slow':
+            hash = Cryptography.Hash.generate(Cryptography.Feeds.FileFeed(f), algorithm=Utils.Constants['hash-algorithm'])
+        else:
+            bytesToHash = str(f.getSize()).encode('utf-8')
+            hash = Cryptography.Hash.generate(Cryptography.Feeds.BytesFeed(bytesToHash), algorithm=Utils.Constants['hash-algorithm'])
+        return hash
 
     @staticmethod
     def constructDirectoryState():
@@ -145,7 +153,8 @@ class Utils:
 
     @staticmethod
     def getReferenceState():
-        f_trackList = SharedObjects.F_DirTrack.listDirectory()
+        trackerFileNamePrefix = FileUtils.File(Utils.Constants['tracker-file-name']).getNameWithoutExtension()
+        f_trackList = SharedObjects.F_DirTrack.listDirectory(conditional=lambda x: x.getNameWithoutExtension().startswith(trackerFileNamePrefix))
         f_trackList.sort(key=lambda x: str(x))
         f_trackLast = f_trackList[-1]
         return JSON.fromFile(f_trackLast)
@@ -154,11 +163,17 @@ class SharedObjects:
     
     F_CWD:FileUtils.File = None
     F_DirTrack:FileUtils.File = None
+    F_Settings:FileUtils.File = None
+    Settings:dict = None
 
     @staticmethod
     def initialize():
         SharedObjects.F_CWD = FileUtils.File.Utils.getWorkingDirectory()
         SharedObjects.F_DirTrack = SharedObjects.F_CWD.traverseDirectory(Utils.Constants['tracker-directory-name'])
+        SharedObjects.F_Settings = SharedObjects.F_DirTrack.traverseDirectory('settings.json')
+
+        if SharedObjects.F_Settings.isExists():
+            SharedObjects.Settings = JSON.fromFile(SharedObjects.F_Settings)
 
     @staticmethod
     def cleanUp():
@@ -169,17 +184,17 @@ class CommandHandler:
     class Commit:
         
         @staticmethod
-        def run(isReset:bool=False):
-            
-            # ? If must reset, then (...)
-            if isReset:
-                if SharedObjects.F_DirTrack.isExists():
-                    FileUtils.File.Utils.recycle(SharedObjects.F_DirTrack)
+        def run():
             
             # ? Determine if must commit, or not (...)
             isCommit = None
             if not SharedObjects.F_DirTrack.isExists():
                 SharedObjects.F_DirTrack.makeDirectory()
+
+                # Create settings file with default settings.
+                SharedObjects.Settings = Utils.Constants['default-settings'].copy()
+                JSON.saveAs(SharedObjects.Settings, SharedObjects.F_Settings)
+
                 currentState = Utils.constructDirectoryState()
                 isCommit = True
                 Utils.Report.Info('First commit in current directory.')
@@ -216,6 +231,21 @@ class CommandHandler:
                 else:
                     Utils.Report.Info('There is no delta, directory un-changed.')
 
+    class Settings:
+
+        @staticmethod
+        def run(mode:str=None):
+
+            if not SharedObjects.F_DirTrack.isExists():
+                Utils.Report.Error("Current directory has no commit(s).")
+            else:
+
+                if mode is not None:
+                    SharedObjects.Settings['mode'] = mode
+                
+                FileUtils.File.Utils.recycle(SharedObjects.F_Settings)
+                JSON.saveAs(SharedObjects.Settings, SharedObjects.F_Settings)
+
 @click.group()
 def cli():
     '''
@@ -224,13 +254,12 @@ def cli():
     pass
 
 @cli.command()
-@click.option('--reset', is_flag=True, default=False, help='Delete all previous tracking history.')
-def commit(reset):
+def commit():
     '''
     Commit the current state of the directory.
     '''
     SharedObjects.initialize()
-    CommandHandler.Commit.run(reset)
+    CommandHandler.Commit.run()
     SharedObjects.cleanUp()
     
 @cli.command()
@@ -240,6 +269,16 @@ def delta():
     '''
     SharedObjects.initialize()
     CommandHandler.Delta.run()
+    SharedObjects.cleanUp()
+
+@cli.command()
+@click.option('--mode', type=click.Choice(['fast', 'slow']), required=False, help='Switches between fast and slow mode.')
+def settings(mode):
+    '''
+    Modify the settings of a (tracked) directory.
+    '''
+    SharedObjects.initialize()
+    CommandHandler.Settings.run(mode)
     SharedObjects.cleanUp()
 
 if __name__ == '__main__':
