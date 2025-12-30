@@ -20,6 +20,7 @@ APP_NAME = 'dirtrack'
 class Utils:
     
     Constants = {
+        'iterator-length' : 6,
         'tracker-file-name' : f"{APP_NAME}.json",
         'tracker-directory-name' : f'.{APP_NAME}',
         'hash-algorithm' : Cryptography.Hash.Algorithms.SHA256,
@@ -220,7 +221,7 @@ class CommandHandler:
 
                 if isSaveRequired:
                     f_trackerBase = SharedObjects.F_DirTrack.traverseDirectory(Utils.Constants['tracker-file-name'])
-                    f_trackerNew = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_trackerBase)))
+                    f_trackerNew = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_trackerBase), iteratorLength=Utils.Constants['iterator-length']))
                     JSON.saveAs(currentState, f_trackerNew)
                 
     class Init:
@@ -283,9 +284,13 @@ class CommandHandler:
             else:
                 f_trackerList = Utils.getTrackerFiles()
                 if len(f_trackerList) > 1:
+                    f_trackerLast = f_trackerList[-1]
                     for f_tracker in f_trackerList[:-1]:
                         FileUtils.File.Utils.recycle(f_tracker)
-                
+                    f_trackerBase = SharedObjects.F_DirTrack.traverseDirectory(Utils.Constants['tracker-file-name'])
+                    f_trackerLastNewLocation = FileUtils.File(FileUtils.File.Utils.Path.modifyName(str(f_trackerBase), suffix=('-' + ('0' * Utils.Constants['iterator-length']))))
+                    FileUtils.File.Utils.move(f_trackerLast, f_trackerLastNewLocation)
+
                 Utils.Report.Info("Directory optimized successfully.")
 
 @click.group()
