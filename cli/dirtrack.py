@@ -15,13 +15,14 @@ import automatey.Formats.JSON as JSON
 import automatey.Utils.Cryptography as Cryptography
 import automatey.Utils.CLI as CLI
 
+APP_NAME = 'dirtrack'
+
 class Utils:
     
     Constants = {
-        'tracker-file-name' : 'dirtrack.json',
-        'tracker-directory-name' : '.dirtrack',
+        'tracker-file-name' : f"{APP_NAME}.json",
+        'tracker-directory-name' : f'.{APP_NAME}',
         'hash-algorithm' : Cryptography.Hash.Algorithms.SHA256,
-        
         'cli' : {
             'text-color' : {
                 'report-error' : Graphics.TextColor(
@@ -150,18 +151,24 @@ class Utils:
         delta['metadata']['is-directory-modified' ] = isDirectoryModified
         
         return delta
+    
+    @staticmethod
+    def getTrackerFiles():
+        
+        f_trackerList = SharedObjects.F_DirTrack.listDirectory(conditional=lambda x: x.getNameWithoutExtension().startswith(APP_NAME))
+        f_trackerList.sort(key=lambda x: str(x))
+        
+        return f_trackerList
 
     @staticmethod
     def getReferenceState():
         
-        trackerFileNamePrefix = FileUtils.File(Utils.Constants['tracker-file-name']).getNameWithoutExtension()
-        f_trackList = SharedObjects.F_DirTrack.listDirectory(conditional=lambda x: x.getNameWithoutExtension().startswith(trackerFileNamePrefix))
-        f_trackList.sort(key=lambda x: str(x))
+        f_trackerList = Utils.getTrackerFiles()
         
         state = None
-        if len(f_trackList) != 0:
-            f_trackLast = f_trackList[-1]
-            state = JSON.fromFile(f_trackLast)
+        if len(f_trackerList) != 0:
+            f_trackerLast = f_trackerList[-1]
+            state = JSON.fromFile(f_trackerLast)
             
         return state
 
@@ -202,19 +209,19 @@ class CommandHandler:
 
                 if referenceState is None:
                     isSaveRequired = True
-                    Utils.Report.Info('First commit in directory.')
+                    Utils.Report.Info('First commit.')
                 else:
                     delta = Utils.constructDelta(referenceState, currentState)
                     if delta['metadata']['is-directory-modified']:
                         isSaveRequired = True
                         Utils.Report.Delta(delta)
                     else:
-                        Utils.Report.Info('There is no delta, directory un-changed.')
+                        Utils.Report.Error('There is no delta.')
 
                 if isSaveRequired:
-                    f_trackBase = SharedObjects.F_DirTrack.traverseDirectory(Utils.Constants['tracker-file-name'])
-                    f_trackNew = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_trackBase)))
-                    JSON.saveAs(currentState, f_trackNew)
+                    f_trackerBase = SharedObjects.F_DirTrack.traverseDirectory(Utils.Constants['tracker-file-name'])
+                    f_trackerNew = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_trackerBase)))
+                    JSON.saveAs(currentState, f_trackerNew)
                 
     class Init:
 
@@ -240,14 +247,14 @@ class CommandHandler:
             else:
                 referenceState = Utils.getReferenceState()
                 if referenceState is None:
-                    Utils.Report.Error("No commit(s) found in the directory.")
+                    Utils.Report.Error("No commit(s) found.")
                 else:
                     currentState = Utils.constructDirectoryState()
                     delta = Utils.constructDelta(referenceState, currentState)
                     if delta['metadata']['is-directory-modified']:
                         Utils.Report.Delta(delta)
                     else:
-                        Utils.Report.Info('There is no delta, directory un-changed.')
+                        Utils.Report.Error('There is no delta.')
 
     class Settings:
 
@@ -265,6 +272,21 @@ class CommandHandler:
                 JSON.saveAs(SharedObjects.Settings, SharedObjects.F_Settings)
 
                 Utils.Report.Info('Settings updated successfully.')
+    
+    class Optimize:
+
+        @staticmethod
+        def run():
+
+            if not SharedObjects.F_DirTrack.isExists():
+                Utils.Report.Error("Directory is not initialized.")
+            else:
+                f_trackerList = Utils.getTrackerFiles()
+                if len(f_trackerList) > 1:
+                    for f_tracker in f_trackerList[:-1]:
+                        FileUtils.File.Utils.recycle(f_tracker)
+                
+                Utils.Report.Info("Directory optimized successfully.")
 
 @click.group()
 def cli():
@@ -308,6 +330,15 @@ def settings(mode):
     '''
     SharedObjects.initialize()
     CommandHandler.Settings.run(mode)
+    SharedObjects.cleanUp()
+
+@cli.command()
+def optimize():
+    '''
+    Optimizes a (tracked) directory by removing all but the last commit.
+    '''
+    SharedObjects.initialize()
+    CommandHandler.Optimize.run()
     SharedObjects.cleanUp()
 
 if __name__ == '__main__':
