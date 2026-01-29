@@ -631,25 +631,34 @@ def audio():
 @audio.command()
 @click.option('--input', required=True, help='Input (video) file.')
 def mute(input):
+    '''
+    Removes audio from a video (i.e., mutes the video).
+    '''
     CommandHandler.Audio.Mute.run(FileUtils.File(input))
 
 @audio.command()
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--extension', required=False, default='m4a', help='Extension of output file.')
 def extract(input, extension):
+    '''
+    Extracts audio from a video, without any re-encoding.
+    '''
     CommandHandler.Audio.Extract.run(FileUtils.File(input), extension)
 
 @audio.command()
 @click.option('--input', required=True, help='Input (video) file.')
 @click.option('--audio', required=True, help='Input (audio) file.')
 def replace(input, audio):
+    '''
+    Replace audio of a video with another audio.
+    '''
     CommandHandler.Audio.Replace.run(FileUtils.File(input), FileUtils.File(audio))
 
 @audio.command()
 @click.option('--input', required=True, help='Input (audio) file.')
 def convert(input):
     '''
-    Convert an audio, or a directory of audio(s), into '.m4a' file(s).
+    Convert an input file, or a directory of input file(s), into '.m4a' file(s).
     '''
     CommandHandler.Audio.Convert.run(FileUtils.File(input))
 
