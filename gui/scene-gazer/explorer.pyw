@@ -102,6 +102,14 @@ class Utils:
                     'display-name' : 'Size'
                 },
                 {
+                    'key' : 'length',
+                    'display-name' : 'Length'
+                },
+                {
+                    'key' : 'resolution',
+                    'display-name' : 'Resolution'
+                },
+                {
                     'key' : 'filter-state',
                     'display-name' : ''
                 }
@@ -241,6 +249,8 @@ class Utils:
                         'name' : dFileNode.asFile().getNameWithoutExtension(),
                         'size' : '',
                         'extension' : '',
+                        'length' : '',
+                        'resolution' : '',
                         'filter-state' : Constants.FilterExcludedText
                     }
 
@@ -263,12 +273,18 @@ class Utils:
                     except:
                         raise ExceptionUtils.ValidationError(f"Error occurred while parsing metadata: '{str(dFileNode.asFile())}'")
 
+                    # ? Fetch video info.
+                    video = VideoUtils.Video(dFileNode.asFile())
+                    videoDimensions = video.getDimensions()
+
                     # ? Construct attribute map.
                     extension = dFileNode.asFile().getExtension()
                     self.attributeMap = {
                         'name' : dFileNode.asFile().getNameWithoutExtension(),
                         'size' : StringUtils.MakePretty.Size(dFileNode.asFile().getSize()),
                         'extension' : extension.upper() if (extension is not None) else '',
+                        'length' : str(video.getDuration()),
+                        'resolution' : f"({videoDimensions[0]}, {videoDimensions[1]})",
                         'filter-state' : Constants.FilterExcludedText if (self.tags is None) else Constants.FilterOutText
                     }
 
