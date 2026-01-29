@@ -24,6 +24,7 @@ try:
 
     prefix = CLI.Input.getString('Prefix [Optional]: ')
     suffix = CLI.Input.getString('Suffix [Optional]: ')
+    requestedDigitCount = CLI.Input.Repeater(lambda: CLI.Input.getInt('Number of digits to use for numbering [0 for auto]: '))
     fileClass = CLI.Input.Repeater(lambda: CLI.Input.getOption('Process which class of files? [Select Option]', [x['name'] for x in conditionals]))
 
     f_srcDir = FileUtils.File(sys.argv[1])
@@ -34,7 +35,7 @@ try:
     if code != 'yesido':
         raise ExceptionUtils.ValidationError("It seems you got ere' by mistake. No-problemo! No harm done.")
 
-    digitCount = len(str(len(f_fileList)))
+    digitCount = len(str(len(f_fileList))) if requestedDigitCount == 0 else requestedDigitCount
     for idx, f in enumerate(f_fileList):
         newName = prefix + str(idx + 1).zfill(digitCount) + suffix
         FileUtils.File.Utils.rename(f, newName)
