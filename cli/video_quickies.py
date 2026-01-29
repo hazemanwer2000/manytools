@@ -97,16 +97,6 @@ class FFMPEG:
             r'-c copy',
             r'{{{OUTPUT-FILE}}}',
         ),
-        'VideoMetadata' : ProcessUtils.CommandTemplate(
-            r'ffmpeg',
-            r'-hide_banner',
-            r'-loglevel error',
-            r'-i {{{INPUT-FILE}}}',
-            r'-i {{{METADATA-FILE}}}',
-            r'-map_metadata 1',
-            r'-codec copy',
-            r'{{{OUTPUT-FILE}}}',
-        ),
         'VideoNoMetadata' : ProcessUtils.CommandTemplate(
             r'ffmpeg',
             r'-hide_banner',
@@ -422,34 +412,6 @@ class CommandHandler:
             N = int(video.getDuration().toSeconds() / offset) - 1
             video.generateThumbnails(f_outputDir, N)
 
-    class Chapters:
-
-        @staticmethod
-        def run(f_input:FileUtils.File, f_chapters:FileUtils.File):
-
-            # Construct metadata of video in FFMPEG's format.
-            srt = SRT.Parser(f_chapters)
-            txt_metadata = FFMPEG.writeMetadata(srt.getSubtitles())
-
-            # ? Create metadata (text) file.
-            f_tmpDir = FileUtils.File.Utils.getTemporaryDirectory()
-            f_metadata = f_tmpDir.traverseDirectory('metadata.txt')
-            f_metadata.quickWrite(txt_metadata, 't')
-
-            # ? Derive output file.
-            f_outputBase = f_input.traverseDirectory('..', f_input.getName())
-            f_output = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_outputBase)))
-
-            # ? Generate (concat-video) file.
-            commandFormatter = FFMPEG.CommandTemplates['VideoMetadata'].createFormatter()
-            commandFormatter.assertParameter('input-file', str(f_input))
-            commandFormatter.assertParameter('metadata-file', str(f_metadata))
-            commandFormatter.assertParameter('output-file', str(f_output))
-            Utils.executeCommand(str(commandFormatter))
-
-            # ? Clean-up (...)
-            FileUtils.File.Utils.recycle(f_tmpDir)
-
     class NoMetadata:
 
         @staticmethod
@@ -629,15 +591,6 @@ def screenshots(input, offset):
     Create 'N' screenshots of a video.
     '''
     CommandHandler.Screenshots.run(FileUtils.File(input), offset)
-
-@cli.command()
-@click.option('--input', required=True, help='Input (video) file.')
-@click.option('--chapters', required=True, help='SRT chapters file.')
-def chapters(input, chapters):
-    '''
-    Specify the chapters in a video.
-    '''
-    CommandHandler.Chapters.run(FileUtils.File(input), FileUtils.File(chapters))
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
