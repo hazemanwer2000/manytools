@@ -489,18 +489,39 @@ class CommandHandler:
             @staticmethod
             def run(f_input:FileUtils.File):
 
-                # ? (...)
-                f_output = FileUtils.File(
-                    FileUtils.File.Utils.Path.iterateName(
-                        FileUtils.File.Utils.Path.modifyName(str(f_input), extension='m4a')
+                f_inputList = []
+                f_outputList = []
+                
+                # ? If input is a directory, (...)
+                if f_input.isDirectory():
+                
+                    # ? Setup I/O directories.
+                    f_inputDirectory = f_input 
+                    f_outputDirectory = FileUtils.File(FileUtils.File.Utils.Path.iterateName(str(f_inputDirectory)))
+                    f_outputDirectory.makeDirectory()
+                    
+                    # ? Collect I/O file(s).
+                    f_inputList += f_input.listDirectory(conditional=lambda x: x.isFile())
+                    for path_inputFile_relative in f_input.listDirectoryRelatively(conditional=lambda x: x.isFile()):
+                        f_outputFile = f_outputDirectory.traverseDirectory(FileUtils.File.Utils.Path.modifyName(path_inputFile_relative, extension='mp4'))
+                        f_outputList.append(f_outputFile)
+                
+                else:
+                    f_inputFile = f_input
+                    f_outputFile = FileUtils.File(
+                        FileUtils.File.Utils.Path.iterateName(
+                            FileUtils.File.Utils.Path.modifyName(str(f_input), extension='mp4')
+                        )
                     )
-                )
-
-                # ? Generate.
-                commandFormatter = FFMPEG.CommandTemplates['AudioConvert'].createFormatter()
-                commandFormatter.assertParameter('input-file', str(f_input))
-                commandFormatter.assertParameter('output-file', str(f_output))
-                Utils.executeCommand(str(commandFormatter))
+                    f_inputList.append(f_inputFile)
+                    f_outputList.append(f_outputFile)
+                
+                # ? Convert each file.
+                for f_inputFile, f_outputFile in zip(f_inputList, f_outputList):
+                    commandFormatter = FFMPEG.CommandTemplates['AudioConvert'].createFormatter()
+                    commandFormatter.assertParameter('input-file', str(f_inputFile))
+                    commandFormatter.assertParameter('output-file', str(f_outputFile))
+                    Utils.executeCommand(str(commandFormatter))
 
 class CustomGroup(click.Group):
     def invoke(self, ctx):
@@ -627,6 +648,9 @@ def replace(input, audio):
 @audio.command()
 @click.option('--input', required=True, help='Input (audio) file.')
 def convert(input):
+    '''
+    Convert an audio, or a directory of audio(s), into '.m4a' file(s).
+    '''
     CommandHandler.Audio.Convert.run(FileUtils.File(input))
 
 if __name__ == '__main__':
