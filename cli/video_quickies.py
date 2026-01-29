@@ -42,10 +42,6 @@ class Utils:
             )
         },
         'command' : {
-            'thumbnails' : {
-                'directory-name' : '.Thumbnails',
-                'output-extension' : 'jpg',
-            },
             'thumbnail' : {
                 'output-extension' : 'jpg',
             }
@@ -306,68 +302,6 @@ class CommandHandler:
             # ? Clean-up (...)
             FileUtils.File.Utils.recycle(f_tmpDir)
 
-    class Thumbnails:
-        
-        @staticmethod
-        def run(f_inputDir:FileUtils.File, rows:int, cols:int, timestampOptions:str, aspectRatio:float, isForce:bool, isFlat:bool):
-            
-            commandConstants = Utils.Constants['command']['thumbnails']
-            
-            if isFlat:
-                
-                # Validate existence of thumbnail(s) directory.
-                f_thumbnailsDir = FileUtils.File('.').traverseDirectory(commandConstants['directory-name'])
-                if not (f_thumbnailsDir.isExists() and f_thumbnailsDir.isDirectory()):
-                    raise ExceptionUtils.ValidationError('Thumbnail(s) directory does not exist.')
-                
-                # Gather input video file(s).
-                path_videoInputList = f_inputDir.listDirectoryRelatively(isRecursive=True, conditional=lambda x: VideoUtils.Video.Utils.isVideo(x))
-                f_videoInputList = [f_inputDir.traverseDirectory(x) for x in path_videoInputList]
-                
-                # ? Construct output thumnail path(s).
-                f_thumbnailList = []
-                for path_videoInput in path_videoInputList:
-                    f_thumbnail = f_thumbnailsDir.traverseDirectory(
-                        FileUtils.File.Utils.Path.modifyName(
-                            path_videoInput.replace('/', '-'),
-                            extension=commandConstants['output-extension'])
-                    )
-                    f_thumbnailList.append(f_thumbnail)
-                
-            else:
-            
-                # ? Gather input video file(s).
-                f_thumbnailsDirList = f_inputDir.listDirectory(isRecursive=True, conditional=lambda x: (x.isDirectory() and x.getName() == commandConstants['directory-name']))
-                f_videoDirList = [x.traverseDirectory('..') for x in f_thumbnailsDirList]
-                f_videoInputList = []
-                for f_videoDir in f_videoDirList:
-                    f_videoInputList += f_videoDir.listDirectory(conditional=lambda x: VideoUtils.Video.Utils.isVideo(x))
-                
-                # ? Construct output thumnail path(s).
-                f_thumbnailList = []
-                for f_videoInput in f_videoInputList:
-                    videoNameWithoutExt = f_videoInput.getNameWithoutExtension()
-                    f_thumbnail = f_videoInput.traverseDirectory('..', commandConstants['directory-name'], videoNameWithoutExt + '.' + commandConstants['output-extension'])
-                    f_thumbnailList.append(f_thumbnail)
-            
-            # ? Loop on I/O.
-            for f_videoInput, f_thumbnail in zip(f_videoInputList, f_thumbnailList):
-                
-                # ? Generate thumbnail only if not already generated, or force-flag is set.
-                isGenerateThumbnail = False
-                if isForce:
-                    isGenerateThumbnail = True
-                    if f_thumbnail.isExists():
-                        FileUtils.File.Utils.recycle(f_thumbnail)
-                else:
-                    if not f_thumbnail.isExists():
-                        isGenerateThumbnail = True
-                    
-                # ? (...)
-                if isGenerateThumbnail:
-                    CLI.echo(message='Video: ' + str(f_videoInput) + '\n', textColor=Utils.Constants['cli']['text-color'])
-                    CommandHandler.Thumbnail.run(f_videoInput, rows, cols, timestampOptions, aspectRatio, f_output=f_thumbnail)
-
     class Concat:
         
         @staticmethod
@@ -587,22 +521,6 @@ def thumbnail(input, rows, cols, timestamps, aspect_ratio):
     if aspect_ratio != None:
         aspect_ratio = float(eval(aspect_ratio))
     CommandHandler.Thumbnail.run(FileUtils.File(input), rows, cols, timestamps, aspect_ratio)
-
-@cli.command()
-@click.option('--input', required=True, help='Input (video) file.')
-@click.option('--rows', required=True, help='Number of rows.', type=int)
-@click.option('--cols', required=True, help='Number of columns.', type=int)
-@click.option('--timestamps', help='Specifies options for overlaying timestamps. Format is "ALIGNMENT,COLOR". For example, "bottom-left,#000000"', type=str)
-@click.option('--aspect_ratio', help='Force aspect ratio of thumbnail (e.g., 16/9, 1.75).', type=str)
-@click.option('--force', is_flag=True, default=False, help='Re-generate already generated thumbnail(s).')
-@click.option('--flat', is_flag=True, default=False, help="If specified, thumbnail(s) of video(s) in sub-directories are generated in './.Thumbnails'.")
-def thumbnails(input, rows, cols, timestamps, aspect_ratio, force, flat):
-    '''
-    Create a thumbnail for all video(s) within a directory, recursive, if a sub-directory called '.Thumbnails' present in the same directory as the video.
-    '''
-    if aspect_ratio != None:
-        aspect_ratio = float(eval(aspect_ratio))
-    CommandHandler.Thumbnails.run(FileUtils.File(input), rows, cols, timestamps, aspect_ratio, force, flat)
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
