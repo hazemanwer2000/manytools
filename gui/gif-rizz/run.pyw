@@ -22,6 +22,7 @@ application = GElements.Application()
 application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app'])))
 
 GIFPlayer = GElements.Widgets.Complex.GIFPlayer()
+GIFPlayer.getRenderer().load(FileUtils.File(constants['path']['gif']['default']))
 
 rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=0)
 rootLayout.setWidget(GElements.Widgets.Decorators.ScrollArea(GIFPlayer,

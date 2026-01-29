@@ -3,6 +3,9 @@
     "path" : {
         "icon" : {
             "app" : "{{ current_directory }}/resources/icon/melon.png"
+        },
+        "gif" : {
+            "default" : "{{ current_directory }}/resources/gif/default.gif"
         }
     },
     "gui" : {
