@@ -424,6 +424,20 @@ class Utils:
             def updateTagEnabledState(self, enabledTags):
                 self.tagsWidget.updateTagEnabledState(enabledTags)
 
+        class Description(GElements.CustomWidget):
+
+            def __init__(self):
+
+                self.textEditWidget = GElements.Widgets.Basics.TextEdit(isEditable=False,
+                                                                        isTextSelectable=False,
+                                                                        isWrapText=True,
+                                                                        isHorizontalScrollBar=False)
+                
+                super().__init__(self.textEditWidget)
+
+            def update(self, text:str):
+                self.textEditWidget.setText(text)
+
 class Constants:
 
     TreeColumnOffset = 20
@@ -519,6 +533,11 @@ if allTags is not None:
     tagsManagerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onSelectedTagsChange)
     tabWidgets.append(tagsManagerWidget)
     tabNames.append("Tags")
+
+# ? ? ? Construct Description Widget.
+descriptionWidget = Utils.CustomWidget.Description()
+tabWidgets.append(descriptionWidget)
+tabNames.append("Description")
 
 if len(tabWidgets) > 0:
 
