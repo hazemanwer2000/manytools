@@ -18,6 +18,7 @@ from pprint import pprint
 from collections import OrderedDict
 import subprocess
 import os
+
 import jinja2
 
 import SharedUtils.Metadata as Metadata
@@ -464,6 +465,9 @@ f_root = FileUtils.File(sys.argv[1])
 application = GElements.Application()
 application.setIcon(GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app'])))
 
+splashScreen = GElements.SplashScreen(GUtils.Image(FileUtils.File(constants['path']['image']['splash-screen'])))
+splashScreen.render(application)
+
 # ? Construct GUI.
 
 # ? ? Construct Tree Widget.
@@ -659,4 +663,5 @@ updateWindowStatus(0)
 
 # ? Run GUI loop.
 window.show()
+splashScreen.derender(window)
 application.run()

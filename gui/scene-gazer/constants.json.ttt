@@ -3,6 +3,9 @@
     "path" : {
         "icon" : {
             "app" : "{{ current_directory }}/resources/icon/video.png"
+        },
+        "image" : {
+            "splash-screen" : "{{ current_directory }}/resources/icon/video-large.png"
         }
     },
 
