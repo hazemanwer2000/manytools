@@ -130,6 +130,31 @@ class Utils:
             class Utils:
 
                 @staticmethod
+                def isDescriptionAvailable(rootFileNode:"Utils.CustomWidget.FileTree.FileNode") -> bool:
+                    '''
+                    Checks if there is at least one description available in the file hierarchy.
+                    '''
+                    queue = [rootFileNode]
+
+                    result = False
+                    
+                    while (len(queue) > 0):
+                        currentFileNode = queue.pop(0)
+                        if isinstance(currentFileNode, Utils.CustomWidget.FileTree.RegularFileNode):
+                            if currentFileNode.getDescription() is not None:
+                                result = True
+                                break
+                        elif isinstance(currentFileNode, Utils.CustomWidget.FileTree.DirectoryNode):
+                            if currentFileNode.getDescription() is not None:
+                                result = True
+                                break
+                            queue.extend(currentFileNode.getChildren())
+                        else:
+                            raise ExceptionUtils.ImplementationError("Instance is of an unexpected type.")
+                    
+                    return result
+
+                @staticmethod
                 def getAllTags(rootFileNode:"Utils.CustomWidget.FileTree.FileNode", conditional=lambda n:True):
                     '''
                     Fetches all tag(s) in the file hierarchy.
@@ -526,6 +551,13 @@ def onSelectedTagsChange():
     # ? Update window status.
     updateWindowStatus(filteredInCount)
 
+# ? ? ? Construct Description Widget.
+descriptionWidget = None
+if Utils.CustomWidget.FileTree.Utils.isDescriptionAvailable(rootFileNode):
+    descriptionWidget = Utils.CustomWidget.Description()
+    tabWidgets.append(descriptionWidget)
+    tabNames.append("Description")
+
 # ? ? ? Construct Tags Widget.
 allTags = Utils.CustomWidget.FileTree.Utils.getAllTags(rootFileNode)
 if allTags is not None:
@@ -533,11 +565,6 @@ if allTags is not None:
     tagsManagerWidget = Utils.CustomWidget.TagsManager(tagsWidget, onSelectedTagsChange)
     tabWidgets.append(tagsManagerWidget)
     tabNames.append("Tags")
-
-# ? ? ? Construct Description Widget.
-descriptionWidget = Utils.CustomWidget.Description()
-tabWidgets.append(descriptionWidget)
-tabNames.append("Description")
 
 if len(tabWidgets) > 0:
 
@@ -565,10 +592,11 @@ window = GElements.Window(title=Constants.WindowTitleTemplate.render(root_path=s
 # ? ? Setup Event Handler(s).
 
 def treeSelectedNodeChangedHandler(node:Utils.CustomWidget.FileTree.FileNode):
-    description = node.getDescription()
-    if description is None:
-        description = ''
-    descriptionWidget.update(description)
+    if descriptionWidget is not None:
+        description = node.getDescription()
+        if description is None:
+            description = ''
+        descriptionWidget.update(description)
 
 treeWidget.setEventHandler(GUtils.EventHandlers.SelectionChangeEventHandler(treeSelectedNodeChangedHandler))
 
