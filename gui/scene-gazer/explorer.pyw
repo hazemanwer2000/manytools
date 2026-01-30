@@ -285,7 +285,7 @@ class Utils:
                         'size' : StringUtils.MakePretty.Size(dFileNode.asFile().getSize()),
                         'extension' : extension.upper() if (extension is not None) else '',
                         'length' : str(video.getDuration()),
-                        'resolution' : f"({videoDimensions[0]}, {videoDimensions[1]})",
+                        'resolution' : f"{videoDimensions[0]}, {videoDimensions[1]}",
                         'filter-state' : Constants.FilterExcludedText if (self.tags is None) else Constants.FilterOutText
                     }
 
@@ -429,7 +429,6 @@ class Constants:
     TreeColumnOffset = 20
     TabWidth = 350
     WindowSize = (1100, 600)
-    DescriptionDialogSize = (350, 250)
 
     ErrorDialogSize = (1000, 400)
 
@@ -554,24 +553,6 @@ def openWith(commandKey):
     command = str(commandFormatter).replace('/', '\\')
     subprocess.Popen(command, shell=True)
 
-# ? ? ? Create Description Dialog.
-
-descriptionDialogTextEdit = GElements.Widgets.Basics.TextEdit(isEditable=False, 
-                                                            isWrapText=True,
-                                                            isHorizontalScrollBar=False)
-
-descriptionDialogLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
-descriptionDialogLayout.setWidget(descriptionDialogTextEdit, 0, 0)
-
-descriptionDialog = GElements.Dialog(Constants.WindowTitleTemplate.render(text='Description'), descriptionDialogLayout, minimumSize=Constants.DescriptionDialogSize, isSizeFixed=True)
-
-def showDescription():
-    fileNode = treeWidget.getContextInfo()
-    description = fileNode.getDescription()
-    if description is not None:
-        descriptionDialogTextEdit.setText(description)
-        descriptionDialog.run()
-
 # ? ? ? (...)
 
 menuItem_OpenWithDefaultHandler = GUtils.Menu.EndPoint(
@@ -592,12 +573,6 @@ menuItem_OpenWithThis = GUtils.Menu.EndPoint(
     icon=GUtils.Icon.createFromFile(FileUtils.File(constants['path']['icon']['app']))
 )
 
-menuItem_ReadDescription = GUtils.Menu.EndPoint(
-    text=f'Read Description',
-    fcn=showDescription,
-    icon=GUtils.Icon.createFromFile(Resources.resolve(FileUtils.File('icon/lib/coreui/cil-description.png'))),
-)
-
 def treeContextMenuCallout():
 
     fileNode = treeWidget.getContextInfo()
@@ -612,13 +587,7 @@ def treeContextMenuCallout():
         contextMenuItemList.extend([
             menuItem_OpenWithFileExplorer
         ])
-    
-    if fileNode.getDescription() is not None:
-        contextMenuItemList.extend([
-            GUtils.Menu.Separator(),
-            menuItem_ReadDescription
-        ])
-    
+
     treeWidget.showContextMenu(GUtils.Menu(contextMenuItemList))
 
 treeWidget.setContextMenuCallout(treeContextMenuCallout)
