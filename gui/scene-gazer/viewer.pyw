@@ -196,7 +196,7 @@ f_constants = f_appDir.traverseDirectory('constants.json')
 constants = JSON.fromFile(f_constants)
 
 # ? Get video path (i.e., mandatory (only) argument).
-f_video = FileUtils.File(sys.argv[1])
+f_video = FileUtils.File(FileUtils.File.Utils.Path.getAbsolute(sys.argv[1]))
 
 # ? Create application instance.
 
@@ -278,7 +278,7 @@ else:
     rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
     rootLayout.setWidget(videoPlayer, 0, 0)
 
-window = GElements.Window(title=constants['title'] + '  |  ' + FileUtils.File.Utils.Path.getAbsolute(str(f_video)),
+window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
                           rootLayout=rootLayout,
                           minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)

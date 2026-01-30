@@ -471,7 +471,7 @@ class Constants:
         }
 
 # ? Get root path (i.e., mandatory (only) argument).
-f_root = FileUtils.File(sys.argv[1])
+f_root = FileUtils.File(FileUtils.File.Utils.Path.getAbsolute(sys.argv[1]))
 
 # ? Create application instance.
 
@@ -557,17 +557,20 @@ else:
     rootLayout.setWidget(treeWidget, 0, 0)
 
 # ? ? Window.
-window = GElements.Window(title=Constants.WindowTitleTemplate.render(root_path=FileUtils.File.Utils.Path.getAbsolute(str(f_root))),
+window = GElements.Window(title=Constants.WindowTitleTemplate.render(root_path=str(f_root)),
                           rootLayout=rootLayout,
                           minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)
 
 # ? ? Setup Event Handler(s).
 
-def treeClickEventHandler(node):
-    print(node)
+def treeSelectedNodeChangedHandler(node:Utils.CustomWidget.FileTree.FileNode):
+    description = node.getDescription()
+    if description is None:
+        description = ''
+    descriptionWidget.update(description)
 
-treeWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(treeClickEventHandler))
+treeWidget.setEventHandler(GUtils.EventHandlers.SelectionChangeEventHandler(treeSelectedNodeChangedHandler))
 
 # ? ? Create Tree Context-Menu.
 
