@@ -278,7 +278,7 @@ else:
     rootLayout = GElements.Layouts.GridLayout(1, 1, elementMargin=AbstractGraphics.SymmetricMargin(5), elementSpacing=5)
     rootLayout.setWidget(videoPlayer, 0, 0)
 
-window = GElements.Window(title=constants['title'] + '  |  ' + str(f_video),
+window = GElements.Window(title=constants['title'] + '  |  ' + FileUtils.File.Utils.Path.getAbsolute(str(f_video)),
                           rootLayout=rootLayout,
                           minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)

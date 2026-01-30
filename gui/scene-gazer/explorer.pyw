@@ -557,10 +557,17 @@ else:
     rootLayout.setWidget(treeWidget, 0, 0)
 
 # ? ? Window.
-window = GElements.Window(title=Constants.WindowTitleTemplate.render(root_path=str(f_root)),
+window = GElements.Window(title=Constants.WindowTitleTemplate.render(root_path=FileUtils.File.Utils.Path.getAbsolute(str(f_root))),
                           rootLayout=rootLayout,
                           minimumSize=Constants.WindowSize,
                           isEnableStatusBar=True)
+
+# ? ? Setup Event Handler(s).
+
+def treeClickEventHandler(node):
+    print(node)
+
+treeWidget.setEventHandler(GUtils.EventHandlers.ClickEventHandler(treeClickEventHandler))
 
 # ? ? Create Tree Context-Menu.
 
