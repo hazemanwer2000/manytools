@@ -598,12 +598,18 @@ def treeSelectedNodeChangedHandler(node:Utils.CustomWidget.FileTree.FileNode):
             description = ''
         descriptionWidget.update(description)
 
+def treeNodeDoubleClickedHandler(node:Utils.CustomWidget.FileTree.FileNode):
+    if isinstance(node, Utils.CustomWidget.FileTree.RegularFileNode):
+        openWith("this", fileNode=node)
+
 treeWidget.setEventHandler(GUtils.EventHandlers.SelectionChangeEventHandler(treeSelectedNodeChangedHandler))
+treeWidget.setEventHandler(GUtils.EventHandlers.DoubleClickEventHandler(treeNodeDoubleClickedHandler))
 
 # ? ? Create Tree Context-Menu.
 
-def openWith(commandKey):
-    fileNode = treeWidget.getContextInfo()
+def openWith(commandKey, fileNode:Utils.CustomWidget.FileTree.FileNode=None):
+    if fileNode is None:
+        fileNode = treeWidget.getContextInfo()
     f_selected = fileNode.asFile()
     commandFormatter = Constants.Commands.OpenWith[commandKey].createFormatter()
     commandFormatter.assertParameter("file-path", str(f_selected))
