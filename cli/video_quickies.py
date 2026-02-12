@@ -73,6 +73,25 @@ class Utils:
 class FFMPEG:
     
     CommandTemplates = {
+        'VideoSpeed' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-FILE}}}',
+            r'-crf {{{CRF}}}',
+            r'-filter_complex "[0:v]setpts={{{REVERSE-SPEED-FACTOR}}}*PTS[v]; [0:a]atempo={{{SPEED-FACTOR}}}[a]"',
+            r'-map "[v]"',
+            r'-map "[a]"',
+            r'{{{OUTPUT-FILE}}}',
+        ),
+        'VideoSpeedNoAudio' : ProcessUtils.CommandTemplate(
+            r'ffmpeg',
+            r'-hide_banner',
+            r'-i {{{INPUT-FILE}}}',
+            r'-crf {{{CRF}}}',
+            r'-filter_complex "[0:v]setpts={{{REVERSE-SPEED-FACTOR}}}*PTS[v]"',
+            r'-map "[v]"',
+            r'{{{OUTPUT-FILE}}}',
+        ),
         'VideoConvert' : ProcessUtils.CommandTemplate(
             r'ffmpeg',
             r'-hide_banner',
@@ -457,6 +476,27 @@ class CommandHandler:
                     commandFormatter.assertParameter('output-file', str(f_outputFile))
                     Utils.executeCommand(str(commandFormatter))
 
+    class Speed:
+
+        @staticmethod
+        def run(f_input:FileUtils.File, speedFactor:float, crf:int, isNoAudio:bool):
+
+            # ? (...)
+            f_output = FileUtils.File(
+                FileUtils.File.Utils.Path.iterateName(
+                    FileUtils.File.Utils.Path.modifyName(str(f_input))
+                )
+            )
+
+            # ? Generate.
+            commandFormatter = FFMPEG.CommandTemplates['VideoSpeedNoAudio' if isNoAudio else 'VideoSpeed'].createFormatter()
+            commandFormatter.assertParameter('input-file', str(f_input))
+            commandFormatter.assertParameter('speed-factor', f"{speedFactor:.6f}")
+            commandFormatter.assertParameter('reverse-speed-factor', f"{(1/speedFactor):.6f}")
+            commandFormatter.assertParameter('crf', str(crf))
+            commandFormatter.assertParameter('output-file', str(f_output))
+            Utils.executeCommand(str(commandFormatter))
+
 class CustomGroup(click.Group):
     def invoke(self, ctx):
         Utils.initialize()
@@ -507,6 +547,17 @@ def convert(input, crf, width, height):
     Convert a video, or a directory of video(s), into '.mp4' file(s).
     '''
     CommandHandler.Convert.run(FileUtils.File(input), crf, width, height)
+
+@cli.command()
+@click.option('--input', required=True, help='Input (video) file.')
+@click.option('--factor', required=True, help='Speed-up factor. For example, "2" will make the video play twice as fast.', type=float)
+@click.option('--crf', required=False, help='CRF value.', type=int)
+@click.option('--no-audio', is_flag=True, help='Whether the video has an audio stream.')
+def speed(input, factor, crf, no_audio):
+    '''
+    Change the speed of a video.
+    '''
+    CommandHandler.Speed.run(FileUtils.File(input), factor, crf, no_audio)
 
 @cli.command()
 @click.option('--input', required=True, help='Input (video) file.')
