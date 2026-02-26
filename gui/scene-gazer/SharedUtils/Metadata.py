@@ -159,7 +159,7 @@ class Chapters:
                 raise ExceptionUtils.ValidationError("Chapter entries must be at least one.")
             
             # ? ASSERT (...)
-            if chapters[0]['timestamp'] != str(TimeUtils.Time(0)):
+            if chapters[0]['timestamp'] != TimeUtils.Time(0):
                 raise ExceptionUtils.ValidationError("First chapter entry must be a zero timestamp.")
         
         return chapters
