@@ -2,6 +2,7 @@
 import automatey.Utils.TimeUtils as TimeUtils
 import automatey.OS.FileUtils as FileUtils
 import automatey.Formats.JSON as JSON
+import automatey.Utils.ExceptionUtils as ExceptionUtils
 
 import typing
 from pprint import pprint
@@ -152,6 +153,14 @@ class Chapters:
             # ? Add 'index' field.
             for idx, chapter in enumerate(chapters):
                 chapter['index'] = idx + 1
+
+            # ? ASSERT (...)
+            if len(chapters) < 1:
+                raise ExceptionUtils.ValidationError("Chapter entries must be at least one.")
+            
+            # ? ASSERT (...)
+            if chapters[0]['timestamp'] != str(TimeUtils.Time(0)):
+                raise ExceptionUtils.ValidationError("First chapter entry must be a zero timestamp.")
         
         return chapters
 
