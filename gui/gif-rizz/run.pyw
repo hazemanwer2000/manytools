@@ -53,7 +53,7 @@ def loadFile():
 
 window.createToolbar(GUtils.Menu([
     GUtils.Menu.EndPoint(
-        text='Generate',
+        text='Load file',
         fcn=loadFile,
         icon=GUtils.Icon.createFromLibrary(GUtils.Icon.StandardIcon.FileOpen),
     ),
