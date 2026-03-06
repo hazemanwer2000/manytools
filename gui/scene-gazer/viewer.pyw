@@ -109,7 +109,7 @@ class Utils:
 
                 sliderRangeFrom = [0, int(self.videoRenderer.getDuration())]
                 sliderRangeTo = [0, 1000000]
-                sliderInitValue = int(MathUtils.mapValue(int(self.timestamp), sliderRangeFrom, sliderRangeTo))
+                sliderInitValue = int(MathUtils.Floating.mapValue(int(self.timestamp), sliderRangeFrom, sliderRangeTo))
                 self.slider = GElements.Widgets.Basics.Slider(sliderRangeTo, sliderInitValue)
                 self.slider.setEditable(False)
 

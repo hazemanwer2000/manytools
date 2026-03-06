@@ -296,7 +296,7 @@ class CommandHandler:
                     textColor=ColorUtils.Color.fromHEX(tsOptionColorHEXCode),
                     offsetRatio=AbstractGraphics.Point(0.01, 0.03),
                     cornerAlignment=AbstractGraphics.Alignment.Corner.__dict__[StringUtils.Case.Snake2Pascal(tsOptionAlignment)],
-                    sizeRatio=MathUtils.correlate(cols, (4, 0.075), (2, 0.045))
+                    sizeRatio=MathUtils.Floating.correlate(cols, (4, 0.075), (2, 0.045))
                 )
             
             # ? Generate thumbnail(s).

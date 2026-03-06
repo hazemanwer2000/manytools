@@ -147,7 +147,7 @@ def jumpToNearestKeyframe(isForward:bool):
             # Fix: Because micro-seconds are neglected by the video-player, must increment by 1-ms when searching using current video position.
             if isForward:
                 currentVideoPosition = currentVideoPosition + TimeUtils.Time.createFromMilliseconds(1)
-            nearestValues = MathUtils.findNearestValues(currentVideoPosition, Utils.Processor.VideoInformation.keyframes)
+            nearestValues = MathUtils.Floating.findNearestValues(currentVideoPosition, Utils.Processor.VideoInformation.keyframes)
             newVideoPosition = nearestValues[1] if isForward else nearestValues[0]
             if not (newVideoPosition is None):
                 videoPlayer.seekPosition(newVideoPosition)
