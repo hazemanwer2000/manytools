@@ -158,7 +158,7 @@ def jumpToNearestKeyframe(isForward:bool):
 
 def initiateVideoGeneration():
     
-    GElements.StandardDialog.BackgroundActivity.awaitActivity()
+    GElements.StandardDialog.BackgroundActivity.awaitActivity('Processing')
     
     # ? Pause video first.
     videoPlayer.pause()
