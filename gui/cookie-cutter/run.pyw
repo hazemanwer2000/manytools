@@ -58,19 +58,19 @@ class Announcement:
     
     @staticmethod
     def VideoInformationStillLoading():
-        GElements.StandardDialog.Message.Announce.Information('Video information is still being loaded.')
+        GElements.StandardDialog.Message.Announce.Information('Information', 'Video information is still being loaded.')
 
     @staticmethod
     def NoMoreKeyframes():
-        GElements.StandardDialog.Message.Announce.Information('Video has no more keyframes.')
+        GElements.StandardDialog.Message.Announce.Information('Information', 'Video has no more keyframes.')
 
     @staticmethod
     def VideoGenerationSuccessful():
-        GElements.StandardDialog.Message.Announce.Information('Video was generated successfully.')
+        GElements.StandardDialog.Message.Announce.Information('Information', 'Video was generated successfully.')
 
     @staticmethod
     def VideoGenerationFailed():
-        GElements.StandardDialog.Message.Announce.Error('Failed to generate video.')
+        GElements.StandardDialog.Message.Announce.Error('Error', 'Failed to generate video.')
 
 # ? Setup event handler(s).
 
